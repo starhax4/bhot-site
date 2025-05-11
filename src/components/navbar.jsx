@@ -35,6 +35,7 @@ export default function Navbar({ onNavClick }) {
                 onClick={() => {
                   onNavClick("contact");
                 }}
+                className="cursor-pointer"
               >
                 Contacts
               </button>
@@ -43,6 +44,7 @@ export default function Navbar({ onNavClick }) {
               onClick={() => {
                 onNavClick("account");
               }}
+              className="cursor-pointer"
             >
               <div className="flex justify-center items-center size-10 rounded-full outline-[3px] outline-primary shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] cursor-pointer">
                 <span>GM</span>
@@ -87,9 +89,9 @@ export default function Navbar({ onNavClick }) {
               )}
             </button>
             {isMenuOpen && (
-              <div className="absolute flex mx-auto bg-white shadow-md top-32 right-2 w-[200px]">
-                <ul className="flex flex-col justify-between items-center gap-4 mx-auto text-start list-none text-base font-bold text-primary hover:text-green-950">
-                  <li>
+              <div className="absolute flex mx-auto bg-white shadow-md top-22 right-2 w-[90vw]">
+                <ul className="flex flex-col justify-between gap-4 my-2 mx-4 text-start list-none text-base font-bold text-primary hover:text-green-950">
+                  <li className="">
                     <Link to="/">Home</Link>
                   </li>
                   <li>
@@ -99,16 +101,22 @@ export default function Navbar({ onNavClick }) {
                     <Link to="/pricing">Pricing</Link>
                   </li>
                   <li>
-                    <Link to="/contact">Contact</Link>
+                    <button
+                      onClick={() => {
+                        onNavClick("contact");
+                      }}
+                      className="cursor-pointer"
+                    >
+                      Contacts
+                    </button>
                   </li>
                   <button
                     onClick={() => {
-                      alert("gm clicked");
+                      onNavClick("account");
                     }}
+                    className="cursor-pointer"
                   >
-                    <div className="flex justify-center items-center size-10 rounded-full outline-[3px] outline-primary shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] cursor-pointer">
-                      <span>GM</span>
-                    </div>
+                    My Account
                   </button>
                 </ul>
               </div>

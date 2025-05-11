@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
-import Hero from "../components/home/hero";
-import Brand from "../components/home/brands";
 import Modal from "../components/modal";
+import TermsText from "../components/terms-text";
 
-const Home = () => {
+const Terms = () => {
   const [selectedModal, setSelectedModal] = useState(null);
 
   const handleCloseModal = () => {
@@ -15,8 +14,7 @@ const Home = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <Hero onCtaClick={setSelectedModal} />
-      <Brand />
+      <TermsText />
       <Footer />
       <Modal
         open={selectedModal !== null}
@@ -28,4 +26,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Terms;
