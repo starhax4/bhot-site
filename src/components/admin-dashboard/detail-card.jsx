@@ -8,7 +8,7 @@ const DetailCard = ({
   isDecreasing = false,
 }) => {
   return (
-    <div className="flex flex-col gap-7 md:w-64 md:h-40 px-4 py-4 bg-white  shadow-lg rounded-3xl">
+    <div className="flex flex-col gap-7 w-64 md:h-40 px-4 py-4 bg-white  shadow-lg rounded-3xl">
       <div className="flex justify-between">
         <div className="flex flex-col gap-5">
           <p className="text-neutral-800 text-base font-semibold font-['Nunito_Sans']">
@@ -57,7 +57,7 @@ const DetailCard = ({
               {percentage}%
             </span>
             {"  "}
-            {isDecreasing ? "Down" : "Up"} from yesterday
+            {isDecreasing ? "Down" : "Up  "} from yesterday
           </p>
         </div>
       </div>

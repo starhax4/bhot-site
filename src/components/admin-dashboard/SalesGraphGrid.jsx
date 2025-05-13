@@ -44,7 +44,7 @@ const SalesGraphGrid = () => {
   ];
 
   return (
-    <div className="flex flex-col gap-10  md:py-11 md:w-[45vw]">
+    <div className="flex flex-col gap-10 px-4 py-4  md:py-11 md:w-[45vw]">
       <ConversionGraph
         data={defaultData}
         title="Visits"

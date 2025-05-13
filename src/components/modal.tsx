@@ -55,7 +55,7 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className={`relative z-50 w-[90vw] mx-auto md:w-[65vw] h-[90vh] bg-white rounded-3xl border-2 border-neutral-400 ${
+              className={`relative z-50 w-[90vw] mx-auto md:w-[65vw]  bg-white rounded-3xl border-2 border-neutral-400 ${
                 className || ""
               }`}
             >

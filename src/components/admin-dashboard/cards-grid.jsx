@@ -3,7 +3,7 @@ import DetailCard from "./detail-card";
 
 const CardsGrid = () => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 md:w-[50vw] gap-14 place-items-center md:px-12 md:py-11">
+    <div className="grid grid-cols-1 md:grid-cols-2 md:w-[50vw] gap-4  md:gap-14 place-items-center md:px-12 md:py-11">
       <DetailCard
         title="Total Users"
         value={40689}

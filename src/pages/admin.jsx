@@ -41,7 +41,7 @@ const Admin = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <div className="flex">
+      <div className="flex flex-col md:flex-row ">
         <CardsGrid />
         <SalesGraphGrid />
       </div>

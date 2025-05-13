@@ -8,7 +8,7 @@ export default function Navbar({ onNavClick }) {
     setIsMenuOpen((prev) => !prev);
   };
   return (
-    <nav className="sticky top-0 mx-auto px-4 py-2 md:px-12 md:h-32  border-b-[0.5px] bg-white border-b-gray-200 shadow-md">
+    <nav className="sticky top-0 mx-auto px-4 py-2 md:px-12 md:h-32  border-b-[0.5px] bg-white border-b-gray-200 shadow-md z-[1000]">
       <div className="flex justify-between items-center md:items-end  ">
         <div>
           <Link to="/">
@@ -89,7 +89,7 @@ export default function Navbar({ onNavClick }) {
               )}
             </button>
             {isMenuOpen && (
-              <div className="absolute flex mx-auto bg-white shadow-md top-22 right-2 w-[90vw]">
+              <div className="absolute flex mx-auto bg-white shadow-md top-22 right-2 w-[90vw] z-[1000]">
                 <ul className="flex flex-col justify-between gap-4 my-2 mx-4 text-start list-none text-base font-bold text-primary hover:text-green-950">
                   <li className="">
                     <Link to="/">Home</Link>
