@@ -8,7 +8,7 @@ export default function Navbar({ onNavClick }) {
     setIsMenuOpen((prev) => !prev);
   };
   return (
-    <nav className="sticky mx-auto px-4 py-2 md:px-12 md:h-32 border-b-[0.5px] border-b-gray-200 shadow-md z-50">
+    <nav className="sticky top-0 mx-auto px-4 py-2 md:px-12 md:h-32  border-b-[0.5px] bg-white border-b-gray-200 shadow-md">
       <div className="flex justify-between items-center md:items-end  ">
         <div>
           <Link to="/">
@@ -25,7 +25,7 @@ export default function Navbar({ onNavClick }) {
               <Link to="/">Home</Link>
             </li>
             <li>
-              <Link to="/dashboard onc">Dashboard</Link>
+              <Link to="/dashboard">Dashboard</Link>
             </li>
             <li>
               <Link to="/pricing">Pricing</Link>

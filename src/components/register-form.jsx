@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Input from "./input";
 import ButtonCTA from "./button";
 import { Link } from "react-router";
+import SelectInput from "./select-input";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,7 +10,11 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
     //form Submition logic
+    console.log(data);
+
     nextModal("register-2");
   };
 
@@ -35,14 +40,14 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               <Input
                 label="First Name"
                 name="first-name"
-                placeHolder="John "
+                // placeHolder="John "
                 className=""
                 required
               />
               <Input
                 label="Last Name"
                 name="last-name"
-                placeHolder="Smith"
+                // placeHolder="Smith"
                 required
               />
             </div>
@@ -50,15 +55,22 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               <Input
                 label="Email"
                 name="email"
-                placeHolder="example@gmail.com"
+                // placeHolder="example@gmail.com"
                 type="email"
                 required
               />
-              <Input
-                label="Age Bracket"
+              <SelectInput
                 name="age"
-                placeHolder="18-23"
-                required
+                label="Age Bracket"
+                options={[
+                  { label: "18-24", value: "18-24" },
+                  { label: "24-40", value: "24-40" },
+                  { label: "40-55", value: "40-55" },
+                  { label: "55-100", value: "55-100" },
+                ]}
+                // defaultValue="18-24"
+                // searchEnabled={true}
+                // onSearch={handleSearch}
               />
             </div>
             <Input
@@ -73,22 +85,20 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               type="password"
               required
             />
-            <div className="flex flex-col">
-              <label
-                htmlFor="hear-from"
-                className="text-primary"
-              >
-                How did you hear about us?
-              </label>
-              <select
-                name="hear-from"
-                id="hear-from"
-                className="px-4 py-2 outline rounded text-gray-500"
-              >
-                <option value="google">Google Search</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
+            <SelectInput
+              name="hear-from"
+              label="How did you hear about us?"
+              options={[
+                { label: "Google Search", value: "google" },
+                { label: "Social Media", value: "social" },
+                { label: "Friend", value: "friend" },
+                { label: "Other", value: "other" },
+              ]}
+              // searchEnabled={true}
+              // onSearch={handleSearch}
+              fullWidth
+            />
+
             <div className="flex gap-2 items-baseline">
               <input
                 type="checkbox"

@@ -2,13 +2,24 @@ import React, { useState } from "react";
 import Input from "./input";
 import ButtonCTA from "./button";
 import { Link } from "react-router";
+import SelectInput from "./select-input";
 
 const AccountDetails = ({ closeModal }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState({
+    firstName: "John",
+    lastName: "Doe",
+    email: "example@gmail.com",
+    password: "Password1234",
+    property: "1, First Street, City, AB12 3CD",
+    plan: "Basic",
+  });
 
   const closeAccountModal = () => {
     closeModal();
   };
+
+  const handleDataChange = () => {};
 
   return (
     <div className="w-full px-12 py-8 ">
@@ -22,17 +33,17 @@ const AccountDetails = ({ closeModal }) => {
               <Input
                 label="First Name"
                 name="first-name"
-                placeHolder="John "
+                value={userData.firstName}
+                onChange={handleDataChange}
                 className="mt-3.5 bg-[#F9F9F9]"
-                labelClassName="text-black"
                 disabled={!isAuthenticated}
               />
               <Input
                 label="Last Name"
                 name="last-name"
-                placeHolder="Smith"
+                value={userData.lastName}
+                onChange={handleDataChange}
                 className="mt-3.5 bg-[#F9F9F9]"
-                labelClassName="text-black"
                 disabled={!isAuthenticated}
               />
             </div>
@@ -40,30 +51,38 @@ const AccountDetails = ({ closeModal }) => {
               <Input
                 label="Email"
                 name="email"
-                placeHolder="example@gmail.com"
+                value={userData.email}
+                onChange={handleDataChange}
                 className="mt-3.5 bg-[#F9F9F9]"
                 disabled={!isAuthenticated}
               />
               <Input
                 label="Password"
                 name="password"
-                placeHolder="********"
+                type="password"
+                value={userData.password}
+                onChange={handleDataChange}
                 disabled={!isAuthenticated}
                 className="mt-3.5 bg-[#F9F9F9]"
               />
             </div>
             <div className="grid md:grid-cols-2 gap-8">
-              <Input
+              <SelectInput
                 label="Property(ies)"
                 name="property"
-                placeHolder="1, First Street, City, AB12 3CD"
+                value={userData.property}
+                searchEnabled={true}
                 disabled={!isAuthenticated}
                 className="mt-3.5 bg-[#F9F9F9]"
               />
-              <Input
+              <SelectInput
                 label="Plan"
                 name="plan"
-                placeHolder="Basic"
+                defaultValue={userData.plan}
+                options={[
+                  { label: "Basic", value: "basic" },
+                  { label: "Pro", value: "pro" },
+                ]}
                 disabled={!isAuthenticated}
                 className="mt-3.5 bg-[#F9F9F9]"
               />

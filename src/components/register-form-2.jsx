@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import { motion } from "motion/react";
 import Input from "./input";
 import ButtonCTA from "./button";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
+import SelectInput from "./select-input";
 
 const RegisterForm2 = ({ closeModal }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -9,8 +11,10 @@ const RegisterForm2 = ({ closeModal }) => {
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
     //form Submition logic
-    // closeModal();
+    console.log(data);
     navigate("/dashboard");
   };
 
@@ -20,7 +24,12 @@ const RegisterForm2 = ({ closeModal }) => {
         onSubmit={handleRegisterSubmit}
         className="flex flex-col"
       >
-        <div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.3 }}
+        >
           <div>
             <h2 className="text-primary text-5xl font-bold">Register</h2>
             <h4 className="w-full flex md:justify-end font-semibold text-xl">
@@ -29,18 +38,31 @@ const RegisterForm2 = ({ closeModal }) => {
           </div>
           <div className="flex flex-col gap-[270px] mt-8">
             <div className="flex flex-col gap-6">
-              <Input
-                label="PostCode"
+              <SelectInput
                 name="zip-code"
-                placeHolder="AB12 3CD"
-                className=""
-                required
+                label="Postcode"
+                options={[
+                  {
+                    label: "",
+                    value: "",
+                  },
+                ]}
+                searchEnabled={true}
+                // onSearch={handleSearch}
+                fullWidth
               />
-              <Input
-                label="Select Adress"
-                name="adress"
-                placeHolder=""
-                required
+              <SelectInput
+                name="ADRESS"
+                label="select Adress"
+                options={[
+                  {
+                    label: "Okara",
+                    value: "okara",
+                  },
+                ]}
+                searchEnabled={true}
+                // onSearch={handleSearch}
+                fullWidth
               />
             </div>
 
@@ -54,7 +76,7 @@ const RegisterForm2 = ({ closeModal }) => {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
       </form>
     </div>
   );

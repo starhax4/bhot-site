@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import Input from "./input";
+import { motion } from "motion/react";
 import ButtonCTA from "./button";
-import { Link, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,7 +11,10 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   const handleLoginSubmit = (e) => {
     e.preventDefault();
     setIsLoading(true);
+    const formData = new FormData(e.target);
+    const data = Object.fromEntries(formData.entries());
     //form Submition logic
+    console.log(data);
     navigate("/dashboard");
   };
 
@@ -19,7 +23,13 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   };
 
   return (
-    <div className="w-full px-4 md:px-12 py-8 ">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.9 }}
+      transition={{ duration: 0.3 }}
+      className="w-full px-4 md:px-12 py-8 "
+    >
       <form
         onSubmit={handleLoginSubmit}
         className="flex flex-col"
@@ -33,15 +43,13 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               <div className="flex flex-col gap-6">
                 <Input
                   label="Email"
-                  name="zip-code"
-                  placeHolder="example@gmail.com"
+                  name="EMAIL"
                   type="email"
                   required
                 />
                 <Input
                   label="Password"
-                  name="adress"
-                  placeHolder=""
+                  name="PASSword"
                   type="password"
                   required
                 />
@@ -78,7 +86,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
           </div>
         </div>
       </form>
-    </div>
+    </motion.div>
   );
 };
 
