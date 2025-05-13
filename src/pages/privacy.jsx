@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import Modal from "../components/modal";
-import TermsText from "../components/terms-text";
+import PrivacyText from "../components/privacy-text";
 
 const Privacy = () => {
   const [selectedModal, setSelectedModal] = useState(null);
@@ -14,7 +14,7 @@ const Privacy = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <TermsText />
+      <PrivacyText />
       <Footer />
       <Modal
         open={selectedModal !== null}

@@ -165,7 +165,7 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <div className="bg-white shadow-xl w-36 px-2 py-2 rounded-lg">
+              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 miles
@@ -253,7 +253,7 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <div className="bg-white shadow-xl w-36 px-2 py-2 rounded-lg">
+              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 sqm
@@ -341,7 +341,7 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <div className="bg-white shadow-xl w-36 px-2 py-2 rounded-lg">
+              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
                 <div>
                   <div class="">
                     <div className="flex gap-1 font-semibold">

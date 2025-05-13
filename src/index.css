@@ -3,7 +3,7 @@
 
 @theme {
     --font-Sans : "Public Sans" , sans-serif;
-    --font-Playfair-Dispaly : "Playfair Display";
+    --font-Playfair-Dispaly : "Playfair Display" , "Public Sans";
     --font-Nunito : "Nunito Sans";
     --color-primary : #005000;
 }

@@ -41,7 +41,7 @@ const pricingData = {
       name: "£9.99", // Large header text for the plan
       frequency: "/Lifetime",
       buttonText: "Choose Basic Plan",
-      buttonLink: "#",
+      buttonLink: "/checkout/cart?package=basic",
       values: {
         properties: "1",
         benchmarking: true,
@@ -56,7 +56,7 @@ const pricingData = {
       name: "£59.99", // Large header text for the plan
       frequency: "/Year",
       buttonText: "Choose Pro Plan",
-      buttonLink: "#",
+      buttonLink: "/checkout/cart?package=pro",
       values: {
         properties: "Unlimited",
         benchmarking: true,

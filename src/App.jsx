@@ -6,6 +6,11 @@ import Dashboard from "./pages/dashboard";
 import Pricing from "./pages/pricing";
 import Admin from "./pages/admin";
 
+import BillingPage from "./pages/payments/billing";
+import PaymentPage from "./pages/payments/payment";
+import ConfirmPage from "./pages/payments/confirm";
+import CartPage from "./pages/payments/cart";
+
 function App() {
   return (
     <>
@@ -33,6 +38,23 @@ function App() {
         <Route
           path="/pricing"
           element={<Pricing />}
+        />
+        
+        <Route
+          path="/checkout/cart"
+          element={<CartPage />}
+        />
+        <Route
+          path="/checkout/billing"
+          element={<BillingPage />}
+        />
+        <Route
+          path="/checkout/payment"
+          element={<PaymentPage />}
+        />
+        <Route
+          path="/checkout/confirm"
+          element={<ConfirmPage />}
         />
       </Routes>
     </>
