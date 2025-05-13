@@ -23,7 +23,7 @@ const CheckoutStepper = ({ steps, currentStep }) => {
                   isCompleted
                     ? "bg-green-500 border-green-500"
                     : isActive
-                    ? "bg-white border-gray-400"
+                    ? "bg-white border-green-500"
                     : "bg-white border-gray-300"
                 }`}
               >

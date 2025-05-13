@@ -1,3 +1,6 @@
+import React from "react";
+import { Link } from "react-router";
+
 const RecomendationTable = () => {
   return (
     <div className="flex w-[45vw] px-4 pt-4 pb-10 bg-white  shadow-lg rounded-3xl">
@@ -6,8 +9,7 @@ const RecomendationTable = () => {
   );
 };
 
-import React from "react";
-import { Link } from "react-router";
+
 
 // interface RecommendationRow {
 //   id: string;
@@ -19,6 +21,7 @@ import { Link } from "react-router";
 //   totalPaybackPeriod?: string;
 //   locked?: boolean;
 // }
+
 
 const dummyData = [
   {
@@ -55,8 +58,8 @@ const RecommendationsTable = ({ data }) => {
       <h2 className="text-sm font-semibold text-primary mb-4">
         Recommendations
       </h2>
-      <div className="overflow-x-scroll">
-        <table className="min-w-full divide-y divide-gray-200 overflow-x-scroll">
+      <div className="overflow-x-scroll md:overflow-x-hidden">
+        <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-white">
             <tr>
               <th
@@ -143,12 +146,12 @@ const RecommendationsTable = ({ data }) => {
       </div>
       {/* Placeholder for the greyed out buttons/indicators at the bottom */}
       <div className="my-9 flex space-x-2 sm:space-x-6 justify-center sm:justify-start">
-        <div className="w-16 h-8 sm:w-20 sm:h-10 bg-gray-600 rounded-full"></div>
-        <div className="w-16 h-8 sm:w-20 sm:h-10 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-8 sm:w-20 sm:h-10 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-8 sm:w-20 sm:h-10 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-8 sm:w-20 sm:h-10 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-8 sm:w-20 sm:h-10 bg-gray-300 rounded-full"></div>
+        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
+        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
       </div>
     </div>
   );

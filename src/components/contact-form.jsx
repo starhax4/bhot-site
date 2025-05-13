@@ -132,7 +132,7 @@ const ContactForm = ({ closeModal }) => {
             /> */}
             <label
               htmlFor="message"
-              className=""
+              className="text-gray-500"
             >
               Your Message
             </label>
@@ -140,7 +140,7 @@ const ContactForm = ({ closeModal }) => {
               name="message"
               id="message"
               required
-              className="outline-2 rounded px-4 py-2 outline-gray-300 h-44"
+              className="outline-2 rounded px-4 py-2 outline-gray-300 h-38"
               cols="6"
             ></textarea>
           </div>

@@ -1,4 +1,5 @@
 import React, { forwardRef, useState } from "react";
+import { EyeOff, Eye } from "lucide-react";
 
 // A fully reusable outlined input with floating label and password toggle
 const sizeStyles = {
@@ -111,37 +112,7 @@ const OutlinedInput = forwardRef(
               onClick={() => setShowPassword(!showPassword)}
               className="ml-2 z-10 focus:outline-none"
             >
-              {showPassword ? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M13.875 18.825A10.05 10.05 0 0112 19.5c-5.523 0-10-4.477-10-10 0-1.303.265-2.54.745-3.675m3.116 1.581A1.75 1.75 0 118.25 6.75 1.75 1.75 0 016.5 8.75zM12 12a2.5 2.5 0 100-5 2.5 2.5 0 000 5z"
-                  />
-                </svg>
-              ) : (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={2}
-                  stroke="currentColor"
-                  className="w-5 h-5"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M3 3l18 18M8.53 8.53a5.5 5.5 0 017.87 7.87M10.12 2.925A10.045 10.045 0 0112 2.5c5.523 0 10 4.477 10 10 0 1.476-.342 2.884-.946 4.147M5.636 5.636A9.958 9.958 0 002.5 12c0 2.372.833 4.546 2.214 6.196"
-                  />
-                </svg>
-              )}
+              {showPassword ? <Eye /> : <EyeOff />}
             </button>
           ) : (
             endAdornment && <span className="ml-2 z-10">{endAdornment}</span>

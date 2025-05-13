@@ -11,8 +11,8 @@ const scatterData = Array.from({ length: 50 }, () => ({
 
 const DashboardCard = () => {
   const [filter, setFilter] = useState({
-    distance: 0,
-    size: 0,
+    distance: "2", // Initial value for distance
+    size: "1000", // Initial value for size
     type: {
       detachedHouse: false,
       terracedHouse: false,
@@ -60,9 +60,20 @@ const DashboardCard = () => {
 
   const [currentPeriod, setCurrentPeriod] = useState("october");
 
-  const updateDistance = (e) => {
-    setDistance(e.target.value);
+  const propertyOverview = {
+    address: "1 Street Name, City, Post Code",
+    type: "e.g. Mid-terrace House",
+    area: "x sqm",
   };
+
+  const handleRangeChange = (e) => {
+    const { id, value } = e.target;
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      [id]: value,
+    }));
+  };
+
   return (
     <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-lg rounded-3xl ">
       {/* Property Info */}
@@ -78,12 +89,14 @@ const DashboardCard = () => {
 
             <div className="flex flex-col gap-5">
               <p className="text-neutral-400 text-sm font-semibold">
-                1 Street Name, City, Post Code
+                {propertyOverview.address}
               </p>
               <p className="text-neutral-400 text-sm font-semibold">
-                e.g. Mid-terrace House
+                {propertyOverview.type}
               </p>
-              <p className="text-neutral-400 text-sm font-semibold">x sqm</p>
+              <p className="text-neutral-400 text-sm font-semibold mt-5">
+                {propertyOverview.area}
+              </p>
             </div>
           </div>
         </div>
@@ -175,15 +188,17 @@ const DashboardCard = () => {
                   </p>
                 </div>
                 <div>
-                  <div class="">
+                  <div className="">
+                    {" "}
+                    {/* Changed class to className */}
                     <input
                       type="range"
                       id="distance"
-                      class="w-full accent-primary"
+                      className="w-full accent-primary" /* Changed class to className */
                       min="0"
                       max="10"
-                      value="2"
-                      onChange={updateDistance}
+                      value={filter.distance} /* Bind value to state */
+                      onChange={handleRangeChange} /* Use new handler */
                     />
                     <span className="text-neutral-400 text-xs">
                       within <strong>{filter.distance}miles</strong>
@@ -263,15 +278,17 @@ const DashboardCard = () => {
                   </p>
                 </div>
                 <div>
-                  <div class="">
+                  <div className="">
+                    {" "}
+                    {/* Changed class to className */}
                     <input
                       type="range"
                       id="size"
-                      class="w-full accent-primary"
+                      className="w-full accent-primary" /* Changed class to className */
                       min="0"
                       max="5000"
-                      value="1000"
-                      onChange={updateDistance}
+                      value={filter.size} /* Bind value to state */
+                      onChange={handleRangeChange} /* Use new handler */
                     />
                     <span className="text-neutral-400 text-xs">
                       Up to <strong>{filter.size}sqm</strong>

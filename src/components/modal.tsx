@@ -38,7 +38,11 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
     <AnimatePresence>
       {open && (
         <div className="flex justify-center">
-          <div className="absolute mx-auto top-36 overflow-x-hidden">
+          <div
+            className={`absolute mx-auto top-6 overflow-x-hidden z-[600] ${
+              contentType === "login" ? "top-36" : ""
+            } ${contentType === "account" ? "top-32" : ""}`}
+          >
             {/* Overlay */}
             <motion.div
               onClick={onClose}
@@ -55,7 +59,7 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
               transition={{ duration: 0.3 }}
-              className={`relative z-50 w-[90vw] mx-auto md:w-[65vw]  bg-white rounded-3xl border-2 border-neutral-400 ${
+              className={`relative z-[600] w-[90vw] mx-auto md:w-[65vw] bg-white rounded-3xl border-2 border-neutral-400 ${
                 className || ""
               }`}
             >

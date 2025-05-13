@@ -305,8 +305,9 @@ export default function ConversionGraph({
             />
             <Tooltip
               content={<CustomTooltip />}
-              cursor={false}
-              isAnimationActive={false}
+              cursor={true}
+              isAnimationActive={true}
+              wrapperStyle={{ zIndex: 100 }}
             />
             <Area
               type="linear"

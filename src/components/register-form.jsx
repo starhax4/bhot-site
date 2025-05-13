@@ -6,6 +6,8 @@ import SelectInput from "./select-input";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [rePassword, setRePassword] = useState("");
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
@@ -20,6 +22,13 @@ const RegisterForm = ({ closeModal, nextModal }) => {
 
   const handleLoginClick = () => {
     nextModal("login");
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+  };
+  const handleRePasswordChange = (e) => {
+    setRePassword(e.target.value);
   };
 
   return (
@@ -77,12 +86,20 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               label="Password"
               name="password"
               type="password"
+              onChange={handlePasswordChange}
               required
             />
             <Input
               label="Confirm Password"
               name="c-password"
               type="password"
+              onChange={handleRePasswordChange}
+              error={rePassword && password !== rePassword}
+              helperText={
+                rePassword && password !== rePassword
+                  ? "Password does't matched"
+                  : ""
+              }
               required
             />
             <SelectInput
