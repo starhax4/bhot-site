@@ -57,7 +57,7 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className={`relative z-[10] bg-white rounded-3xl border-2 border-neutral-400 w-[90vw] md:w-[65vw] max-h-[100vh] overflow-y-hidden shadow-xl ${
+            className={`relative z-[10] bg-white rounded-3xl border-2 border-neutral-400 w-[90vw] md:w-[65vw] max-h-[90vh] overflow-y-hidden shadow-xl ${
               className || ""
             }`}
           >

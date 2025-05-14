@@ -8,12 +8,12 @@ export default function Navbar({ onNavClick }) {
     setIsMenuOpen((prev) => !prev);
   };
   return (
-    <nav className="sticky top-0 mx-auto px-4 py-2 md:px-12 md:h-32  border-b-[0.5px] bg-white border-b-gray-200 shadow-md z-[500]">
+    <nav className="sticky top-0 mx-auto px-4 py-2 md:px-12 md:h-26  border-b-[0.5px] bg-white border-b-gray-200 shadow-md z-[500]">
       <div className="flex justify-between items-center md:items-end  ">
         <div>
           <Link to="/">
             <img
-              className="w-44 md:w-full"
+              className="w-44 md:w-54"
               src="/BHOTS Logo+Tag 1.png"
               alt="BHOTS_logo"
             />
