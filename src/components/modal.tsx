@@ -43,7 +43,7 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[1000] flex items-center justify-center p-4" // High z-index, flex centering, padding
+          className="fixed top-26 inset-0 z-[1000] flex items-center justify-center p-4" // High z-index, flex centering, padding
         >
           {/* Overlay: Sibling to Modal Box, covers the entire Root Fixed Container. */}
           <div
@@ -57,7 +57,7 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
-            className={`relative z-[10] bg-white rounded-3xl border-2 border-neutral-400 w-[90vw] md:w-[65vw] max-h-[90vh] overflow-y-hidden shadow-xl ${
+            className={`relative z-[10] bg-white rounded-3xl border-2 border-primary w-[90vw] md:w-[55vw] max-h-[90vh] overflow-y-auto shadow-xl ${
               className || ""
             }`}
           >

@@ -3,14 +3,14 @@ import ButtonCTA from "../button";
 
 const Hero = ({ onCtaClick }) => {
   return (
-    <main className="mx-auto my-12 md:my-20 px-4 md:px-12">
+    <main className="mx-auto my-12 md:my-17 px-4 md:px-14">
       <div className="flex flex-col">
         <div className="flex flex-col-reverse gap-4 md:flex-row justify-between">
           <div className="md:w-[50%] flex flex-col gap-6">
             <h1 className="text-black text-3xl md:text-4xl font-normal md:pr-32">
               Unlock the value hiding in your home.
             </h1>
-            <p className="text-xl font-normal">
+            <p className="font-normal">
               At Best House on the Street, we give you everything you need to
               understand your home’s energy performance.
               <br />

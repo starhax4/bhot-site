@@ -100,12 +100,12 @@ const SelectInput = forwardRef(
     const borderColor = error
       ? "border-red-500"
       : focused
-      ? "border-blue-500"
-      : "border-gray-300";
+      ? "border-primary"
+      : "border-gray-500";
     const ringClass = focused
       ? error
         ? "ring-1 ring-red-500"
-        : "ring-1 ring-blue-500"
+        : "ring-1 ring-primary"
       : "";
     const widthClass = fullWidth ? "w-full" : "inline-flex";
 
@@ -134,8 +134,8 @@ const SelectInput = forwardRef(
               className={`absolute left-3 px-1 bg-white transition-all pointer-events-none
               ${
                 focused || displayValue
-                  ? "-top-2 text-xs text-gray-600"
-                  : "top-1/2 -translate-y-1/2 text-gray-500"
+                  ? "-top-2 text-xs text-primary"
+                  : "top-1/2 -translate-y-1/2 text-zinc-600"
               }`}
             >
               {label}

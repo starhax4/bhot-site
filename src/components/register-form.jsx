@@ -32,20 +32,31 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   };
 
   return (
-    <div className="w-full px-4 md:px-12 py-8 ">
+    <div className="w-full px-4 md:px-6 py-5 ">
+      {" "}
+      {/* Reduced padding */}
       <form
         onSubmit={handleRegisterSubmit}
         className="flex flex-col"
       >
         <div>
           <div>
-            <h2 className="text-primary text-5xl font-bold">Register</h2>
-            <h4 className="w-full flex md:justify-end font-semibold text-xl">
+            <h2 className="text-primary text-2xl md:text-3xl font-semibold">
+              Register
+            </h2>{" "}
+            {/* Reduced heading size */}
+            <h4 className="w-full flex md:justify-end font-semibold text-base md:text-lg">
+              {" "}
+              {/* Reduced sub-heading size */}
               Step 1 of 2: Your Information
             </h4>
           </div>
-          <div className="flex flex-col gap-6 mt-8">
-            <div className="grid md:grid-cols-2 gap-8">
+          <div className="flex flex-col gap-4 mt-5">
+            {" "}
+            {/* Reduced gap and margin */}
+            <div className="grid md:grid-cols-2 gap-x-4 gap-y-4">
+              {" "}
+              {/* Reduced grid gap */}
               <Input
                 label="First Name"
                 name="first-name"
@@ -60,7 +71,9 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 required
               />
             </div>
-            <div className="grid md:grid-cols-2 gap-8">
+            <div className="grid md:grid-cols-2 gap-x-4 gap-y-4">
+              {" "}
+              {/* Reduced grid gap */}
               <Input
                 label="Email"
                 name="email"
@@ -115,17 +128,18 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               // onSearch={handleSearch}
               fullWidth
             />
-
             <div className="flex gap-2 items-baseline">
               <input
                 type="checkbox"
                 name="policy"
                 id="policy"
                 required
+                className="mt-1 accent-primary" // Align checkbox better
               />
               <label htmlFor="policy">
-                <p>
-                  I agree to all the{" "}
+                <p className="text-sm">
+                  {" "}
+                  {/* Ensured text is small */}I agree to all the{" "}
                   <Link
                     to="/terms"
                     className="text-primary"
@@ -142,7 +156,6 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 </p>
               </label>
             </div>
-
             <div>
               <ButtonCTA
                 label="Create account and continue"
@@ -153,7 +166,9 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               />
             </div>
             <div className="flex justify-center">
-              <p>
+              <p className="text-sm">
+                {" "}
+                {/* Ensured text is small */}
                 Already have an Account?{" "}
                 <span
                   onClick={handleLoginClick}

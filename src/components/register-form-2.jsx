@@ -56,8 +56,8 @@ const RegisterForm2 = ({ closeModal }) => {
                 label="select Adress"
                 options={[
                   {
-                    label: "Okara",
-                    value: "okara",
+                    label: "Poole, United Kingdom",
+                    value: "poole",
                   },
                 ]}
                 searchEnabled={true}

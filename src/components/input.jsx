@@ -3,7 +3,7 @@ import { EyeOff, Eye } from "lucide-react";
 
 // A fully reusable outlined input with floating label and password toggle
 const sizeStyles = {
-  small: "px-2 pt-3 pb-1 text-sm",
+  small: "px-2.5 pt-4 pb-1.5 text-lg", // Adjusted for more compact "small" size
   medium: "px-3 pt-4 pb-2 text-base",
   large: "px-4 pt-5 pb-3 text-lg",
 };
@@ -23,9 +23,10 @@ const OutlinedInput = forwardRef(
       endAdornment = null,
       fullWidth = false,
       disabled = false,
-      size = "medium",
+      size = "medium", // Changed default size to "small"
       type = "text",
       className = "",
+      inputClass = "",
       ...props
     },
     ref
@@ -45,17 +46,34 @@ const OutlinedInput = forwardRef(
     const inputType = isPassword && showPassword ? "text" : type;
     const hasValue = inputValue !== "";
 
+    // Determine label color and size
+    let labelColorClass = "text-zinc-800";
+    if (error) {
+      labelColorClass = "text-red-500";
+    } else if (focused) {
+      labelColorClass = "text-primary"; // Or your theme's focus color
+    }
+
+    const labelSizeAndPositionClass =
+      hasValue || focused
+        ? size === "small"
+          ? "-top-1.5 text-[0.65rem]" // Adjusted active label for "small"
+          : "-top-2 text-xs" // Default active label for other sizes
+        : size === "small"
+        ? "top-1/2 -translate-y-1/2 text-xs" // Inactive label for "small"
+        : "top-1/2 -translate-y-1/2 text-gray-500"; // Default inactive
+
     // Determine border color
     const borderColor = error
       ? "border-red-500"
       : focused
-      ? "border-blue-500"
-      : "border-gray-300";
+      ? "border-primary"
+      : "border-gray-500";
 
     // Determine ring
     const ringClass =
       focused && !error
-        ? "ring-1 ring-blue-500"
+        ? "ring-1 ring-primary"
         : focused && error
         ? "ring-1 ring-red-500"
         : "";
@@ -67,7 +85,7 @@ const OutlinedInput = forwardRef(
         className={`flex flex-col ${fullWidth ? "w-full" : ""} ${className}`}
       >
         <div
-          className={`relative border ${borderColor} ${ringClass} rounded-lg bg-white flex items-center ${sizeStyles[size]} ${widthClass}`}
+          className={`relative border ${borderColor} ${ringClass} rounded-lg bg-white flex items-center ${sizeStyles[size]} ${widthClass} ${inputClass}`}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
         >
@@ -75,12 +93,11 @@ const OutlinedInput = forwardRef(
           {label && (
             <label
               htmlFor={id || name}
-              className={`absolute left-3 px-1 bg-white transition-all pointer-events-none 
-              ${
-                hasValue || focused
-                  ? "-top-2 text-xs text-gray-600"
-                  : "top-1/2 -translate-y-1/2 text-gray-500"
-              }`}
+              className={`absolute left-2.5 px-1 bg-white transition-all duration-200 ease-in-out pointer-events-none 
+              ${labelSizeAndPositionClass} ${
+                hasValue || focused ? labelColorClass : "text-gray-500"
+              }
+              `}
             >
               {label}
             </label>
@@ -112,7 +129,7 @@ const OutlinedInput = forwardRef(
               onClick={() => setShowPassword(!showPassword)}
               className="ml-2 z-10 focus:outline-none"
             >
-              {showPassword ? <Eye /> : <EyeOff />}
+              {showPassword ? <Eye /> : <EyeOff className="text-gray-500" />}
             </button>
           ) : (
             endAdornment && <span className="ml-2 z-10">{endAdornment}</span>
