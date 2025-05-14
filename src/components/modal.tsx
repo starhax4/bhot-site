@@ -37,36 +37,33 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
   return (
     <AnimatePresence>
       {open && (
-        <div className="flex justify-center">
+        // Root Fixed Container: Covers viewport, centers content, handles overall modal visibility animation.
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[1000] flex items-center justify-center p-4" // High z-index, flex centering, padding
+        >
+          {/* Overlay: Sibling to Modal Box, covers the entire Root Fixed Container. */}
           <div
-            className={`absolute mx-auto top-6 overflow-x-hidden z-[600] ${
-              contentType === "login" ? "top-36" : ""
-            } ${contentType === "account" ? "top-32" : ""}`}
-          >
-            {/* Overlay */}
-            <motion.div
-              onClick={onClose}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-white/75"
-            />
+            onClick={onClose}
+            className="absolute inset-0 bg-white/70" // Covers parent, darkens background
+          />
 
-            {/* Modal Box */}
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.3 }}
-              className={`relative z-[600] w-[90vw] mx-auto md:w-[65vw] bg-white rounded-3xl border-2 border-neutral-400 ${
-                className || ""
-              }`}
-            >
-              {getContent()}
-            </motion.div>
-          </div>
-        </div>
+          {/* Modal Box: Actual modal content, animated, scrollable if content overflows. */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ duration: 0.3, ease: "easeOut" }}
+            className={`relative z-[10] bg-white rounded-3xl border-2 border-neutral-400 w-[90vw] md:w-[65vw] max-h-[100vh] overflow-y-hidden shadow-xl ${
+              className || ""
+            }`}
+          >
+            {getContent()}
+          </motion.div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
