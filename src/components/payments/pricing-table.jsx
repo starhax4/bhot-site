@@ -91,7 +91,7 @@ const PricingTable = () => {
           {/* ----- ROW 1: "Compare Plans" Info & Plan Headers ----- */}
 
           {/* Cell 1.1: "Compare Plans" section */}
-          <div className="p-5 md:p-6">
+          <div className="p-5 md:p-6 md:pt-10">
             <h2 className="text-xl font-bold md:text-2xl text-primary mb-1">
               Compare plans
             </h2>

@@ -38,7 +38,7 @@ const Dashboard = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <div className="flex flex-col md:flex-row py-14 px-4 md:px-14 justify-between gap-14">
+      <div className="flex flex-col md:flex-row py-14 px-4 md:px-14 justify-between gap-8 md:gap-0">
         <DashboardCard />
         <div className="flex flex-col  gap-16">
           <div className="flex flex-col md:flex-row gap-9">

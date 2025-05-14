@@ -248,15 +248,15 @@ const SegmentedCircularGauge = ({ value, grade, size = 192 }) => {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center z-50">
         <span
-          className="font-bold text-gray-800"
-          style={{ fontSize: `${scoreFontSize}px`, lineHeight: "1.1" }} // Added lineHeight for better spacing
+          className="font-semibold text-xl textblack"
+          style={{ lineHeight: "1.1" }} // Added lineHeight for better spacing
         >
           {roundedValue}
         </span>
         {grade && (
           <span
-            className="text-gray-700"
-            style={{ fontSize: `${gradeFontSize}px`, lineHeight: "1.1" }} // Added lineHeight
+            className="font-semibold text-xl textblack"
+            style={{ lineHeight: "1.1" }} // Added lineHeight
           >
             {grade.toUpperCase()}
           </span>

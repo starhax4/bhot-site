@@ -10,7 +10,7 @@ const ValueCard = ({
   return (
     <div className="flex flex-col md:w-[21vw] px-6 py-6 bg-white  shadow-lg rounded-3xl">
       <div>
-        <p className="text-sm font-semibold text-primary">{title}</p>
+        <p className="text-lg font-semibold text-primary">{title}</p>
         {desc && (
           <p className="text-sm font-semibold text-neutral-400">
             If all receommendations implemented

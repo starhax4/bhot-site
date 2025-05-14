@@ -52,10 +52,10 @@ const LockIcon = () => (
 const RecommendationsTable = ({ data }) => {
   return (
     <div className="w-full bg-white p-4 sm:p-6 rounded-3xl shadow-lg md:w-[45vw] mx-auto">
-      <h2 className="text-sm font-semibold text-primary my-4">
+      <h2 className="text-lg font-semibold text-primary my-4">
         Recommendations
       </h2>
-      <div className="overflow-x-scroll overflow-y-auto md:overflow-x-hidden">
+      <div className="overflow-x-scroll overflow-y-auto md:overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-white">
             <tr>

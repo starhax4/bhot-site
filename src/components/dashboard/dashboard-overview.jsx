@@ -97,14 +97,14 @@ const DashboardCard = () => {
               <p className="text-neutral-400 text-sm font-semibold">Area: </p>
             </div>
 
-            <div className="flex flex-col gap-5">
-              <p className="text-neutral-400 text-sm font-semibold">
+            <div className="flex flex-col gap-5 w-48">
+              <p className="text-neutral-400 text-sm font-semibold h-10">
                 {propertyOverview.address}
               </p>
-              <p className="text-neutral-400 text-sm font-semibold">
+              <p className="text-neutral-400 text-sm font-semibold h-10">
                 {propertyOverview.type}
               </p>
-              <p className="text-neutral-400 text-sm font-semibold mt-5">
+              <p className="text-neutral-400 text-sm font-semibold h-10">
                 {propertyOverview.area}
               </p>
             </div>
@@ -368,7 +368,7 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
+              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg mt-2.5">
                 <div>
                   <div class="">
                     <div className="flex gap-1 font-semibold">
