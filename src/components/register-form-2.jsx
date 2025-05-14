@@ -36,7 +36,7 @@ const RegisterForm2 = ({ closeModal }) => {
               Step 2 of 2: Your Property
             </h4>
           </div>
-          <div className="flex flex-col gap-[270px] mt-8">
+          <div className="flex flex-col gap-[226px] mt-8">
             <div className="flex flex-col gap-6">
               <SelectInput
                 name="zip-code"

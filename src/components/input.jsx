@@ -3,7 +3,7 @@ import { EyeOff, Eye } from "lucide-react";
 
 // A fully reusable outlined input with floating label and password toggle
 const sizeStyles = {
-  small: "px-2.5 pt-4 pb-1.5 text-lg", // Adjusted for more compact "small" size
+  small: "px-2.5 pt-3 pb-1.5 text-base", // Adjusted for more compact "small" size
   medium: "px-3 pt-4 pb-2 text-base",
   large: "px-4 pt-5 pb-3 text-lg",
 };
@@ -23,7 +23,7 @@ const OutlinedInput = forwardRef(
       endAdornment = null,
       fullWidth = false,
       disabled = false,
-      size = "medium", // Changed default size to "small"
+      size = "small", // Changed default size to "small"
       type = "text",
       className = "",
       inputClass = "",
@@ -60,8 +60,8 @@ const OutlinedInput = forwardRef(
           ? "-top-1.5 text-[0.65rem]" // Adjusted active label for "small"
           : "-top-2 text-xs" // Default active label for other sizes
         : size === "small"
-        ? "top-1/2 -translate-y-1/2 text-xs" // Inactive label for "small"
-        : "top-1/2 -translate-y-1/2 text-gray-500"; // Default inactive
+        ? "top-1/2 -translate-y-1/2 text-base" // Inactive label for "small"
+        : "top-1/2 -translate-y-1/2 text-zinc-600"; // Default inactive
 
     // Determine border color
     const borderColor = error

@@ -2,7 +2,7 @@ import React, { forwardRef, useState, useRef, useEffect } from "react";
 
 // Reusable SelectInput with floating label, object options, default value, and async support
 const sizeStyles = {
-  small: "px-2 pt-3 pb-1 text-sm",
+  small: "px-2 pt-3 pb-1.5 text-base",
   medium: "px-3 pt-4 pb-2 text-base",
   large: "px-4 pt-5 pb-3 text-lg",
 };
@@ -22,7 +22,7 @@ const SelectInput = forwardRef(
       helperText = "",
       fullWidth = false,
       disabled = false,
-      size = "medium",
+      size = "small",
       searchEnabled = false,
       onSearch, // async callback(term)
       className = "",
@@ -48,14 +48,14 @@ const SelectInput = forwardRef(
 
     const displayValue = inputText;
 
-    // Filter local options always
-    useEffect(() => {
-      setFiltered(
-        options.filter((opt) =>
-          opt.label.toLowerCase().includes(displayValue.toLowerCase())
-        )
-      );
-    }, [options, displayValue]);
+    // // // Filter local options always
+    // useEffect(() => {
+    //   setFiltered(
+    //     options.filter((opt) =>
+    //       opt.label.toLowerCase().includes(displayValue.toLowerCase())
+    //     )
+    //   );
+    // }, [options, displayValue]);
 
     // Trigger async search if enabled
     useEffect(() => {

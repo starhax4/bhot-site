@@ -27,7 +27,7 @@ export default function BillingPage() {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <div className="container mx-auto px-4 py-8 md:h-[73vh]">
+      <div className="container mx-auto px-4 py-8 md:h-[83vh]">
         <CheckoutStepper
           steps={steps}
           currentStep={currentStep}

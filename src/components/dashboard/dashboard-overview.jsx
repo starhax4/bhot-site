@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import SegmentedCircularGauge from "./SegmentedCircularGauge";
 import ScatterPlot from "./scatter-plot";
-import LineChartCard from "./line-chart";
 
 // Dummy data for scatter plot
 const scatterData = Array.from({ length: 50 }, () => ({
@@ -20,6 +19,11 @@ const DashboardCard = () => {
       flat: false,
     },
   });
+
+  const [openDropdown, setOpenDropdown] = useState(null); // 'distance', 'size', 'type'
+  const [distanceButtonLabel, setDistanceButtonLabel] = useState("Distance");
+  const [sizeButtonLabel, setSizeButtonLabel] = useState("Size");
+  const [typeButtonLabel, setTypeButtonLabel] = useState("Type");
 
   const sampleData = [
     { id: "proj1", frequency: 3, projectSuccess: 50 },
@@ -74,6 +78,111 @@ const DashboardCard = () => {
     address: "1 Street Name, City, Post Code",
     type: "e.g. Mid-terrace House",
     area: "x sqm",
+  };
+
+  const distanceOptions = [
+    { label: "Distance", value: "default_distance", miles: filter.distance },
+    { label: "Within 1 mile", value: "1", miles: "1" },
+    { label: "Within 2 miles", value: "2", miles: "2" },
+    { label: "Within 5 miles", value: "5", miles: "5" },
+    { label: "Within 10 miles", value: "10", miles: "10" },
+  ];
+
+  const sizeOptions = [
+    { label: "Size", value: "default_size", sqm: filter.size },
+    { label: "Up to 500 sqm", value: "500", sqm: "500" },
+    { label: "Up to 1000 sqm", value: "1000", sqm: "1000" },
+    { label: "Up to 2500 sqm", value: "2500", sqm: "2500" },
+    { label: "Up to 5000 sqm", value: "5000", sqm: "5000" },
+  ];
+
+  const typeOptions = [
+    { label: "Type", value: "default_type" },
+    { label: "Any Type", value: "any_type" },
+    { label: "Detached House", value: "detachedHouse" },
+    { label: "Terraced House", value: "terracedHouse" },
+    { label: "Park House", value: "parkHouse" },
+    { label: "Flat", value: "flat" },
+  ];
+
+  const handleDropdownToggle = (dropdownId) => {
+    setOpenDropdown(openDropdown === dropdownId ? null : dropdownId);
+  };
+
+  const handleDistanceOptionSelect = (option) => {
+    setDistanceButtonLabel(
+      option.label === "Distance" ? "Distance" : option.label
+    );
+    if (option.value !== "default_distance") {
+      setFilter((prevFilter) => ({
+        ...prevFilter,
+        distance: option.miles,
+      }));
+    }
+    setOpenDropdown(null);
+  };
+
+  const handleSizeOptionSelect = (option) => {
+    setSizeButtonLabel(option.label === "Size" ? "Size" : option.label);
+    if (option.value !== "default_size") {
+      setFilter((prevFilter) => ({
+        ...prevFilter,
+        size: option.sqm,
+      }));
+    }
+    setOpenDropdown(null);
+  };
+
+  const handleTypeOptionSelect = (option) => {
+    setTypeButtonLabel(option.label);
+    const newTypeFilterState = {
+      detachedHouse: false,
+      terracedHouse: false,
+      parkHouse: false,
+      flat: false,
+    };
+    if (option.value !== "default_type" && option.value !== "any_type") {
+      newTypeFilterState[option.value] = true;
+    }
+    // For "any_type", all remain false. For "default_type", no change to filter.type from here.
+    if (option.value !== "default_type") {
+      setFilter((prevFilter) => ({
+        ...prevFilter,
+        type: newTypeFilterState,
+      }));
+    }
+    setOpenDropdown(null);
+  };
+
+  const handleCheckboxChange = (typeName) => {
+    setFilter((prevFilter) => {
+      const updatedType = {
+        ...prevFilter.type,
+        [typeName]: !prevFilter.type[typeName],
+      };
+
+      const trueTypes = Object.entries(updatedType)
+        .filter(([_, value]) => value)
+        .map(([key]) => key);
+
+      if (trueTypes.length === 0) {
+        setTypeButtonLabel("Any Type");
+      } else if (trueTypes.length === 1) {
+        const selectedTypeOption = typeOptions.find(
+          (opt) => opt.value === trueTypes[0]
+        );
+        setTypeButtonLabel(
+          selectedTypeOption ? selectedTypeOption.label : "Type"
+        );
+      } else {
+        setTypeButtonLabel("Multiple Types");
+      }
+
+      return {
+        ...prevFilter,
+        type: updatedType,
+      };
+    });
   };
 
   const handleRangeChange = (e) => {
@@ -137,15 +246,14 @@ const DashboardCard = () => {
         </h2>
         <div className="flex flex-col my-4">
           <div className="flex flex-col items-center md:items-start gap-4 md:flex-row justify-between w-full">
-            <div className="flex flex-col gap-2">
+            {/* Distance Filter */}
+            <div className="flex flex-col gap-2 relative">
               <button
                 type="button"
-                onClick={() => {
-                  //   setSelectedOptions("careers");
-                }}
-                className={`w-24 px-1 py-2  outline-2 outline-offset-[-1px] outline-primary bg-primary  text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
+                onClick={() => handleDropdownToggle("distance")}
+                className={`w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
               >
-                <p className="text-nowrap text-xs">Distance </p>
+                <p className="text-nowrap text-xs">{distanceButtonLabel}</p>
                 <div className="flex my-auto items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -163,31 +271,20 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  //   setSelectedOptions("careers");
-                }}
-                className={`w-24 px-1 py-2  outline-2 outline-offset-[-1px] bg-gray-400  text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
-              >
-                <p className="text-nowrap text-xs">Distance </p>
-                <div className="flex my-auto items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-chevron-down-icon lucide-chevron-down"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
+              {openDropdown === "distance" && (
+                <div className="absolute top-full mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                  {distanceOptions.map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => handleDistanceOptionSelect(opt)}
+                      className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-xs text-gray-700"
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
                 </div>
-              </button>
+              )}
+              {/* Gray button removed */}
               <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
@@ -199,24 +296,25 @@ const DashboardCard = () => {
                 </div>
                 <div>
                   <div className="">
-                    {" "}
-                    {/* Changed class to className */}
                     <input
                       type="range"
                       id="distance"
-                      className="w-full accent-primary" /* Changed class to className */
+                      className="w-full accent-primary"
                       min="0"
                       max="10"
-                      value={filter.distance} /* Bind value to state */
-                      onChange={handleRangeChange} /* Use new handler */
+                      value={filter.distance}
+                      onChange={handleRangeChange}
                     />
                     <span className="text-neutral-400 text-xs">
-                      within <strong>{filter.distance}miles</strong>
+                      within <strong>{filter.distance} miles</strong>
                     </span>
                     <div className="flex justify-end">
                       <button
                         onClick={() => {
-                          console.log("Distance apply clicked");
+                          console.log(
+                            "Distance apply clicked for range:",
+                            filter.distance
+                          );
                         }}
                         className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
                       >
@@ -227,15 +325,15 @@ const DashboardCard = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
+
+            {/* Size Filter */}
+            <div className="flex flex-col gap-2 relative">
               <button
                 type="button"
-                onClick={() => {
-                  //   setSelectedOptions("careers");
-                }}
-                className={`w-24 px-1 py-2  outline-2 outline-offset-[-1px] outline-primary bg-primary  text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
+                onClick={() => handleDropdownToggle("size")}
+                className={`w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
               >
-                <p className="text-nowrap text-xs">Size </p>
+                <p className="text-nowrap text-xs">{sizeButtonLabel}</p>
                 <div className="flex my-auto items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -253,31 +351,20 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  //   setSelectedOptions("careers");
-                }}
-                className={`w-24 px-1 py-2  outline-2 outline-offset-[-1px] bg-gray-400  text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
-              >
-                <p className="text-nowrap text-xs">Size </p>
-                <div className="flex my-auto items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-chevron-down-icon lucide-chevron-down"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
+              {openDropdown === "size" && (
+                <div className="absolute top-full mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                  {sizeOptions.map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => handleSizeOptionSelect(opt)}
+                      className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-xs text-gray-700"
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
                 </div>
-              </button>
+              )}
+              {/* Gray button removed */}
               <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
@@ -289,24 +376,25 @@ const DashboardCard = () => {
                 </div>
                 <div>
                   <div className="">
-                    {" "}
-                    {/* Changed class to className */}
                     <input
                       type="range"
                       id="size"
-                      className="w-full accent-primary" /* Changed class to className */
+                      className="w-full accent-primary"
                       min="0"
                       max="5000"
-                      value={filter.size} /* Bind value to state */
-                      onChange={handleRangeChange} /* Use new handler */
+                      value={filter.size}
+                      onChange={handleRangeChange}
                     />
                     <span className="text-neutral-400 text-xs">
-                      Up to <strong>{filter.size}sqm</strong>
+                      Up to <strong>{filter.size} sqm</strong>
                     </span>
                     <div className="flex justify-end">
                       <button
                         onClick={() => {
-                          console.log("Distance apply clicked");
+                          console.log(
+                            "Size apply clicked for range:",
+                            filter.size
+                          );
                         }}
                         className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
                       >
@@ -317,15 +405,15 @@ const DashboardCard = () => {
                 </div>
               </div>
             </div>
-            <div className="flex flex-col gap-2">
+
+            {/* Type Filter */}
+            <div className="flex flex-col gap-2 relative">
               <button
                 type="button"
-                onClick={() => {
-                  //   setSelectedOptions("careers");
-                }}
-                className={`w-24 px-1 py-2  outline-2 outline-offset-[-1px] outline-primary bg-primary  text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
+                onClick={() => handleDropdownToggle("type")}
+                className={`w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
               >
-                <p className="text-nowrap text-xs">Type </p>
+                <p className="text-nowrap text-xs">{typeButtonLabel}</p>
                 <div className="flex my-auto items-center">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
@@ -343,46 +431,33 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <button
-                type="button"
-                onClick={() => {
-                  //   setSelectedOptions("careers");
-                }}
-                className={`w-24 px-1 py-2  outline-2 outline-offset-[-1px] bg-gray-400  text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
-              >
-                <p className="text-nowrap text-xs">Type </p>
-                <div className="flex my-auto items-center">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="lucide lucide-chevron-down-icon lucide-chevron-down"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
+              {openDropdown === "type" && (
+                <div className="absolute top-full mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                  {typeOptions.map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => handleTypeOptionSelect(opt)}
+                      className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-xs text-gray-700"
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
                 </div>
-              </button>
-              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
+              )}
+              {/* Gray button removed */}
+              <div className="bg-white shadow-xl w-58 md:w-36 px-2 py-2 rounded-lg">
                 <div>
-                  <div class="">
-                    <div className="flex gap-1 font-semibold">
+                  <div className="">
+                    {" "}
+                    {/* Ensure className is used, was class previously */}
+                    <div className="flex gap-1 font-semibold ">
                       <input
                         type="checkbox"
                         name="detachedHouse"
                         id="detachedHouse"
                         className="accent-primary"
-                        onChange={() => {
-                          setFilter({
-                            ...filter,
-                            type: { ...filter.type, detachedHouse: true },
-                          });
-                        }}
+                        checked={filter.type.detachedHouse}
+                        onChange={() => handleCheckboxChange("detachedHouse")}
                       />
                       <label
                         htmlFor="detachedHouse"
@@ -397,12 +472,8 @@ const DashboardCard = () => {
                         name="terracedHouse"
                         id="terracedHouse"
                         className="accent-primary"
-                        onChange={() => {
-                          setFilter({
-                            ...filter,
-                            type: { ...filter.type, terracedHouse: true },
-                          });
-                        }}
+                        checked={filter.type.terracedHouse}
+                        onChange={() => handleCheckboxChange("terracedHouse")}
                       />
                       <label
                         htmlFor="terracedHouse"
@@ -417,12 +488,8 @@ const DashboardCard = () => {
                         name="parkHouse"
                         id="parkHouse"
                         className="accent-primary"
-                        onChange={() => {
-                          setFilter({
-                            ...filter,
-                            type: { ...filter.type, parkHouse: true },
-                          });
-                        }}
+                        checked={filter.type.parkHouse}
+                        onChange={() => handleCheckboxChange("parkHouse")}
                       />
                       <label
                         htmlFor="parkHouse"
@@ -437,12 +504,8 @@ const DashboardCard = () => {
                         name="flat"
                         id="flat"
                         className="accent-primary"
-                        onChange={() => {
-                          setFilter({
-                            ...filter,
-                            type: { ...filter.type, flat: true },
-                          });
-                        }}
+                        checked={filter.type.flat}
+                        onChange={() => handleCheckboxChange("flat")}
                       />
                       <label
                         htmlFor="flat"
@@ -451,11 +514,13 @@ const DashboardCard = () => {
                         Flat
                       </label>
                     </div>
-
                     <div className="flex justify-end">
                       <button
                         onClick={() => {
-                          console.log("Distance apply clicked");
+                          console.log(
+                            "Type apply clicked. Current types:",
+                            filter.type
+                          );
                         }}
                         className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
                       >
@@ -469,50 +534,16 @@ const DashboardCard = () => {
           </div>
           <div className="my-4">
             <ScatterPlot
-              data={sampleData}
-              highlightedPointId={"proj4"}
+              data={sampleData} // Ensure sampleData is correctly formatted for ScatterPlot
+              highlightedPointId={"proj4"} // Example, adjust as needed
               yAxisLabel="Project Success"
               xAxisLabel="Frequency"
-              // width="w-full"
-              // height={256}
+              // width="w-full" // ScatterPlot should handle its own width/height or accept props
+              // height={256}  // ScatterPlot should handle its own width/height or accept props
             />
           </div>
         </div>
       </div>
-
-      {/* Filters */}
-      {/* <h3 className="text-lg font-bold mb-4">Neighbourhood benchmarking</h3>
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        {["Distance", "Size", "Type"].map((filter) => (
-          <div key={filter}>
-            <label className="block text-sm font-medium">{filter}</label>
-            <select className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:outline-none focus:ring focus:ring-green-500">
-              <option>{filter}</option>
-            </select>
-          </div>
-        ))}
-      </div> */}
-
-      {/* Scatter Plot */}
-      {/* <h3 className="text-lg font-bold mb-4">Project Success</h3>
-      <div className="relative h-48 bg-gray-100 rounded-lg">
-        <svg
-          viewBox="0 0 200 250"
-          className="w-full h-full"
-        >
-          {scatterData.map((point, index) => (
-            <circle
-              key={index}
-              cx={point.x * 10}
-              cy={250 - point.y}
-              r="2"
-              fill="#6B46C1"
-            />
-          ))}
-        </svg>
-        <div className="absolute bottom-2 left-2 text-xs">Frequency</div>
-        <div className="absolute top-2 left-2 text-xs">Project Success</div>
-      </div> */}
     </div>
   );
 };

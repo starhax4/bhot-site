@@ -89,7 +89,7 @@ const AccountDetails = ({ closeModal }) => {
                 className="mt-3.5 bg-[#F9F9F9]"
               />
             </div>
-            <div className="flex justify-center mt-36">
+            <div className="flex justify-center mt-32">
               <span
                 className="text-center cursor-pointer font-medium hover:text-primary"
                 onClick={closeAccountModal}
