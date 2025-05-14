@@ -136,7 +136,7 @@ const DashboardCard = () => {
           Neighbourhood benchmarking
         </h2>
         <div className="flex flex-col my-4">
-          <div className="flex flex-col items-center gap-4 md:flex-row justify-between w-full">
+          <div className="flex flex-col items-center md:items-start gap-4 md:flex-row justify-between w-full">
             <div className="flex flex-col gap-2">
               <button
                 type="button"
@@ -368,7 +368,7 @@ const DashboardCard = () => {
                   </svg>
                 </div>
               </button>
-              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg mt-2.5">
+              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
                 <div>
                   <div class="">
                     <div className="flex gap-1 font-semibold">
