@@ -158,6 +158,8 @@ export default function ConversionGraph({
     <div
       className="w-full bg-white rounded-lg overflow-hidden font-['Nunito_Sans']"
       style={{
+        position: "relative", // Added to establish a stacking context
+        zIndex: 0, // Ensures this stacking context is properly ordered
         height: `${height}px`,
         boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
       }}

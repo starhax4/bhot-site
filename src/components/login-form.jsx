@@ -45,12 +45,16 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                   label="Email"
                   name="EMAIL"
                   type="email"
+                  // error={true}
+                  // helperText="Wrong Email"
                   required
                 />
                 <Input
                   label="Password"
                   name="PASSword"
                   type="password"
+                  // error={true}
+                  // helperText="Wrong Password"
                   required
                 />
               </div>

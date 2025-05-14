@@ -25,13 +25,23 @@ const DashboardCard = () => {
     { id: "proj1", frequency: 3, projectSuccess: 50 },
     { id: "proj2", frequency: 4, projectSuccess: 75 },
     { id: "proj3", frequency: 5, projectSuccess: 60 },
-    { id: "proj4", frequency: 8.5, projectSuccess: 105 }, // Highlighted point
-    { id: "proj5", frequency: 9, projectSuccess: 130 },
-    { id: "proj6", frequency: 12, projectSuccess: 150 },
-    { id: "proj7", frequency: 15, projectSuccess: 180 },
-    { id: "proj8", frequency: 17, projectSuccess: 220 },
-    { id: "proj9", frequency: 19, projectSuccess: 200 },
-    // ... more data points
+    { id: "proj4", frequency: 6, projectSuccess: 80 },
+    { id: "proj5", frequency: 7, projectSuccess: 95 },
+    { id: "proj6", frequency: 8, projectSuccess: 105 },
+    { id: "proj7", frequency: 9, projectSuccess: 120 },
+    { id: "proj8", frequency: 10, projectSuccess: 135 },
+    { id: "proj9", frequency: 11, projectSuccess: 150 },
+    { id: "proj10", frequency: 12, projectSuccess: 145 },
+    { id: "proj11", frequency: 13, projectSuccess: 180 },
+    { id: "proj12", frequency: 14, projectSuccess: 190 },
+    { id: "proj13", frequency: 15, projectSuccess: 175 },
+    { id: "proj14", frequency: 16, projectSuccess: 192 },
+    { id: "proj15", frequency: 17, projectSuccess: 200 },
+    { id: "proj16", frequency: 18, projectSuccess: 195 },
+    { id: "proj17", frequency: 19, projectSuccess: 205 },
+    { id: "proj18", frequency: 20, projectSuccess: 198 },
+    { id: "proj19", frequency: 21, projectSuccess: 208 },
+    { id: "proj20", frequency: 22, projectSuccess: 210 },
   ];
 
   // Sample data - replace with your actual data source

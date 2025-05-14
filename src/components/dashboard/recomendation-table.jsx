@@ -9,8 +9,6 @@ const RecomendationTable = () => {
   );
 };
 
-
-
 // interface RecommendationRow {
 //   id: string;
 //   measure: string;
@@ -21,7 +19,6 @@ const RecomendationTable = () => {
 //   totalPaybackPeriod?: string;
 //   locked?: boolean;
 // }
-
 
 const dummyData = [
   {
@@ -55,10 +52,10 @@ const LockIcon = () => (
 const RecommendationsTable = ({ data }) => {
   return (
     <div className="w-full bg-white p-4 sm:p-6 rounded-3xl shadow-lg md:w-[45vw] mx-auto">
-      <h2 className="text-sm font-semibold text-primary mb-4">
+      <h2 className="text-sm font-semibold text-primary my-4">
         Recommendations
       </h2>
-      <div className="overflow-x-scroll md:overflow-x-hidden">
+      <div className="overflow-x-scroll overflow-y-auto md:overflow-x-hidden">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-white">
             <tr>
@@ -122,7 +119,10 @@ const RecommendationsTable = ({ data }) => {
                 <td className="px-4 py-9 text-wrap text-black text-sm font-normal font-['Sora']">
                   {row.epcImpact}
                 </td>
-                <td className="px-4 py-9 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td
+                  className="row-span-2 px-4 py-9 text-wrap text-black text-sm font-normal font-['Sora']"
+                  colspan={row.locked ? "2" : "1"}
+                >
                   {row.locked ? (
                     <Link to="/pricing">
                       <div className="flex flex-col items-center text-center">
@@ -141,17 +141,48 @@ const RecommendationsTable = ({ data }) => {
                 </td>
               </tr>
             ))}
+            <tr>
+              <td className="px-4 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
+              </td>
+              <td className="px-2 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="px-2 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="px-2 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="px-4 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+            </tr>
+            <tr>
+              <td className="px-4 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
+              </td>
+              <td className="px-2 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="px-2 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="px-2 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="px-4 py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+              <td className="py-6">
+                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              </td>
+            </tr>
           </tbody>
         </table>
-      </div>
-      {/* Placeholder for the greyed out buttons/indicators at the bottom */}
-      <div className="my-9 flex space-x-2 sm:space-x-6 justify-center sm:justify-start">
-        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
-        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-        <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
       </div>
     </div>
   );
