@@ -16,7 +16,7 @@ const ButtonCTA = ({
       } ${className && className}`}
       type={submit ? "submit" : "button"}
     >
-      <p className="text-zinc-100 text-lg font-semibold">{label}</p>
+      <p className="text-zinc-100 text-base font-semibold">{label}</p>
       {isLoading && <span className="text-white ml-0.5">...</span>}
     </button>
   );

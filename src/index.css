@@ -11,3 +11,34 @@
 body{
     font-family: 'Public Sans', sans-serif;
 }
+
+/* Custom Scrollbar Styles */
+/* For Webkit browsers (Chrome, Safari, newer versions of Opera) */
+::-webkit-scrollbar {
+  width: 8px; /* Width of the scrollbar */
+  height: 8px; /* Height of the scrollbar for horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Hide the track */
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1; /* Color of the scroll thumb */
+  border-radius: 4px; /* Rounded corners for the scroll thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1; /* Color of the scroll thumb when hovered */
+}
+
+/* Hide scrollbar buttons (arrows) */
+::-webkit-scrollbar-button {
+  display: none;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin; /* "auto" or "thin" */
+  scrollbar-color: #c1c1c1 transparent; /* thumb and transparent track color */
+}
