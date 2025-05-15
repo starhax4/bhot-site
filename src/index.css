@@ -4,7 +4,7 @@
 @theme {
     --font-Sans : "Public Sans" , sans-serif;
     --font-Playfair-Dispaly : "Playfair Display" , "Public Sans";
-    --font-Nunito : "Nunito Sans";
+    --font-Nunito : "Nunito Sans","Public Sans";
     --color-primary : #005000;
 }
 

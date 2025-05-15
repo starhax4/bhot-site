@@ -272,7 +272,7 @@ const DashboardCard = () => {
                 </div>
               </button>
               {openDropdown === "distance" && (
-                <div className="absolute top-full mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[20%] mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {distanceOptions.map((opt) => (
                     <div
                       key={opt.value}
@@ -352,7 +352,7 @@ const DashboardCard = () => {
                 </div>
               </button>
               {openDropdown === "size" && (
-                <div className="absolute top-full mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[20%] mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {sizeOptions.map((opt) => (
                     <div
                       key={opt.value}
@@ -432,7 +432,7 @@ const DashboardCard = () => {
                 </div>
               </button>
               {openDropdown === "type" && (
-                <div className="absolute top-full mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[20%] mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {typeOptions.map((opt) => (
                     <div
                       key={opt.value}

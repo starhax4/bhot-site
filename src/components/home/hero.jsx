@@ -3,7 +3,7 @@ import ButtonCTA from "../button";
 
 const Hero = ({ onCtaClick }) => {
   return (
-    <main className="mx-auto my-12 md:my-17 px-4 md:px-14">
+    <main className="mx-auto my-12 md:my-18 px-4 md:px-14">
       <div className="flex flex-col">
         <div className="flex flex-col-reverse gap-4 md:flex-row justify-between">
           <div className="md:w-[50%] flex flex-col gap-6">

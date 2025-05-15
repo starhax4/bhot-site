@@ -14,7 +14,9 @@ const Pricing = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <PricingTable />
+      <div className="mb-23">
+        <PricingTable />
+      </div>
       <Footer />
       <Modal
         open={selectedModal !== null}
