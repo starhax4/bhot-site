@@ -1,4 +1,3 @@
-"use client";
 
 import { useState } from "react";
 import { Check, CreditCard } from "lucide-react";
@@ -45,7 +44,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
   };
 
   return (
-    <div className="bg-green-50 p-4 rounded-lg">
+    <div className="bg-emerald-500/10 p-4 rounded-lg">
       <div className="flex items-center mb-4">
         <div className="w-6 h-6 rounded-full bg-green-500 flex items-center justify-center mr-4">
           <Check className="w-4 h-4 text-white" />
@@ -83,7 +82,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
               value={cardData.cardNumber}
               onChange={handleChange}
               placeholder="Enter the 16-digit card number on the card"
-              className="flex-1 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="flex-1 p-2 border border-gray-300 bg-white rounded-l-md focus:outline-none focus:ring-1 focus:ring-green-500"
               maxLength="16"
               required
             />
@@ -101,7 +100,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
             value={cardData.cardholderName}
             onChange={handleChange}
             placeholder="Enter the name on the card"
-            className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="w-full p-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
             required
           />
         </div>
@@ -118,7 +117,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
                 value={cardData.expiryMonth}
                 onChange={handleChange}
                 placeholder="MM"
-                className="w-16 p-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-16 p-2 border border-gray-300 bg-white rounded-l-md focus:outline-none focus:ring-1 focus:ring-green-500"
                 maxLength="2"
                 required
               />
@@ -131,7 +130,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
                 value={cardData.expiryYear}
                 onChange={handleChange}
                 placeholder="YY"
-                className="w-16 p-2 border border-gray-300 rounded-r-md focus:outline-none focus:ring-1 focus:ring-green-500"
+                className="w-16 p-2 border border-gray-300 bg-white rounded-r-md focus:outline-none focus:ring-1 focus:ring-green-500"
                 maxLength="2"
                 required
               />
@@ -146,7 +145,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
               value={cardData.cvv}
               onChange={handleChange}
               placeholder="Security code"
-              className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="w-full p-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
               maxLength="3"
               required
             />
@@ -160,7 +159,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
             name="setAsDefault"
             checked={cardData.setAsDefault}
             onChange={handleChange}
-            className="h-4 w-4 text-green-500 focus:ring-green-400 border-gray-300 rounded"
+            className="h-4 w-4 text-green-500 bg-white focus:ring-green-400 border-gray-300 rounded"
           />
           <label
             htmlFor="setAsDefault"

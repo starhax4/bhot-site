@@ -1,9 +1,7 @@
-
-
 import { useState } from "react";
 import PaymentCard from "./payment-card";
 import AddCardForm from "./add-card-form";
-import { ArrowLeft, Check } from "lucide-react";
+import { ArrowLeft, Check, CreditCard } from "lucide-react";
 
 const PaymentSection = ({ onProceed, onBack }) => {
   const [savedCards, setSavedCards] = useState([
@@ -75,7 +73,10 @@ const PaymentSection = ({ onProceed, onBack }) => {
       <div className="border border-gray-200 rounded-lg mb-6">
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center">
-            <span className="font-medium">Registered cards</span>
+            <span className="flex items-center font-medium">
+              <CreditCard className="w-5 h-5 text-gray-700 mr-2" />
+              Registered cards
+            </span>
           </div>
         </div>
 
@@ -86,7 +87,7 @@ const PaymentSection = ({ onProceed, onBack }) => {
               card={card}
               isSelected={card.id === selectedCardId && !showAddCardForm}
               onSelect={handleSelectCard}
-              className="border-b border-gray-200 last:border-b-0"
+              className="border-b border-gray-200 last:border-b-0 hover:bg-emerald-500/10"
             />
           ))}
         </div>
@@ -100,7 +101,7 @@ const PaymentSection = ({ onProceed, onBack }) => {
         />
       ) : (
         <div
-          className="bg-green-50 p-4 rounded-lg mb-6 cursor-pointer"
+          className="bg-emerald-500/10 p-4 rounded-lg mb-6 cursor-pointer"
           onClick={() => setShowAddCardForm(true)}
         >
           <div className="flex items-center">

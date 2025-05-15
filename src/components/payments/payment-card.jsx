@@ -29,11 +29,29 @@ const PaymentCard = ({
           <span className="text-sm font-medium">{card.bankName}</span>
         </div>
 
-        <div className="w-1/4 text-sm text-gray-600">{card.lastFourDigits}</div>
+        <div
+          className={`w-1/4 text-sm ${
+            isSelected ? "text-black" : "text-gray-600 "
+          }`}
+        >
+          {card.lastFourDigits}
+        </div>
 
-        <div className="w-1/4 text-sm text-gray-600">{card.cardholderName}</div>
+        <div
+          className={`w-1/4 text-sm ${
+            isSelected ? "text-black" : "text-gray-600 "
+          }`}
+        >
+          {card.cardholderName}
+        </div>
 
-        <div className="w-1/4 text-sm text-gray-600">{card.expiryDate}</div>
+        <div
+          className={`w-1/4 text-sm ${
+            isSelected ? "text-black" : "text-gray-600 "
+          }`}
+        >
+          {card.expiryDate}
+        </div>
       </div>
     </div>
   );

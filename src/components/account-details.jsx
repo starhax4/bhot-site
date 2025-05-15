@@ -79,7 +79,7 @@ const AccountDetails = ({ closeModal }) => {
               <SelectInput
                 label="Plan"
                 name="plan"
-                defaultValue={userData.plan}
+                defaultValue={"Basic"}
                 searchEnabled={false}
                 options={[
                   { label: "Basic", value: "basic" },

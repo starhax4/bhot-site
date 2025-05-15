@@ -1,11 +1,11 @@
 import { Check } from "lucide-react";
 
-const CheckoutStepper = ({ steps, currentStep }) => {
+const CheckoutStepper = ({ steps, currentStep, className = "" }) => {
   return (
-    <div className="max-w-2xl md:w-[50vw] mb-8 mx-auto">
+    <div className="max-w-2xl mb-8 mx-auto">
       <div className="flex justify-between items-center relative">
         {/* Progress line */}
-        <div className="absolute h-[1px] bg-gray-300 left-0 right-0 top-[30%] transform -translate-y-1/2 z-0"></div>
+        <div className="absolute h-[1px] bg-gray-300 left-0 right-0 top-[30%] transform -translate-y-1/2 z-0 "></div>
 
         {/* Steps */}
         {steps.map((step, index) => {
@@ -15,7 +15,7 @@ const CheckoutStepper = ({ steps, currentStep }) => {
           return (
             <div
               key={index}
-              className="flex flex-col items-center relative z-10"
+              className={`flex flex-col items-center relative z-10 ${className}`}
             >
               {/* Circle */}
               <div
