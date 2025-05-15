@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Check, CreditCard } from "lucide-react";
 
@@ -71,45 +70,54 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="mb-4">
-          <label className="block text-sm text-gray-700 mb-1">
-            Card number
-          </label>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex flex-col gap-0.5 md:w-[37%]">
+            <label className="text-sm text-black">Card number</label>
+            <p className="text-zinc-600 text-xs">
+              Enter the 16-digit card number on the card
+            </p>
+          </div>
           <div className="flex">
+            <div className="bg-white p-3 border border-r-0 border-gray-300 rounded-l-md">
+              <CreditCard className="w-5 h-5 text-gray-400" />
+            </div>
             <input
               type="text"
               name="cardNumber"
               value={cardData.cardNumber}
               onChange={handleChange}
-              placeholder="Enter the 16-digit card number on the card"
-              className="flex-1 p-2 border border-gray-300 bg-white rounded-l-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="md:w-68 flex-1 p-3 border border-gray-300 bg-white rounded-r-md focus:outline-none focus:ring-1 focus:ring-green-500"
               maxLength="16"
               required
             />
-            <div className="bg-white p-2 border border-l-0 border-gray-300 rounded-r-md">
-              <CreditCard className="w-5 h-5 text-gray-400" />
-            </div>
           </div>
         </div>
 
-        <div className="mb-4">
-          <label className="block text-sm text-gray-700 mb-1">Card owner</label>
+        <div className="flex items-center gap-4 mb-4">
+          <div className="flex flex-col gap-0.5 md:w-[37%]">
+            <label className="text-sm text-black">Card owner</label>
+            <p className="text-zinc-600 text-xs">Enter the name on the card</p>
+          </div>
+
           <input
             type="text"
             name="cardholderName"
             value={cardData.cardholderName}
             onChange={handleChange}
-            placeholder="Enter the name on the card"
-            className="w-full p-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+            className="w-full md:w-80 p-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
             required
           />
         </div>
 
-        <div className="flex space-x-4 mb-4">
-          <div className="w-1/2">
-            <label className="block text-sm text-gray-700 mb-1">
-              Expiry date
-            </label>
+        <div className="flex  space-x-4 mb-4">
+          <div className="flex items-center gap-14 ">
+            <div className="flex flex-col gap-0.5 md:w-[70%]">
+              <label className="text-sm text-black">Expiry date</label>
+              <p className="text-zinc-600 text-xs">
+                Enter the expration date of the card
+              </p>
+            </div>
+
             <div className="flex">
               <input
                 type="text"
@@ -137,15 +145,17 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
             </div>
           </div>
 
-          <div className="w-1/2">
-            <label className="block text-sm text-gray-700 mb-1">CVV2</label>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-0.5 ">
+              <label className="text-sm text-black">CVV2</label>
+              <p className="text-zinc-600 text-xs">Security code</p>
+            </div>
             <input
               type="text"
               name="cvv"
               value={cardData.cvv}
               onChange={handleChange}
-              placeholder="Security code"
-              className="w-full p-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
+              className="w-16 p-2 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
               maxLength="3"
               required
             />
