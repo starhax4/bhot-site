@@ -26,7 +26,9 @@ const AccountDetails = ({ closeModal }) => {
       <div className="flex flex-col">
         <div>
           <div>
-            <h2 className="text-primary text-2xl md:text-3xl font-semibold">My Account</h2>
+            <h2 className="text-primary text-2xl md:text-3xl font-semibold">
+              My Account
+            </h2>
           </div>
           <div className="flex flex-col gap-6 mt-8">
             <div className="grid md:grid-cols-2 gap-8">
@@ -70,22 +72,32 @@ const AccountDetails = ({ closeModal }) => {
               <SelectInput
                 label="Property(ies)"
                 name="property"
-                value={userData.property}
-                // options={}
-                searchEnabled={true}
+                DefaultValue={"1, First Street, City, AB12 3CD"}
+                options={[
+                  {
+                    label: "1, First Street, City, AB12 3CD",
+                    value: "1, First Street, City, AB12 3CD",
+                  },
+                  {
+                    label: "1, First Street, City, AB12 3CD",
+                    value: "1, First Street, City, AB12 3CD",
+                  },
+                ]}
+                searchEnabled={false}
                 disabled={!isAuthenticated}
                 className="mt-3.5 bg-[#F9F9F9]"
               />
               <SelectInput
                 label="Plan"
                 name="plan"
-                defaultValue={"Basic"}
+                value={"Basic"}
+                defaultValue={"basic"}
                 searchEnabled={false}
                 options={[
                   { label: "Basic", value: "basic" },
                   { label: "Pro", value: "pro" },
                 ]}
-                // disabled={!isAuthenticated}
+                disabled={!isAuthenticated}
                 className="mt-3.5 bg-[#F9F9F9]"
               />
             </div>

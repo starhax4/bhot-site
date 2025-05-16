@@ -37,11 +37,23 @@ const SelectInput = forwardRef(
     const [filtered, setFiltered] = useState(options);
     const containerRef = useRef(null);
 
-    // Initialize from defaultValue
+    // Initialize and synchronize from defaultValue and options
     useEffect(() => {
       if (defaultValue) {
+        // If a defaultValue is provided, always try to set it as the selectedValue
+        setSelectedValue(defaultValue);
         const found = options.find((opt) => opt.value === defaultValue);
-        if (found) setInputText(found.label);
+        if (found) {
+          // If found in options, set the display text to its label
+          setInputText(found.label);
+        } else {
+          // If not found in options, clear the display text
+          setInputText("");
+        }
+      } else {
+        // If defaultValue is falsy (e.g., "", null, undefined),
+        // clear the display text and set selectedValue to this falsy value
+        setInputText("");
         setSelectedValue(defaultValue);
       }
     }, [defaultValue, options]);
