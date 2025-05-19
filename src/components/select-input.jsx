@@ -37,37 +37,74 @@ const SelectInput = forwardRef(
     const [filtered, setFiltered] = useState(options);
     const containerRef = useRef(null);
 
-    // Initialize and synchronize from defaultValue and options
+    // Initialize and synchronize input display text and selected value
     useEffect(() => {
       if (defaultValue) {
-        // If a defaultValue is provided, always try to set it as the selectedValue
-        setSelectedValue(defaultValue);
-        const found = options.find((opt) => opt.value === defaultValue);
-        if (found) {
-          // If found in options, set the display text to its label
-          setInputText(found.label);
-        } else {
-          // If not found in options, clear the display text
-          setInputText("");
+        // If defaultValue is truthy, ensure selectedValue and inputText align with it.
+        // This handles cases where defaultValue prop itself changes to a new truthy value.
+        if (selectedValue !== defaultValue) {
+          setSelectedValue(defaultValue);
+        }
+        const foundOption = options.find((opt) => opt.value === defaultValue);
+        const newText = foundOption ? foundOption.label : "";
+        if (inputText !== newText) {
+          setInputText(newText);
         }
       } else {
-        // If defaultValue is falsy (e.g., "", null, undefined),
-        // clear the display text and set selectedValue to this falsy value
-        setInputText("");
-        setSelectedValue(defaultValue);
+        // If defaultValue is falsy (e.g., "", null, undefined).
+        // Only reset to this falsy defaultValue if no actual selection has been made by the user.
+        // This prevents wiping out a user's selection if the component re-renders
+        // (e.g., due to options prop changing reference) and defaultValue is empty.
+        if (!selectedValue) {
+          // Check if selectedValue is also falsy
+          if (inputText !== "") {
+            setInputText("");
+          }
+          // Ensure selectedValue is strictly the defaultValue (e.g. "" vs null)
+          if (selectedValue !== defaultValue) {
+            setSelectedValue(defaultValue);
+          }
+        }
+        // If selectedValue is truthy here, it means the user has made a selection.
+        // Even if defaultValue is falsy, we don't override the user's choice.
+        // However, we should ensure the inputText matches the selectedValue's label if options changed.
+        else {
+          const foundOption = options.find(
+            (opt) => opt.value === selectedValue
+          );
+          const newText = foundOption
+            ? foundOption.label
+            : selectedValue
+            ? inputText
+            : ""; // Keep inputText if selectedValue became invalid but was truthy
+          if (inputText !== newText && foundOption) {
+            // Only update if found and different
+            setInputText(newText);
+          } else if (!foundOption && selectedValue) {
+            // Selected value is no longer in options, but it was a user selection.
+            // Decide behavior: clear, or keep text? For now, keep text if it was a specific selection.
+            // Or, to be safe, if value not in options, clear.
+            // Let's clear if not found, to avoid stale display text for an invalid value.
+            // setInputText(""); // This might be too aggressive if user is typing a custom value not in options.
+            // For a select, typically the value must be in options.
+            // If selectedValue is not in options, it's effectively invalid.
+            // The current logic for handleSelect ensures selectedValue is from options.
+            // This path implies selectedValue exists but its option disappeared.
+          }
+        }
       }
-    }, [defaultValue, options]);
+    }, [defaultValue, options, selectedValue, inputText]); // Dependencies updated
 
     const displayValue = inputText;
 
-    // // // Filter local options always
-    // useEffect(() => {
-    //   setFiltered(
-    //     options.filter((opt) =>
-    //       opt.label.toLowerCase().includes(displayValue.toLowerCase())
-    //     )
-    //   );
-    // }, [options, displayValue]);
+    // // Filter local options always
+    useEffect(() => {
+      setFiltered(
+        options.filter((opt) =>
+          opt.label.toLowerCase().includes(displayValue.toLowerCase())
+        )
+      );
+    }, [options, displayValue]);
 
     // Trigger async search if enabled
     useEffect(() => {

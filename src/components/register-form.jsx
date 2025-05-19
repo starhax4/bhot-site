@@ -3,11 +3,15 @@ import Input from "./input";
 import ButtonCTA from "./button";
 import { Link } from "react-router";
 import SelectInput from "./select-input";
+import { motion } from "motion/react";
+import { useNavigate } from "react-router";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
+  const [isFirst, setIsFirst] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
+  const navigate = useNavigate();
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
@@ -17,7 +21,13 @@ const RegisterForm = ({ closeModal, nextModal }) => {
     //form Submition logic
     console.log(data);
 
-    nextModal("register-2");
+    navigate("/dashboard");
+
+    // nextModal("register-2");
+  };
+
+  const handleNext = () => {
+    setIsFirst(false);
   };
 
   const handleLoginClick = () => {
@@ -39,7 +49,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
         onSubmit={handleRegisterSubmit}
         className="flex flex-col"
       >
-        <div>
+        <div className={`${isFirst ? "block" : "hidden"}`}>
           <div>
             <h2 className="text-primary text-2xl md:text-3xl font-semibold">
               Register
@@ -160,7 +170,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               <ButtonCTA
                 label="Create account and continue"
                 fullWidth
-                submit
+                onClickHandler={handleNext}
                 className=""
                 isLoading={isLoading}
               />
@@ -180,6 +190,61 @@ const RegisterForm = ({ closeModal, nextModal }) => {
             </div>
           </div>
         </div>
+
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.9 }}
+          transition={{ duration: 0.3 }}
+          className={`${isFirst ? "hidden" : "block"}`}
+        >
+          <div>
+            <h2 className="text-primary text-5xl font-bold">Register</h2>
+            <h4 className="w-full flex md:justify-end font-semibold text-xl">
+              Step 2 of 2: Your Property
+            </h4>
+          </div>
+          <div className="flex flex-col gap-[226px] mt-8">
+            <div className="flex flex-col gap-6">
+              <SelectInput
+                name="zip-code"
+                label="Postcode"
+                options={[
+                  {
+                    label: "57400",
+                    value: "57400",
+                  },
+                ]}
+                searchEnabled={true}
+                // onSearch={handleSearch}
+                fullWidth
+              />
+              <SelectInput
+                name="adress"
+                label="select Adress"
+                options={[
+                  {
+                    label: "Poole, United Kingdom",
+                    value: "poole",
+                  },
+                ]}
+                searchEnabled={true}
+                // onSearch={handleSearch}
+                fullWidth
+              />
+            </div>
+
+            <div>
+              <ButtonCTA
+                label="Go to Dashboard"
+                fullWidth
+                submit
+                className=""
+                isLoading={isLoading}
+              />
+            </div>
+          </div>
+        </motion.div>
       </form>
     </div>
   );
