@@ -51,7 +51,7 @@ const LockIcon = () => (
 
 const RecommendationsTable = ({ data }) => {
   return (
-    <div className="w-full bg-white p-4 sm:p-6 rounded-3xl shadow-lg md:w-[45vw] mx-auto">
+    <div className="w-full bg-white px-4 py-4 sm:py-9 sm:px-6 rounded-3xl shadow-lg md:w-[45vw] mx-auto min-h-[50vh]">
       <h2 className="text-lg font-semibold text-primary my-4">
         Recommendations
       </h2>
@@ -141,7 +141,7 @@ const RecommendationsTable = ({ data }) => {
                 </td>
               </tr>
             ))}
-            <tr>
+            <tr className="">
               <td className="px-4 py-6">
                 <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
               </td>
@@ -161,7 +161,7 @@ const RecommendationsTable = ({ data }) => {
                 <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
               </td>
             </tr>
-            <tr>
+            {/* <tr>
               <td className="px-4 py-6">
                 <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
               </td>
@@ -180,7 +180,7 @@ const RecommendationsTable = ({ data }) => {
               <td className="py-6">
                 <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
               </td>
-            </tr>
+            </tr> */}
           </tbody>
         </table>
       </div>
