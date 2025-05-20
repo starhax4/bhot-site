@@ -3,19 +3,19 @@ import React from "react";
 const Brands = () => {
   return (
     <div className="mx-auto my-14 flex flex-col gap-4">
-      <div className="mx-auto flex flex-col md:flex-row md:justify-center items-baseline md:items-center gap-6 md:gap-36">
+      <div>
+        <h2 className="text-black  font-normal text-xl  text-center">
+          Data sources from the following resources:
+        </h2>
+      </div>
+      <div className="mx-auto flex flex-col md:flex-row md:justify-evenly items-baseline md:items-center gap-6 md:gap-36">
         <div>
           <img
             src="/HMLR.png"
             alt="HM_land_registry_logo"
           />
         </div>
-        <div>
-          <img
-            src="/ONS.png"
-            alt="ons_logo"
-          />
-        </div>
+
         <div>
           <img
             src="/dluhc.png"

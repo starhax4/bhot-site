@@ -11,6 +11,9 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
+  const [showOtherHearFromField, setShowOtherHearFromField] = useState(false); // Added state
+  const [otherHearFromText, setOtherHearFromText] = useState(""); // Added state
+  const [error, setError] = useState(false); //
   const navigate = useNavigate();
 
   const handleRegisterSubmit = (e) => {
@@ -18,6 +21,13 @@ const RegisterForm = ({ closeModal, nextModal }) => {
     setIsLoading(true);
     const formData = new FormData(e.target);
     const data = Object.fromEntries(formData.entries());
+
+    // If "Other" was selected for hear-from, use the text from the additional input
+    if (data["hear-from"] === "other") {
+      data["hear-from"] = data.hear_from_other_text || "other"; // Use specified text or empty string
+    }
+    delete data.hear_from_other_text; // Clean up the temporary field
+
     //form Submition logic
     console.log(data);
 
@@ -39,6 +49,21 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   };
   const handleRePasswordChange = (e) => {
     setRePassword(e.target.value);
+  };
+
+  const isPasswordDifferent = () => {
+    return rePassword !== "" && password !== rePassword;
+  };
+
+  // Handler for the "How did you hear about us?" SelectInput
+  const handleHearFromChange = (e) => {
+    const selectedValue = e.target.value;
+    if (selectedValue === "other") {
+      setShowOtherHearFromField(true);
+    } else {
+      setShowOtherHearFromField(false);
+      setOtherHearFromText(""); // Clear the text if a non-other option is chosen
+    }
   };
 
   return (
@@ -95,10 +120,11 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 name="age"
                 label="Age Bracket"
                 options={[
-                  { label: "18-24", value: "18-24" },
-                  { label: "24-40", value: "24-40" },
-                  { label: "40-55", value: "40-55" },
-                  { label: "55-100", value: "55-100" },
+                  { label: "18-25", value: "18-25" },
+                  { label: "26-35", value: "26-35" },
+                  { label: "36-45", value: "36-45" },
+                  { label: "46-55", value: "46-55" },
+                  { label: "56+", value: "56-100" },
                 ]}
                 // defaultValue="18-24"
                 // searchEnabled={true}
@@ -117,11 +143,9 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               name="c-password"
               type="password"
               onChange={handleRePasswordChange}
-              error={rePassword && password !== rePassword}
+              error={isPasswordDifferent()}
               helperText={
-                rePassword && password !== rePassword
-                  ? "Password does't matched"
-                  : ""
+                isPasswordDifferent() ? "Password does't matched" : ""
               }
               required
             />
@@ -134,10 +158,21 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 { label: "Friend", value: "friend" },
                 { label: "Other", value: "other" },
               ]}
+              onChange={handleHearFromChange} // Added onChange handler
               // searchEnabled={true}
               // onSearch={handleSearch}
               fullWidth
             />
+            {showOtherHearFromField && (
+              <Input
+                label="Please specify"
+                name="hear_from_other_text" // Temporary name for FormData collection
+                value={otherHearFromText}
+                onChange={(e) => setOtherHearFromText(e.target.value)}
+                required // Make this field required if "Other" is selected
+                className="mt-0" // Relies on parent gap, adjust if needed e.g. mt-2 or mt-4
+              />
+            )}
             <div className="flex gap-2 items-baseline">
               <input
                 type="checkbox"
@@ -173,6 +208,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 onClickHandler={handleNext}
                 className=""
                 isLoading={isLoading}
+                disabled={isPasswordDifferent()}
               />
             </div>
             <div className="flex justify-center">
@@ -221,7 +257,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               />
               <SelectInput
                 name="adress"
-                label="select Adress"
+                label="Select Adress"
                 options={[
                   {
                     label: "Poole, United Kingdom",

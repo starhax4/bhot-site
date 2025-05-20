@@ -45,113 +45,77 @@ const describeArc = (x, y, radius, startAngle, endAngle) => {
   return d;
 };
 
-// Define colors
-const TdColors = {
-  teal600: "#0D9488",
-  red500: "#EF4444",
-  orange500: "#F97316",
-  orange300: "#FDBA74", // Peach
-  yellow500: "#EAB308",
-  lime500: "#84CC16", // Lime Green
-  green500: "#22C55E", // Bright Green
-};
-
-const segmentAngleSize = 360 / 7;
-
-// Outer segments: Red, Orange, Peach, Yellow, Lime, Green, Teal
-const outerSegmentsData = [
-  {
-    id: "red",
-    color: TdColors.red500,
-    startAngle: 0,
-    endAngle: segmentAngleSize,
-  },
-  {
-    id: "orange",
-    color: TdColors.orange500,
-    startAngle: segmentAngleSize,
-    endAngle: 2 * segmentAngleSize,
-  },
-  {
-    id: "peach",
-    color: TdColors.orange300,
-    startAngle: 2 * segmentAngleSize,
-    endAngle: 3 * segmentAngleSize,
-  },
-  {
-    id: "yellow",
-    color: TdColors.yellow500,
-    startAngle: 3 * segmentAngleSize,
-    endAngle: 4 * segmentAngleSize,
-  },
-  {
-    id: "lime",
-    color: TdColors.lime500,
-    startAngle: 4 * segmentAngleSize,
-    endAngle: 5 * segmentAngleSize,
-  },
-  {
-    id: "green",
-    color: TdColors.green500,
-    startAngle: 5 * segmentAngleSize,
-    endAngle: 6 * segmentAngleSize,
-  },
-  {
-    id: "teal",
-    color: TdColors.teal600,
-    startAngle: 6 * segmentAngleSize,
-    endAngle: 360,
-  },
+// Define colors and grade boundaries
+const gradeBoundariesAndColors = [
+  { grade: "G", min: 0, max: 20, color: "#E9153B" }, // Min set to 0 for continuous gauge display
+  { grade: "F", min: 21, max: 38, color: "#EF8023" },
+  { grade: "E", min: 39, max: 54, color: "#FCAA65" },
+  { grade: "D", min: 55, max: 68, color: "#FFD500" },
+  { grade: "C", min: 69, max: 80, color: "#8DCE46" },
+  { grade: "B", min: 81, max: 91, color: "#19B459" },
+  { grade: "A", min: 92, max: 100, color: "#00C781" },
 ];
 
-const getActiveSegmentColor = (
-  angle,
-  segments,
-  progressValue,
-  scaleStartAngleUsedInCalc
-) => {
-  const normalizedAngle = ((angle % 360) + 360) % 360;
+// Calculate outer segments data based on grade boundaries
+const outerSegmentsData = gradeBoundariesAndColors.map(
+  (gradeInfo, index, arr) => {
+    let startPercentForAngleCalc;
+    if (index === 0) {
+      // The first segment (G) starts at its defined min percentage (which is 0)
+      startPercentForAngleCalc = gradeInfo.min;
+    } else {
+      // Subsequent segments start visually where the previous segment ended (its max percentage)
+      startPercentForAngleCalc = arr[index - 1].max;
+    }
+    // The end percentage for the current segment is its own max percentage
+    const endPercentForAngleCalc = gradeInfo.max;
 
-  if (progressValue === 100) {
-    let targetAngleForSegmentLookup =
-      (scaleStartAngleUsedInCalc - 0.01 + 360) % 360;
-    for (const segment of segments) {
-      if (
-        targetAngleForSegmentLookup >= segment.startAngle &&
-        targetAngleForSegmentLookup < segment.endAngle
-      ) {
-        return segment.color;
-      }
-    }
-    if (Math.abs(scaleStartAngleUsedInCalc) < 0.01) {
-      // Started at 0, 100% means last segment
-      return segments[segments.length - 1].color;
-    }
+    return {
+      id: gradeInfo.grade,
+      color: gradeInfo.color,
+      // Convert these continuous percentages to angles (0-360 degrees)
+      startAngle: (startPercentForAngleCalc / 100) * 360,
+      // Ensure the last segment precisely ends at 360 degrees if its max is 100%
+      endAngle:
+        endPercentForAngleCalc === 100 && index === arr.length - 1
+          ? 360
+          : (endPercentForAngleCalc / 100) * 360,
+    };
   }
+);
 
-  for (const segment of segments) {
-    if (
-      normalizedAngle >= segment.startAngle &&
-      normalizedAngle < segment.endAngle
-    ) {
-      return segment.color;
+// Function to calculate grade based on value
+const calculateGrade = (value, boundaries) => {
+  const val = Math.round(value); // Round to nearest integer for comparison
+  for (const { grade, min, max } of boundaries) {
+    if (val >= min && val <= max) {
+      return grade;
     }
   }
-  if (Math.abs(normalizedAngle) < 0.001) {
-    // Exactly 0
-    const firstSegment = segments.find(
-      (s) => Math.abs(s.startAngle) < 0.001 && s.endAngle > 0
-    );
-    if (firstSegment) return firstSegment.color;
+  // Special case for 0, if G starts at 1 as per spec
+  if (val === 0 && boundaries[0].min === 1 && boundaries[0].grade === "G") {
+    return "G";
   }
-  if (Math.abs(normalizedAngle - 360) < 0.01) {
-    // Exactly 360 (should be caught by < endAngle for last segment)
-    return segments[segments.length - 1].color;
-  }
-  return segments[0].color; // Fallback
+  return ""; // Fallback if no grade matches (should not happen for 0-100)
 };
 
-const SegmentedCircularGauge = ({ value, grade, size = 192 }) => {
+// Function to get the color for the inner progress arc
+const getProgressArcColor = (value, boundaries) => {
+  const val = Math.round(value); // Round to nearest integer
+  for (const { grade, min, max, color } of boundaries) {
+    if (val >= min && val <= max) {
+      return color;
+    }
+  }
+  // Special case for 0, if G starts at 1
+  if (val === 0 && boundaries[0].min === 1 && boundaries[0].grade === "G") {
+    return boundaries[0].color;
+  }
+  return boundaries[0].color; // Fallback to the lowest grade color
+};
+
+const SegmentedCircularGauge = ({ value, size = 192 }) => {
+  // Removed 'grade' prop
   // Default size 192px (w-48)
   const viewBoxSize = 100; // SVG internal coordinate system size
   const center = viewBoxSize / 2;
@@ -165,14 +129,14 @@ const SegmentedCircularGauge = ({ value, grade, size = 192 }) => {
   const scaleStartAngle = 0;
   const scaleSpan = 360;
 
-  const progressValue = Math.max(0, Math.min(100, value));
+  const progressValue = Math.max(0, Math.min(100, value)); // Clamp value between 0 and 100
 
   const actualProgressEndAngle =
     scaleStartAngle + (progressValue / 100) * scaleSpan;
 
   let pathDrawingEndAngle;
   if (progressValue === 100) {
-    pathDrawingEndAngle = scaleStartAngle + (scaleSpan - 0.001);
+    pathDrawingEndAngle = scaleStartAngle + (scaleSpan - 0.001); // Prevent full circle overlap issue
   } else {
     pathDrawingEndAngle = actualProgressEndAngle;
   }
@@ -185,12 +149,14 @@ const SegmentedCircularGauge = ({ value, grade, size = 192 }) => {
     pathDrawingEndAngle
   );
 
-  const colorLookupAngle = actualProgressEndAngle;
-  const progressCurrentColor = getActiveSegmentColor(
-    colorLookupAngle,
-    outerSegmentsData,
+  // Calculate current grade and color for the progress arc
+  const currentDisplayGrade = calculateGrade(
     progressValue,
-    scaleStartAngle
+    gradeBoundariesAndColors
+  );
+  const progressArcFillColor = getProgressArcColor(
+    progressValue,
+    gradeBoundariesAndColors
   );
 
   const roundedValue = Math.round(progressValue);
@@ -212,7 +178,9 @@ const SegmentedCircularGauge = ({ value, grade, size = 192 }) => {
       aria-valuenow={roundedValue}
       aria-valuemin="0"
       aria-valuemax="100"
-      aria-label={`Score: ${roundedValue}${grade ? " " + grade : ""}`}
+      aria-label={`Score: ${roundedValue}${
+        currentDisplayGrade ? " " + currentDisplayGrade : ""
+      }`}
     >
       <svg
         viewBox={`0 0 ${viewBoxSize} ${viewBoxSize}`}
@@ -232,33 +200,33 @@ const SegmentedCircularGauge = ({ value, grade, size = 192 }) => {
               fill="none"
               stroke={segment.color}
               strokeWidth={outerStrokeWidth}
-              strokeLinecap="butt"
+              strokeLinecap="butt" // Ensures segments meet cleanly
             />
           ))}
-          {progressValue > 0 && (
+          {progressValue > 0 && ( // Only draw progress path if value > 0
             <path
               d={progressPath}
               fill="none"
-              stroke={progressCurrentColor}
+              stroke={progressArcFillColor} // Use the calculated color for the progress arc
               strokeWidth={innerStrokeWidth}
-              strokeLinecap="butt"
+              strokeLinecap="butt" // Or 'round' for a rounded end cap
             />
           )}
         </g>
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center z-50">
         <span
-          className="font-semibold text-xl textblack"
-          style={{ lineHeight: "1.1" }} // Added lineHeight for better spacing
+          className="font-semibold text-black" // Ensure text color has good contrast
+          style={{ fontSize: `${scoreFontSize}px`, lineHeight: "1.1" }}
         >
           {roundedValue}
         </span>
-        {grade && (
+        {currentDisplayGrade && (
           <span
-            className="font-semibold text-xl textblack"
-            style={{ lineHeight: "1.1" }} // Added lineHeight
+            className="font-semibold text-black" // Ensure text color has good contrast
+            style={{ fontSize: `${gradeFontSize}px`, lineHeight: "1.1" }}
           >
-            {grade.toUpperCase()}
+            {currentDisplayGrade.toUpperCase()}
           </span>
         )}
       </div>
@@ -274,10 +242,14 @@ export default SegmentedCircularGauge;
 // function App() {
 //   return (
 //     <div className="flex flex-wrap items-center justify-center min-h-screen bg-gray-100 p-4 gap-4">
-//       <SegmentedCircularGauge value={71} grade="C" /> {/* Default size (192px) */}
-//       <SegmentedCircularGauge value={95} grade="A" size={240} /> {/* Custom size */}
-//       <SegmentedCircularGauge value={25} grade="D" size={120} /> {/* Smaller size */}
-//       <SegmentedCircularGauge value={100} grade="Max" size={80} /> {/* Even smaller */}
+//       <SegmentedCircularGauge value={71} /> {/* Default size (192px) */}
+//       <SegmentedCircularGauge value={95} size={240} /> {/* Custom size */}
+//       <SegmentedCircularGauge value={25} size={120} /> {/* Smaller size */}
+//       <SegmentedCircularGauge value={0} />
+//       <SegmentedCircularGauge value={1} />
+//       <SegmentedCircularGauge value={20} />
+//       <SegmentedCircularGauge value={21} />
+//       <SegmentedCircularGauge value={100} size={80} /> {/* Even smaller */}
 //     </div>
 //   );
 // }

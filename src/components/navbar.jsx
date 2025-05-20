@@ -37,7 +37,7 @@ export default function Navbar({ onNavClick }) {
                 }}
                 className="cursor-pointer"
               >
-                Contacts
+                Contact
               </button>
             </li>
             <button

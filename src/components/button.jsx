@@ -7,16 +7,31 @@ const ButtonCTA = ({
   className,
   submit = false,
   isLoading,
+  disabled,
+  props,
 }) => {
   return (
     <button
       onClick={onClickHandler}
-      className={`py-3 flex justify-center items-center bg-primary rounded w-56 hover:bg-[#005000f0] cursor-pointer ${
-        fullWidth ? "w-full" : ""
-      } ${className && className}`}
+      className={`py-3 flex justify-center items-center rounded w-56 transition-colors
+      ${fullWidth ? "w-full" : ""}
+      ${className || ""} 
+      ${
+        disabled || isLoading
+          ? "bg-gray-400 cursor-not-allowed"
+          : "bg-primary hover:bg-[#005000f0] cursor-pointer"
+      }`}
       type={submit ? "submit" : "button"}
+      {...props}
+      disabled={disabled || isLoading} // Also disable if loading
     >
-      <p className="text-zinc-100 text-base font-semibold">{label}</p>
+      <p
+        className={`text-base font-semibold ${
+          disabled || isLoading ? "text-gray-600" : "text-zinc-100"
+        }`}
+      >
+        {label}
+      </p>
       {isLoading && <span className="text-white ml-0.5">...</span>}
     </button>
   );

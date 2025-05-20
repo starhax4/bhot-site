@@ -36,7 +36,7 @@ const Hero = ({ onCtaClick }) => {
             <img
               src="/Landing Page Image 1.png"
               alt="house_image"
-              className="md:h-92"
+              className="md:h-98"
             />
           </div>
         </div>
