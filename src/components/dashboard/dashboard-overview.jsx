@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import SegmentedCircularGauge from "./SegmentedCircularGauge";
 import ScatterPlot from "./scatter-plot";
+import { useAuth } from "../../context/auth/AuthContext";
+import SelectInput from "../select-input";
+import Input from "../input";
 
 // Dummy data for scatter plot
 const scatterData = Array.from({ length: 50 }, () => ({
@@ -19,6 +22,14 @@ const DashboardCard = () => {
       flat: false,
     },
   });
+
+  const { user, switchAddress, addAddress, currentAddress } = useAuth();
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newAddress, setNewAddress] = useState("");
+  const [selectedAddress, setSelectedAddress] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [addressSuggestions, setAddressSuggestions] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   const [openDropdown, setOpenDropdown] = useState(null); // 'distance', 'size', 'type'
   const [distanceButtonLabel, setDistanceButtonLabel] = useState("Distance");
@@ -74,10 +85,59 @@ const DashboardCard = () => {
 
   const [currentPeriod, setCurrentPeriod] = useState("october");
 
-  const propertyOverview = {
+  const [propertyOverview, setPropertyOverview] = useState({
     address: "1 Street Name, City, Post Code",
     type: "e.g. Mid-terrace House",
     area: "x sqm",
+  });
+
+  // Update property overview when currentAddress changes
+  useEffect(() => {
+    if (currentAddress) {
+      setPropertyOverview({
+        address: `${currentAddress.street}, ${currentAddress.city}, ${currentAddress.zip}`,
+        type: "e.g. Mid-terrace House", // We would fetch this from API in a real app
+        area: "x sqm", // We would fetch this from API in a real app
+      });
+    }
+  }, [currentAddress]);
+
+  // Handle adding a new address
+  const handleAddAddress1 = () => {
+    if (!newAddress || newAddress.trim() === "") {
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    // Parse the address - assuming format: "Street, City, Zip"
+    const parts = newAddress.split(",").map((part) => part.trim());
+    const addressData = {
+      street: parts[0] || "New Address",
+      city: parts[1] || "City",
+      zip: parts[2] || "Zip",
+      country: "United Kingdom",
+    };
+
+    // Simulate API call delay
+    setTimeout(() => {
+      addAddress(addressData);
+      setNewAddress("");
+      setShowAddForm(false);
+      setIsSubmitting(false);
+    }, 800);
+  };
+
+  // Address options for Pro users
+  const getAddressOptions = () => {
+    if (!user || !user.addresses) return [];
+
+    return user.addresses.map((addr) => ({
+      value: addr.id,
+      label: `${addr.street}, ${addr.city}${
+        addr.id === "addr1" ? " (Primary)" : " (Secondary)"
+      }`,
+    }));
   };
 
   const distanceOptions = [
@@ -193,12 +253,251 @@ const DashboardCard = () => {
     }));
   };
 
+  const handleAddAddress = async () => {
+    if (!newAddress) return;
+
+    setIsSubmitting(true);
+    try {
+      // Parse the address - assuming format: "Street, City, Zip"
+      const parts = newAddress.split(",").map((part) => part.trim());
+      const addressData = {
+        street: parts[0] || "New Address",
+        city: parts[1] || "City",
+        zip: parts[2] || "Zip",
+        country: "United Kingdom",
+      };
+
+      // Call addAddress from context
+      await addAddress(addressData);
+      setNewAddress("");
+      setSelectedAddress(null);
+      setAddressSuggestions([]);
+      setShowAddForm(false);
+    } catch (error) {
+      console.error("Error adding address:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Dummy address suggestions data
+  const dummyAddressSuggestions = [
+    { label: "10 Downing Street, London, SW1A 2AA", value: "10-downing-st" },
+    { label: "221B Baker Street, London, NW1 6XE", value: "221b-baker-st" },
+    {
+      label: "48 Leicester Square, London, WC2H 7LU",
+      value: "48-leicester-sq",
+    },
+    {
+      label: "1 London Bridge Street, London, SE1 9GF",
+      value: "1-london-bridge",
+    },
+    {
+      label: "20 Fenchurch Street, London, EC3M 8AF",
+      value: "20-fenchurch-st",
+    },
+    { label: "1 Canada Square, London, E14 5AB", value: "1-canada-sq" },
+    { label: "Westminster, London, SW1A 0AA", value: "westminster" },
+    { label: "150 Oxford Street, London, W1D 1DF", value: "150-oxford-st" },
+    {
+      label: "31 Notting Hill Gate, London, W11 3JQ",
+      value: "31-notting-hill",
+    },
+    {
+      label: "25 Hampstead High Street, London, NW3 1RL",
+      value: "25-hampstead",
+    },
+  ];
+
+  // Enhanced Mock function to search addresses with loading state
+  const searchAddresses = useCallback(
+    (searchTerm) => {
+      if (!searchTerm || searchTerm.length < 2) {
+        setAddressSuggestions([]);
+        return;
+      }
+
+      setIsSearching(true);
+
+      // Clear any existing search timeout
+      if (window.addressSearchTimeout) {
+        clearTimeout(window.addressSearchTimeout);
+      }
+
+      // Simulated API call with debounce
+      window.addressSearchTimeout = setTimeout(() => {
+        // Simulated server delay
+        const filteredSuggestions = dummyAddressSuggestions.filter((addr) =>
+          addr.label.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+
+        // Add the current input as a custom option if it's not in the results
+        // and has comma-separated format (street, city, zip)
+        const parts = searchTerm.split(",");
+        if (
+          parts.length >= 2 &&
+          !filteredSuggestions.some(
+            (s) => s.label.toLowerCase() === searchTerm.toLowerCase()
+          )
+        ) {
+          filteredSuggestions.push({
+            label: searchTerm,
+            value: `custom-${Date.now()}`, // Generate a unique value
+          });
+        }
+
+        setAddressSuggestions(filteredSuggestions);
+        setIsSearching(false);
+      }, 300);
+    },
+    [dummyAddressSuggestions]
+  );
+
+  // Handle selection of an address from the suggestions
+  const handleAddressSelect = (event) => {
+    const selectedValue = event.target.value;
+    const selected = addressSuggestions.find((s) => s.value === selectedValue);
+
+    if (selected) {
+      setSelectedAddress(selected);
+      setNewAddress(selected.label);
+    }
+  };
+
   return (
     <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl ">
       {/* Property Info */}
       <div className="flex flex-col md:flex-row justify-between">
         <div className="md:w-[40%] flex flex-col gap-4">
-          <h2 className="text-lg  text-primary font-semibold">Your Property</h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-lg text-primary font-semibold">
+              Your Property
+            </h2>
+            {currentAddress && currentAddress.id && (
+              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
+                {currentAddress.id === "addr1" ? "Primary" : "Secondary"}
+              </span>
+            )}
+            {user &&
+              user.plan === "Pro" &&
+              user.addresses &&
+              user.addresses.length < 5 && (
+                <button
+                  onClick={() => {
+                    setShowAddForm(!showAddForm);
+                    setNewAddress("");
+                    setSelectedAddress(null);
+                    setAddressSuggestions([]);
+                  }}
+                  className="ml-auto text-primary hover:text-blue-800 text-sm"
+                  title="Add a new address"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-4 w-4"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                </button>
+              )}
+          </div>
+
+          {/* Pro user address selector */}
+          {user &&
+            user.plan === "Pro" &&
+            user.addresses &&
+            user.addresses.length > 1 && (
+              <div className="mb-3">
+                <SelectInput
+                  label="Select Address"
+                  options={user.addresses.map((addr) => ({
+                    value: addr.id,
+                    label: `${addr.street}, ${addr.city}${
+                      addr.id === "addr1" ? " (Primary)" : " (Secondary)"
+                    }`,
+                  }))}
+                  value={currentAddress?.id || ""}
+                  onChange={(e) => switchAddress(e.target.value)}
+                  name="propertyAddress"
+                  className="text-sm"
+                  size="small"
+                />
+              </div>
+            )}
+
+          {/* Inline add address form with search functionality */}
+          {showAddForm && (
+            <div className="mb-3 p-2 bg-gray-50 rounded-md border border-gray-200">
+              <div className="mb-2">
+                <SelectInput
+                  label="Address"
+                  placeholder="Type to search for an address"
+                  value={selectedAddress?.value || ""}
+                  onChange={handleAddressSelect}
+                  options={addressSuggestions}
+                  searchEnabled={true}
+                  onSearch={searchAddresses}
+                  className="text-sm"
+                  size="small"
+                  inputText={newAddress}
+                  onInputChange={(e) => {
+                    const value = e.target.value;
+                    setNewAddress(value);
+                    // Reset selected address when user types
+                    if (selectedAddress && value !== selectedAddress.label) {
+                      setSelectedAddress(null);
+                    }
+                    // Start search when the user has typed at least 2 characters
+                    if (value && value.length >= 2) {
+                      searchAddresses(value);
+                    }
+                  }}
+                />
+                {isSearching && (
+                  <div className="text-xs text-gray-500 mt-1">Searching...</div>
+                )}
+                {!isSearching &&
+                  newAddress &&
+                  newAddress.length >= 2 &&
+                  addressSuggestions.length === 0 && (
+                    <div className="text-xs text-gray-500 mt-1">
+                      No addresses found. Type a complete address (Street, City,
+                      Postcode).
+                    </div>
+                  )}
+              </div>
+              <div className="flex justify-end gap-2">
+                <button
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setNewAddress("");
+                    setSelectedAddress(null);
+                    setAddressSuggestions([]);
+                  }}
+                  className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAddAddress}
+                  className="px-2 py-1 text-xs bg-primary text-white rounded hover:bg-blue-700"
+                  disabled={isSubmitting || newAddress.trim() === ""}
+                >
+                  {isSubmitting ? "Adding..." : "Add"}
+                </button>
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-2">
             <div className="flex flex-col gap-10">
               <p className="text-neutral-400 text-sm font-semibold">Address:</p>

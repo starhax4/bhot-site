@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router";
+import { useAuth } from "../../context/auth/AuthContext";
 
 const RecomendationTable = () => {
   return (
@@ -20,9 +21,10 @@ const RecomendationTable = () => {
 //   locked?: boolean;
 // }
 
-const dummyData = [
+// Seed data for different addresses, in a real app this would come from an API
+const address1Recommendations = [
   {
-    id: "1",
+    id: "1a",
     measure: "Internal Wall Insulation",
     cost: "£4,000 - £14,000",
     yearlySaving: "£271",
@@ -31,7 +33,7 @@ const dummyData = [
     totalPaybackPeriod: "0.5 years",
   },
   {
-    id: "2",
+    id: "2a",
     measure: "Solar Water Heating",
     cost: "£4,000 - £6,000",
     yearlySaving: "£55",
@@ -40,7 +42,7 @@ const dummyData = [
     locked: true,
   },
   {
-    id: "3",
+    id: "3a",
     measure: "Solar Electricity System",
     cost: "£6,000 - £8,000",
     yearlySaving: "£100",
@@ -48,7 +50,36 @@ const dummyData = [
     estimatedValueImpact: "Upgrade to unlock",
     locked: true,
   },
-  // Add more dummy data rows here if needed
+];
+
+const address2Recommendations = [
+  {
+    id: "1b",
+    measure: "Loft Insulation",
+    cost: "£1,500 - £3,000",
+    yearlySaving: "£215",
+    epcImpact: "+ 5 pts",
+    estimatedValueImpact: "£8,000 - £15,000",
+    totalPaybackPeriod: "0.3 years",
+  },
+  {
+    id: "2b",
+    measure: "Double Glazing",
+    cost: "£5,000 - £8,000",
+    yearlySaving: "£120",
+    epcImpact: "+ 4 pts",
+    estimatedValueImpact: "Upgrade to unlock",
+    locked: true,
+  },
+  {
+    id: "3b",
+    measure: "Heat Pump",
+    cost: "£8,000 - £15,000",
+    yearlySaving: "£350",
+    epcImpact: "+ 10 pts",
+    estimatedValueImpact: "Upgrade to unlock",
+    locked: true,
+  },
 ];
 
 const LockIcon = () => (
@@ -58,12 +89,41 @@ const LockIcon = () => (
   />
 );
 
-const RecommendationsTable = ({ data }) => {
+const RecommendationsTable = ({ data, addressId }) => {
+  const { user, currentAddress } = useAuth();
+  const [recommendations, setRecommendations] = useState(
+    data || address1Recommendations
+  );
+
+  // Update recommendations based on current address
+  useEffect(() => {
+    if (user && user.plan === "Pro" && currentAddress) {
+      // In a real app, we would fetch the recommendations from an API
+      // For now, we'll just toggle between our two sets of dummy data
+      const newRecommendations =
+        currentAddress.id === "addr1"
+          ? address1Recommendations
+          : address2Recommendations;
+
+      setRecommendations(newRecommendations);
+    } else {
+      // For non-Pro users or users without an address, use the default data
+      setRecommendations(data || address1Recommendations);
+    }
+  }, [currentAddress, user, data]);
+
   return (
     <div className="w-full bg-white px-4 py-2 sm:py-6 sm:px-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] md:w-[45vw] mx-auto">
-      <h2 className="text-lg font-semibold text-primary my-2">
-        Recommendations
-      </h2>
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-primary my-2">
+          Recommendations
+        </h2>
+        {user && user.plan === "Pro" && currentAddress && (
+          <p className="text-sm text-gray-500">
+            For: {currentAddress.street}, {currentAddress.city}
+          </p>
+        )}
+      </div>
       <div className="overflow-x-scroll overflow-y-auto md:overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-white">
@@ -107,7 +167,7 @@ const RecommendationsTable = ({ data }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((row, index) => (
+            {recommendations.map((row, index) => (
               <tr
                 key={row.id}
                 className={
@@ -130,7 +190,7 @@ const RecommendationsTable = ({ data }) => {
                 </td>
                 <td
                   className="row-span-2 px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']"
-                  colspan={row.locked ? "2" : "1"}
+                  colSpan={row.locked ? "2" : "1"}
                 >
                   {row.locked ? (
                     <Link to="/pricing">

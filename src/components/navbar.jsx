@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router";
+import AddressManager from "./address-manager"; // Importing AddressManager component
 
 export default function Navbar({ onNavClick }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -124,6 +125,8 @@ export default function Navbar({ onNavClick }) {
           </div>
         </div>
       </div>
+      {/* Address Manager for Pro users, potentially shown near account details or in a dropdown */}
+      {/* <AddressManager /> */}
     </nav>
   );
 }

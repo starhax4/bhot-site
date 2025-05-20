@@ -6,7 +6,7 @@ const Hero = ({ onCtaClick }) => {
     <main className="mx-auto my-12 md:my-18 px-4 md:px-14">
       <div className="flex flex-col">
         <div className="flex flex-col-reverse gap-4 md:flex-row justify-between">
-          <div className="md:w-[50%] flex flex-col gap-6">
+          <div className="md:w-[50%] flex flex-col gap-6 justify-between">
             <h1 className="text-black text-3xl md:text-4xl font-normal md:pr-32">
               Unlock the value hiding in your home.
             </h1>
@@ -36,7 +36,7 @@ const Hero = ({ onCtaClick }) => {
             <img
               src="/Landing Page Image 1.png"
               alt="house_image"
-              className="md:h-98"
+              className="md:min-h-full"
             />
           </div>
         </div>

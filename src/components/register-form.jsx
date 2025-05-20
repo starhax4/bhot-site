@@ -257,7 +257,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               />
               <SelectInput
                 name="adress"
-                label="Select Adress"
+                label="Select Address"
                 options={[
                   {
                     label: "Poole, United Kingdom",

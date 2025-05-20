@@ -26,94 +26,58 @@ const SelectInput = forwardRef(
       searchEnabled = false,
       onSearch, // async callback(term)
       className = "",
+      inputText, // Allow direct control of input text from parent
+      onInputChange, // Allow parent to handle input changes
       ...props
     },
     ref
   ) => {
     const [focused, setFocused] = useState(false);
-    const [inputText, setInputText] = useState("");
-    const [selectedValue, setSelectedValue] = useState(defaultValue);
+    const [internalInputText, setInternalInputText] = useState("");
+    const [selectedValue, setSelectedValue] = useState(value || defaultValue);
     const [showList, setShowList] = useState(false);
     const [filtered, setFiltered] = useState(options);
     const containerRef = useRef(null);
 
-    // Initialize and synchronize input display text and selected value
+    // Handle controlled value prop changes
     useEffect(() => {
-      if (defaultValue) {
-        // If defaultValue is truthy, ensure selectedValue and inputText align with it.
-        // This handles cases where defaultValue prop itself changes to a new truthy value.
-        if (selectedValue !== defaultValue) {
-          setSelectedValue(defaultValue);
+      if (value !== undefined && value !== selectedValue) {
+        setSelectedValue(value);
+        const foundOption = options.find((opt) => opt.value === value);
+        if (foundOption) {
+          setInternalInputText(foundOption.label);
         }
+      }
+    }, [value, options]);
+
+    // Handle default value initialization
+    useEffect(() => {
+      if (value === undefined && defaultValue && !selectedValue) {
+        setSelectedValue(defaultValue);
         const foundOption = options.find((opt) => opt.value === defaultValue);
-        const newText = foundOption ? foundOption.label : "";
-        if (inputText !== newText) {
-          setInputText(newText);
-        }
-      } else {
-        // If defaultValue is falsy (e.g., "", null, undefined).
-        // Only reset to this falsy defaultValue if no actual selection has been made by the user.
-        // This prevents wiping out a user's selection if the component re-renders
-        // (e.g., due to options prop changing reference) and defaultValue is empty.
-        if (!selectedValue) {
-          // Check if selectedValue is also falsy
-          if (inputText !== "") {
-            setInputText("");
-          }
-          // Ensure selectedValue is strictly the defaultValue (e.g. "" vs null)
-          if (selectedValue !== defaultValue) {
-            setSelectedValue(defaultValue);
-          }
-        }
-        // If selectedValue is truthy here, it means the user has made a selection.
-        // Even if defaultValue is falsy, we don't override the user's choice.
-        // However, we should ensure the inputText matches the selectedValue's label if options changed.
-        else {
-          const foundOption = options.find(
-            (opt) => opt.value === selectedValue
-          );
-          const newText = foundOption
-            ? foundOption.label
-            : selectedValue
-            ? inputText
-            : ""; // Keep inputText if selectedValue became invalid but was truthy
-          if (inputText !== newText && foundOption) {
-            // Only update if found and different
-            setInputText(newText);
-          } else if (!foundOption && selectedValue) {
-            // Selected value is no longer in options, but it was a user selection.
-            // Decide behavior: clear, or keep text? For now, keep text if it was a specific selection.
-            // Or, to be safe, if value not in options, clear.
-            // Let's clear if not found, to avoid stale display text for an invalid value.
-            // setInputText(""); // This might be too aggressive if user is typing a custom value not in options.
-            // For a select, typically the value must be in options.
-            // If selectedValue is not in options, it's effectively invalid.
-            // The current logic for handleSelect ensures selectedValue is from options.
-            // This path implies selectedValue exists but its option disappeared.
-          }
+        if (foundOption && !internalInputText) {
+          setInternalInputText(foundOption.label);
         }
       }
-    }, [defaultValue, options, selectedValue, inputText]); // Dependencies updated
+    }, [defaultValue, options, value, selectedValue, internalInputText]);
 
-    const displayValue = inputText;
-
-    // // Filter local options always
+    // Handle external inputText control
     useEffect(() => {
-      setFiltered(
-        options.filter((opt) =>
-          opt.label.toLowerCase().includes(displayValue.toLowerCase())
-        )
+      if (inputText !== undefined && inputText !== internalInputText) {
+        setInternalInputText(inputText);
+      }
+    }, [inputText]);
+
+    // Filter options based on input
+    useEffect(() => {
+      const searchTerm = internalInputText.toLowerCase();
+      const filteredOptions = options.filter((opt) =>
+        opt.label.toLowerCase().includes(searchTerm)
       );
-    }, [options, displayValue]);
+      setFiltered(filteredOptions);
+    }, [options, internalInputText]);
 
-    // Trigger async search if enabled
-    useEffect(() => {
-      if (searchEnabled && onSearch) {
-        onSearch(displayValue);
-      }
-    }, [displayValue, searchEnabled, onSearch]);
-
-    // Close dropdown on outside click
+    // Handle outside clicks
     useEffect(() => {
       const handleClick = (e) => {
         if (containerRef.current && !containerRef.current.contains(e.target)) {
@@ -126,26 +90,49 @@ const SelectInput = forwardRef(
     }, []);
 
     const handleFocus = () => {
-      setFocused(true);
-      setFiltered(options);
-      setShowList(true);
+      if (!disabled) {
+        setFocused(true);
+        setFiltered(options);
+        setShowList(true);
+      }
     };
 
     const handleInputChange = (e) => {
       const term = e.target.value;
-      setInputText(term);
-      setSelectedValue(""); // clear selected when typing
-      if (onChange) onChange({ target: { name, value: "" } });
+      if (disabled) return;
+
+      if (onInputChange) {
+        onInputChange(e);
+      } else {
+        setInternalInputText(term);
+      }
+
+      if (value === undefined) {
+        setSelectedValue("");
+        if (onChange) onChange({ target: { name, value: "" } });
+      }
       setShowList(true);
     };
 
     const handleSelect = (opt) => {
-      setInputText(opt.label);
-      setSelectedValue(opt.value);
-      if (onChange) onChange({ target: { name, value: opt.value } });
+      if (disabled) return;
+
+      setInternalInputText(opt.label);
+
+      if (value === undefined) {
+        setSelectedValue(opt.value);
+      }
+
+      if (onChange) {
+        onChange({ target: { name, value: opt.value } });
+      }
+
       setShowList(false);
+      setFocused(false);
     };
 
+    const displayValue =
+      inputText !== undefined ? inputText : internalInputText;
     const borderColor = error
       ? "border-red-500"
       : focused
@@ -173,7 +160,9 @@ const SelectInput = forwardRef(
         />
 
         <div
-          className={`relative border ${borderColor} ${ringClass} rounded-lg bg-white flex items-center ${sizeStyles[size]} ${widthClass}`}
+          className={`relative border ${borderColor} ${ringClass} rounded-lg bg-white flex items-center ${
+            sizeStyles[size]
+          } ${widthClass} ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
           onFocus={handleFocus}
         >
           {/* Floating label */}
@@ -206,8 +195,8 @@ const SelectInput = forwardRef(
         </div>
 
         {/* Options dropdown */}
-        {showList && filtered.length > 0 && (
-          <ul className="absolute mt-10 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg z-50">
+        {showList && filtered.length > 0 && !disabled && (
+          <ul className="absolute mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg z-50">
             {filtered.map((opt) => (
               <li
                 key={opt.value}
