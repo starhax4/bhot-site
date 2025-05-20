@@ -194,7 +194,7 @@ const DashboardCard = () => {
   };
 
   return (
-    <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-lg rounded-3xl ">
+    <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl ">
       {/* Property Info */}
       <div className="flex flex-col md:flex-row justify-between">
         <div className="md:w-[40%] flex flex-col gap-4">
@@ -226,7 +226,6 @@ const DashboardCard = () => {
             <p className="text-center mt-2 font-medium">Current</p>
             <SegmentedCircularGauge
               value={71}
-              grade="C"
               size={142}
             />
           </div>
@@ -234,7 +233,6 @@ const DashboardCard = () => {
             <p className="text-center mt-2 font-medium">Potential</p>
             <SegmentedCircularGauge
               value={82}
-              grade="B"
               size={142}
             />
           </div>

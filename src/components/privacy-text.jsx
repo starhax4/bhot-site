@@ -128,7 +128,7 @@ const PrivacyText = () => {
 
   return (
     // Using the same main wrapper as your TermsText.jsx
-    <main className="px-4 md:px-14 py-4 md:py-10 text-gray-700">
+    <main className="px-4 md:px-14 py-4 md:py-10 text-gray-700 text-sm">
       {" "}
       {/* Added default text color */}
       <div className=" mx-auto">
@@ -138,9 +138,7 @@ const PrivacyText = () => {
           Using h1 for semantic main title, styled like your strong tags.
           Adjust font size utilities (text-2xl, text-3xl etc.) as needed to match visual hierarchy.
         */}
-        <h1 className="text-primary font-bold  mb-6">
-          Privacy Policy
-        </h1>
+        <h1 className="text-primary font-bold  mb-6">Privacy Policy</h1>
         <div className="mb-6 space-y-1 text-sm">
           <p>
             <strong className="text-primary font-bold">Effective Date:</strong>{" "}
@@ -155,7 +153,7 @@ const PrivacyText = () => {
             www.bhots.co.uk
           </p>
         </div>
-        <div className="space-y-6 text-sm md:text-base">
+        <div className="space-y-6 text-sm ">
           {" "}
           {/* Base text size for content */}
           {sections.map((section) => (

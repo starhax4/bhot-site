@@ -10,8 +10,8 @@ const CheckIcon = () => (
 
 const pricingData = {
   features: [
-    { id: "properties", label: "Number of Properties / Month" },
-    { id: "benchmarking", label: "Peer Benchmarking" },
+    { id: "properties", label: "Number of Properties" },
+    { id: "benchmarking", label: "Neighbourhood Benchmarking" },
     { id: "valuation", label: "Property Valuation Estimate" },
     { id: "efficiency", label: "Energy Efficiency Recommendations" },
     {
@@ -39,7 +39,7 @@ const pricingData = {
     {
       id: "basic",
       name: "£9.99", // Large header text for the plan
-      frequency: "/Lifetime",
+      frequency: "",
       buttonText: "Choose Basic Plan",
       buttonLink: "/checkout/cart?package=basic",
       values: {
@@ -54,7 +54,7 @@ const pricingData = {
     {
       id: "pro",
       name: "£59.99", // Large header text for the plan
-      frequency: "/Year",
+      frequency: "",
       buttonText: "Choose Pro Plan",
       buttonLink: "/checkout/cart?package=pro",
       values: {
@@ -128,7 +128,7 @@ const PricingTable = () => {
             <React.Fragment key={feature.id}>
               {/* Column 1: Feature Label */}
               <div
-                className={`p-3 md:p-5 text-sm md:text-lg text-zinc-800 flex items-center min-h-[55px] md:min-h-[65px] border-t 
+                className={`p-3 md:p-4 text-sm md:text-base text-zinc-800 flex items-center min-h-[45px] md:min-h-[55px] border-t 
                             ${
                               featureIndex === 0
                                 ? "border-gray-300 font-medium"
@@ -145,7 +145,7 @@ const PricingTable = () => {
               {plans.map((plan) => (
                 <div
                   key={`${plan.id}-${feature.id}`}
-                  className={`p-2 md:p-4 border-t border-l border-gray-200 flex justify-center items-center min-h-[55px] md:min-h-[65px]
+                  className={`p-2 md:p-3 border-t border-l border-gray-200 flex justify-center items-center min-h-[45px] md:min-h-[55px]
                               ${
                                 featureIndex === 0
                                   ? "border-gray-300"

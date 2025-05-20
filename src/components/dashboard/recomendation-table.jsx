@@ -39,6 +39,15 @@ const dummyData = [
     estimatedValueImpact: "Upgrade to unlock",
     locked: true,
   },
+  {
+    id: "3",
+    measure: "Solar Electricity System",
+    cost: "£6,000 - £8,000",
+    yearlySaving: "£100",
+    epcImpact: "+ 3 pts",
+    estimatedValueImpact: "Upgrade to unlock",
+    locked: true,
+  },
   // Add more dummy data rows here if needed
 ];
 
@@ -51,8 +60,8 @@ const LockIcon = () => (
 
 const RecommendationsTable = ({ data }) => {
   return (
-    <div className="w-full bg-white px-4 py-4 sm:py-9 sm:px-6 rounded-3xl shadow-lg md:w-[45vw] mx-auto min-h-[50vh]">
-      <h2 className="text-lg font-semibold text-primary my-4">
+    <div className="w-full bg-white px-4 py-2 sm:py-6 sm:px-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] md:w-[45vw] mx-auto">
+      <h2 className="text-lg font-semibold text-primary my-2">
         Recommendations
       </h2>
       <div className="overflow-x-scroll overflow-y-auto md:overflow-x-auto">
@@ -61,37 +70,37 @@ const RecommendationsTable = ({ data }) => {
             <tr>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
               >
                 Measure
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
               >
                 Cost
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
               >
-                Yearly Saving
+                Potential Yearly Bills Saving
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
               >
                 EPC Impact
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
               >
                 Estimated Value Impact
               </th>
               <th
                 scope="col"
-                className="px-1 py-3 text-left text-black text-sm font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-1 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
               >
                 Total Payback Period
               </th>
@@ -107,20 +116,20 @@ const RecommendationsTable = ({ data }) => {
                     : "bg-white" /* Alternating rows not in image, so keeping white */
                 }
               >
-                <td className="px-4 py-9 text-wrap text-sm font-bold font-['Sora']">
+                <td className="px-4 py-6 text-wrap text-sm font-bold font-['Sora']">
                   {row.measure}
                 </td>
-                <td className="px-4 py-9 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td className="px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']">
                   {row.cost}
                 </td>
-                <td className="px-4 py-9 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td className="px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']">
                   {row.yearlySaving}
                 </td>
-                <td className="px-4 py-9 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td className="px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']">
                   {row.epcImpact}
                 </td>
                 <td
-                  className="row-span-2 px-4 py-9 text-wrap text-black text-sm font-normal font-['Sora']"
+                  className="row-span-2 px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']"
                   colspan={row.locked ? "2" : "1"}
                 >
                   {row.locked ? (

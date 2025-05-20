@@ -3,7 +3,6 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import DashboardCard from "../components/dashboard/dashboard-overview";
 import Modal from "../components/modal";
-import RecomendationTable from "../components/dashboard/recomendation-table";
 import ValueCard from "../components/dashboard/value-card";
 import RecommendationsTable from "../components/dashboard/recomendation-table";
 
@@ -26,6 +25,15 @@ const dummyData = [
     estimatedValueImpact: "Upgrade to unlock",
     locked: true,
   },
+  {
+    id: "3",
+    measure: "Solar Electricity System",
+    cost: "£6,000 - £8,000",
+    yearlySaving: "£100",
+    epcImpact: "+ 3 pts",
+    estimatedValueImpact: "Upgrade to unlock",
+    locked: true,
+  },
   // Add more dummy data rows here if needed
 ];
 
@@ -40,7 +48,7 @@ const Dashboard = () => {
       <Navbar onNavClick={setSelectedModal} />
       <div className="flex flex-col md:flex-row py-10 px-4 md:px-14 justify-between gap-8 md:gap-0">
         <DashboardCard />
-        <div className="flex flex-col  gap-16">
+        <div className="flex flex-col  gap-12">
           <div className="flex flex-col md:flex-row gap-9">
             <ValueCard title="Current Value Estimate" />
             <ValueCard

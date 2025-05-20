@@ -105,7 +105,7 @@ const TermsText = () => {
 
   return (
     // Using the same main wrapper as your TermsText.jsx
-    <main className="px-4 md:px-14 py-4 md:py-10 text-gray-700">
+    <main className="px-4 md:px-14 py-4 md:py-10 text-gray-700 text-sm">
       {" "}
       {/* Added default text color */}
       <div className=" mx-auto">
@@ -130,7 +130,7 @@ const TermsText = () => {
             www.bhots.co.uk
           </p>
         </div>
-        <div className="space-y-6 text-sm md:text-base">
+        <div className="space-y-6 text-sm ">
           {" "}
           {/* Base text size for content */}
           {sections.map((section) => (

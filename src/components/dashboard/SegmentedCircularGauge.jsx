@@ -161,15 +161,6 @@ const SegmentedCircularGauge = ({ value, size = 192 }) => {
 
   const roundedValue = Math.round(progressValue);
 
-  // Responsive font sizes
-  // Base sizes for a reference gauge size of 192px
-  const baseSize = 192;
-  const baseScoreFontSize = 30; // Corresponds to text-3xl approx
-  const baseGradeFontSize = 18; // Corresponds to text-lg approx
-
-  const scoreFontSize = (size / baseSize) * baseScoreFontSize;
-  const gradeFontSize = (size / baseSize) * baseGradeFontSize;
-
   return (
     <div
       className="relative"
@@ -216,15 +207,13 @@ const SegmentedCircularGauge = ({ value, size = 192 }) => {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center z-50">
         <span
-          className="font-semibold text-black" // Ensure text color has good contrast
-          style={{ fontSize: `${scoreFontSize}px`, lineHeight: "1.1" }}
+          className="font-semibold text-black text-xl" // Ensure text color has good contrast
         >
           {roundedValue}
         </span>
         {currentDisplayGrade && (
           <span
-            className="font-semibold text-black" // Ensure text color has good contrast
-            style={{ fontSize: `${gradeFontSize}px`, lineHeight: "1.1" }}
+            className="font-semibold text-black text-xl" // Ensure text color has good contrast
           >
             {currentDisplayGrade.toUpperCase()}
           </span>
@@ -235,21 +224,3 @@ const SegmentedCircularGauge = ({ value, size = 192 }) => {
 };
 
 export default SegmentedCircularGauge;
-
-// Example Usage:
-// import SegmentedCircularGauge from './SegmentedCircularGauge';
-//
-// function App() {
-//   return (
-//     <div className="flex flex-wrap items-center justify-center min-h-screen bg-gray-100 p-4 gap-4">
-//       <SegmentedCircularGauge value={71} /> {/* Default size (192px) */}
-//       <SegmentedCircularGauge value={95} size={240} /> {/* Custom size */}
-//       <SegmentedCircularGauge value={25} size={120} /> {/* Smaller size */}
-//       <SegmentedCircularGauge value={0} />
-//       <SegmentedCircularGauge value={1} />
-//       <SegmentedCircularGauge value={20} />
-//       <SegmentedCircularGauge value={21} />
-//       <SegmentedCircularGauge value={100} size={80} /> {/* Even smaller */}
-//     </div>
-//   );
-// }

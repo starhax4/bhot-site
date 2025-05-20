@@ -8,7 +8,7 @@ const ValueCard = ({
   highValue = "xxx,xxx",
 }) => {
   return (
-    <div className="flex flex-col md:w-[21vw] px-6 py-6 bg-white  shadow-lg rounded-3xl">
+    <div className="flex flex-col md:w-[21vw] px-6 py-6 bg-white shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl">
       <div>
         <p className="text-lg font-semibold text-primary">{title}</p>
         {desc && (
