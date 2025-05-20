@@ -12,7 +12,12 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
       case "contact":
         return <ContactForm closeModal={onClose} />;
       case "account":
-        return <AccountDetails closeModal={onClose} />;
+        return (
+          <AccountDetails
+            closeModal={onClose}
+            nextModal={selectedModal}
+          />
+        );
       case "cta":
         return (
           <RegisterForm

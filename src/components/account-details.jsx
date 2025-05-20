@@ -4,8 +4,8 @@ import ButtonCTA from "./button";
 import { Link } from "react-router";
 import SelectInput from "./select-input";
 
-const AccountDetails = ({ closeModal }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const AccountDetails = ({ closeModal, nextModal }) => {
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
   const [userData, setUserData] = useState({
     firstName: "John",
     lastName: "Doe",
@@ -20,6 +20,10 @@ const AccountDetails = ({ closeModal }) => {
   };
 
   const handleDataChange = () => {};
+
+  const handleContactModal = () => {
+    nextModal("contact");
+  };
 
   return (
     <div className="w-full px-12 py-8 ">
@@ -69,37 +73,59 @@ const AccountDetails = ({ closeModal }) => {
               />
             </div>
             <div className="grid md:grid-cols-2 gap-8">
-              <SelectInput
-                label="Property(ies)"
-                name="property"
-                DefaultValue={"1, First Street, City, AB12 3CD"}
-                options={[
-                  {
-                    label: "1, First Street, City, AB12 3CD",
-                    value: "1, First Street, City, AB12 3CD",
-                  },
-                  {
-                    label: "1, First Street, City, AB12 3CD",
-                    value: "1, First Street, City, AB12 3CD",
-                  },
-                ]}
-                searchEnabled={false}
-                disabled={!isAuthenticated}
-                className="mt-3.5 bg-[#F9F9F9]"
-              />
-              <SelectInput
-                label="Plan"
-                name="plan"
-                value={"Basic"}
-                defaultValue={"basic"}
-                searchEnabled={false}
-                options={[
-                  { label: "Basic", value: "basic" },
-                  { label: "Pro", value: "pro" },
-                ]}
-                disabled={!isAuthenticated}
-                className="mt-3.5 bg-[#F9F9F9]"
-              />
+              <div>
+                <SelectInput
+                  label="Property(ies)"
+                  name="property"
+                  value={userData.property}
+                  options={[
+                    {
+                      label: "1, First Street, City, AB12 3CD",
+                      value: "1, First Street, City, AB12 3CD",
+                    },
+                  ]}
+                  searchEnabled={false}
+                  disabled={true}
+                  // helperText="You can't change Address! In case of Mistake Contact us."
+                  className="mt-3.5 bg-[#F9F9F9]"
+                />
+                <div className="mt-2">
+                  <p className="text-xs">
+                    You can't change Address! In case of Mistake{" "}
+                    <span
+                      onClick={handleContactModal}
+                      className="text-primary cursor-pointer"
+                    >
+                      Contact us.
+                    </span>
+                  </p>
+                </div>
+              </div>
+              <div>
+                <SelectInput
+                  label="Plan"
+                  name="plan"
+                  value={userData.plan.toLowerCase()}
+                  options={[
+                    { label: "Basic", value: "basic" },
+                    { label: "Pro", value: "pro" },
+                  ]}
+                  searchEnabled={false}
+                  disabled={!isAuthenticated}
+                  className="mt-3.5 bg-[#F9F9F9]"
+                />
+                <div className="mt-2">
+                  <p className="text-xs">
+                    Want to Upgrade! go to{" "}
+                    <Link
+                      to="/pricing"
+                      className="text-primary cursor-pointer"
+                    >
+                      Pricing & Plans
+                    </Link>
+                  </p>
+                </div>
+              </div>
             </div>
             <div className="flex justify-center mt-32">
               <span

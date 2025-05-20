@@ -61,25 +61,6 @@ const MOCK_PRO_USER = {
 };
 
 export const AuthProvider = ({ children }) => {
-  // Always initialize with Pro user for testing
-  const [user, setUser] = useState(() => {
-    try {
-      const stored = localStorage.getItem("user");
-      if (!stored) {
-        // Initialize with mock Pro user if no stored data
-        localStorage.setItem("user", JSON.stringify(MOCK_PRO_USER));
-        return MOCK_PRO_USER;
-      }
-
-      const parsedUser = JSON.parse(stored);
-      return validateAndCleanUserData(parsedUser);
-    } catch (error) {
-      console.error("Error loading user data:", error);
-      // Return mock Pro user as fallback
-      return MOCK_PRO_USER;
-    }
-  });
-
   const [currentAddress, setCurrentAddress] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -164,6 +145,25 @@ export const AuthProvider = ({ children }) => {
       return null;
     }
   }, []);
+
+  // Always initialize with Pro user for testing
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = localStorage.getItem("user");
+      if (!stored) {
+        // Initialize with mock Pro user if no stored data
+        localStorage.setItem("user", JSON.stringify(MOCK_PRO_USER));
+        return MOCK_PRO_USER;
+      }
+
+      const parsedUser = JSON.parse(stored);
+      return validateAndCleanUserData(parsedUser);
+    } catch (error) {
+      console.error("Error loading user data:", error);
+      // Return mock Pro user as fallback
+      return MOCK_PRO_USER;
+    }
+  });
 
   // Update current address when user changes
   useEffect(() => {

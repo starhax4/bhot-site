@@ -4,6 +4,7 @@ import ScatterPlot from "./scatter-plot";
 import { useAuth } from "../../context/auth/AuthContext";
 import SelectInput from "../select-input";
 import Input from "../input";
+import DualRangeSlider from "../dual-range-slider";
 
 // Dummy data for scatter plot
 const scatterData = Array.from({ length: 50 }, () => ({
@@ -14,7 +15,10 @@ const scatterData = Array.from({ length: 50 }, () => ({
 const DashboardCard = () => {
   const [filter, setFilter] = useState({
     distance: "2", // Initial value for distance
-    size: "1000", // Initial value for size
+    size: {
+      min: 0,
+      max: 50,
+    }, // Initial range 0-50 sqm
     type: {
       detachedHouse: false,
       terracedHouse: false,
@@ -149,11 +153,13 @@ const DashboardCard = () => {
   ];
 
   const sizeOptions = [
-    { label: "Size", value: "default_size", sqm: filter.size },
-    { label: "Up to 500 sqm", value: "500", sqm: "500" },
-    { label: "Up to 1000 sqm", value: "1000", sqm: "1000" },
-    { label: "Up to 2500 sqm", value: "2500", sqm: "2500" },
-    { label: "Up to 5000 sqm", value: "5000", sqm: "5000" },
+    { label: "Size", value: "default_size" },
+    { label: "0-50 sqm", value: "0-50", min: 0, max: 50 },
+    { label: "51-100 sqm", value: "51-100", min: 51, max: 100 },
+    { label: "101-150 sqm", value: "101-150", min: 101, max: 150 },
+    { label: "151-200 sqm", value: "151-200", min: 151, max: 200 },
+    { label: "201-300 sqm", value: "201-300", min: 201, max: 300 },
+    { label: "301+ sqm", value: "301+", min: 301, max: 5000 },
   ];
 
   const typeOptions = [
@@ -187,7 +193,10 @@ const DashboardCard = () => {
     if (option.value !== "default_size") {
       setFilter((prevFilter) => ({
         ...prevFilter,
-        size: option.sqm,
+        size: {
+          min: option.min,
+          max: option.max,
+        },
       }));
     }
     setOpenDropdown(null);
@@ -244,6 +253,17 @@ const DashboardCard = () => {
       };
     });
   };
+
+  const handleSizeRangeChange = useCallback(([min, max]) => {
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      size: {
+        min,
+        max,
+      },
+    }));
+    setSizeButtonLabel(`${min}-${max === 5000 ? "+" : max} sqm`);
+  }, []);
 
   const handleRangeChange = (e) => {
     const { id, value } = e.target;
@@ -661,44 +681,28 @@ const DashboardCard = () => {
                   ))}
                 </div>
               )}
-              {/* Gray button removed */}
-              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
-                <div className="flex justify-between">
-                  <p className="text-neutral-400 text-xs font-semibold">
-                    0 sqm
-                  </p>
-                  <p className="text-neutral-400 text-xs font-semibold">
-                    5,000 sqm
-                  </p>
-                </div>
-                <div>
-                  <div className="">
-                    <input
-                      type="range"
-                      id="size"
-                      className="w-full accent-primary"
-                      min="0"
-                      max="5000"
-                      value={filter.size}
-                      onChange={handleRangeChange}
-                    />
-                    <span className="text-neutral-400 text-xs">
-                      Up to <strong>{filter.size} sqm</strong>
-                    </span>
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => {
-                          console.log(
-                            "Size apply clicked for range:",
-                            filter.size
-                          );
-                        }}
-                        className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
-                      >
-                        Apply
-                      </button>
-                    </div>
-                  </div>
+              {/* Size Range Slider */}
+              <div className="bg-white shadow-xl md:w-48 px-4 py-3 rounded-lg">
+                <DualRangeSlider
+                  min={0}
+                  max={5000}
+                  step={10}
+                  minValue={filter.size.min}
+                  maxValue={filter.size.max}
+                  onChange={handleSizeRangeChange}
+                  formatLabel={(value) =>
+                    `${value}${value === 5000 ? "+" : ""} sqm`
+                  }
+                />
+                <div className="flex justify-end mt-2">
+                  <button
+                    onClick={() => {
+                      console.log("Size range apply clicked:", filter.size);
+                    }}
+                    className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
+                  >
+                    Apply
+                  </button>
                 </div>
               </div>
             </div>

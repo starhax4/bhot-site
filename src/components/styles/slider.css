@@ -1,0 +1,35 @@
+.dual-range-slider .multi-range-slider {
+  border: none !important;
+  box-shadow: none !important;
+  padding: 10px 0;
+}
+
+.dual-range-slider .multi-range-slider .bar-left,
+.dual-range-slider .multi-range-slider .bar-right,
+.dual-range-slider .multi-range-slider .bar-inner {
+  height: 3px;
+  box-shadow: none;
+}
+
+.dual-range-slider .multi-range-slider .thumb-left,
+.dual-range-slider .multi-range-slider .thumb-right {
+  width: 4px;
+  height: 4px;
+  border: 2px solid #fff;
+  background: #005000;
+  box-shadow: none;
+  margin-top: -5px;
+  cursor: pointer;
+}
+
+.dual-range-slider .multi-range-slider .caption {
+  display: none;
+}
+
+.dual-range-slider .multi-range-slider .ruler {
+  display: none;
+}
+
+.dual-range-slider .multi-range-slider .bar {
+  margin: 0;
+}

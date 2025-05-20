@@ -9,6 +9,7 @@ import RecommendationsTable from "../components/dashboard/recomendation-table";
 import DetailCard from "../components/admin-dashboard/detail-card";
 import CardsGrid from "../components/admin-dashboard/cards-grid";
 import SalesGraphGrid from "../components/admin-dashboard/SalesGraphGrid";
+import UserAddressManager from "../components/admin-dashboard/user-address-manager";
 
 const dummyData = [
   {
@@ -41,9 +42,12 @@ const Admin = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <div className="flex flex-col md:flex-row ">
-        <CardsGrid />
-        <SalesGraphGrid />
+      <div className="flex flex-col gap-6 p-6">
+        <div className="flex flex-col md:flex-row gap-6">
+          <CardsGrid />
+          <SalesGraphGrid />
+        </div>
+        <UserAddressManager />
       </div>
       <Footer />
       <Modal

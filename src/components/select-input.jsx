@@ -33,7 +33,9 @@ const SelectInput = forwardRef(
     ref
   ) => {
     const [focused, setFocused] = useState(false);
-    const [internalInputText, setInternalInputText] = useState("");
+    const initialLabel =
+      options.find((opt) => opt.value === (value || defaultValue))?.label || "";
+    const [internalInputText, setInternalInputText] = useState(initialLabel);
     const [selectedValue, setSelectedValue] = useState(value || defaultValue);
     const [showList, setShowList] = useState(false);
     const [filtered, setFiltered] = useState(options);
@@ -172,7 +174,7 @@ const SelectInput = forwardRef(
               className={`absolute left-3 px-1 bg-white transition-all pointer-events-none
               ${
                 focused || displayValue
-                  ? "-top-2 text-xs text-primary"
+                  ? `-top-2 text-xs ${focused ? "text-primary" : "text-black"}`
                   : "top-1/2 -translate-y-1/2 text-zinc-600"
               }`}
             >
