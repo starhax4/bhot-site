@@ -11,6 +11,13 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
     setAsDefault: false,
   });
 
+  const isValidCardNumber = (number) => {
+    // Remove any spaces or dashes
+    const cleanNumber = number.replace(/[\s-]/g, "");
+    // Check if it's exactly 16 digits and contains only numbers
+    return /^\d{16}$/.test(cleanNumber);
+  };
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setCardData({
@@ -70,15 +77,15 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
       </div>
 
       <form onSubmit={handleSubmit}>
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
           <div className="flex flex-col gap-0.5 md:w-[37%]">
             <label className="text-sm text-black">Card number</label>
             <p className="text-zinc-600 text-xs">
               Enter the 16-digit card number on the card
             </p>
           </div>
-          <div className="flex">
-            <div className="bg-white p-3 border border-r-0 border-gray-300 rounded-l-md">
+          <div className="flex items-center">
+            <div className="bg-white p-3 py-3.5 border border-r-0 border-gray-300 rounded-l-md">
               <CreditCard className="w-5 h-5 text-gray-400" />
             </div>
             <input
@@ -90,10 +97,27 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
               maxLength="16"
               required
             />
+            <div className={`w-10 h-full flex items-center justify-end `}>
+              <div
+                className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                  isValidCardNumber(cardData.cardNumber)
+                    ? "bg-green-500"
+                    : "border border-gray-300 bg-white"
+                }`}
+              >
+                <Check
+                  className={`w-4 h-4 ${
+                    isValidCardNumber(cardData.cardNumber)
+                      ? "text-white"
+                      : "text-gray-300"
+                  }`}
+                />
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 mb-4">
+        <div className="flex flex-col md:flex-row  md:items-center gap-4 mb-4">
           <div className="flex flex-col gap-0.5 md:w-[37%]">
             <label className="text-sm text-black">Card owner</label>
             <p className="text-zinc-600 text-xs">Enter the name on the card</p>
@@ -109,8 +133,8 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
           />
         </div>
 
-        <div className="flex  space-x-4 mb-4">
-          <div className="flex items-center gap-14 ">
+        <div className="flex justify-between md:justify-start md:space-x-4 mb-4">
+          <div className="flex flex-col md:flex-row  md:items-center gap-4 md:gap-14 ">
             <div className="flex flex-col gap-0.5 md:w-[70%]">
               <label className="text-sm text-black">Expiry date</label>
               <p className="text-zinc-600 text-xs">
@@ -145,7 +169,7 @@ const AddCardForm = ({ onAddCard, onCancel }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-col md:flex-row  items-center gap-4 md:gap-3">
             <div className="flex flex-col gap-0.5 ">
               <label className="text-sm text-black">CVV2</label>
               <p className="text-zinc-600 text-xs">Security code</p>

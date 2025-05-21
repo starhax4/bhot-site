@@ -558,7 +558,7 @@ const DashboardCard = () => {
         </div>
       </div>
       <div className="flex flex-col mt-4">
-        <h2 className="flex text-center md:justify-start text-base  text-primary font-semibold">
+        <h2 className="flex text-center justify-center md:justify-start text-base  text-primary font-semibold">
           Neighbourhood benchmarking
         </h2>
         <div className="flex flex-col my-4">
@@ -602,7 +602,7 @@ const DashboardCard = () => {
                 </div>
               )}
               {/* Gray button removed */}
-              <div className="bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
+              <div className="w-62 bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 miles
@@ -682,7 +682,7 @@ const DashboardCard = () => {
                 </div>
               )}
               {/* Size Range Slider */}
-              <div className="bg-white shadow-xl w-58 md:w-36 px-2 py-2 rounded-lg">
+              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg">
                 <DualRangeSlider
                   min={0}
                   max={5000}
@@ -746,7 +746,7 @@ const DashboardCard = () => {
                 </div>
               )}
               {/* Gray button removed */}
-              <div className="bg-white shadow-xl w-58 md:w-36 px-2 py-2 rounded-lg">
+              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg">
                 <div>
                   <div className="">
                     {" "}
