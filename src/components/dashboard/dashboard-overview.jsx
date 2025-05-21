@@ -540,7 +540,7 @@ const DashboardCard = () => {
         </div>
 
         {/* Circular Progress Indicators */}
-        <div className="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap items-center gap-6 xl:gap-10 sm:justify-center xl:justify-end mt-6 xl:mt-0">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap items-center gap-6 xl:gap-6 sm:justify-center xl:justify-end mt-6 xl:mt-0">
           <div className="w-36 sm:mb-4 xl:mb-0">
             <p className="text-center mt-2 font-medium">Current</p>
             <SegmentedCircularGauge
