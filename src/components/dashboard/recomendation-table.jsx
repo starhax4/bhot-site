@@ -38,7 +38,8 @@ const address1Recommendations = [
     cost: "£4,000 - £6,000",
     yearlySaving: "£55",
     epcImpact: "+ 2 pts",
-    estimatedValueImpact: "Upgrade to unlock",
+    estimatedValueImpact: "£20,000 - £40,000",
+    totalPaybackPeriod: "0.5 years",
     locked: true,
   },
   {
@@ -47,7 +48,8 @@ const address1Recommendations = [
     cost: "£6,000 - £8,000",
     yearlySaving: "£100",
     epcImpact: "+ 3 pts",
-    estimatedValueImpact: "Upgrade to unlock",
+    estimatedValueImpact: "£20,000 - £40,000",
+    totalPaybackPeriod: "0.5 years",
     locked: true,
   },
 ];
@@ -68,7 +70,8 @@ const address2Recommendations = [
     cost: "£5,000 - £8,000",
     yearlySaving: "£120",
     epcImpact: "+ 4 pts",
-    estimatedValueImpact: "Upgrade to unlock",
+    estimatedValueImpact: "£20,000 - £40,000",
+    totalPaybackPeriod: "0.5 years",
     locked: true,
   },
   {
@@ -77,7 +80,8 @@ const address2Recommendations = [
     cost: "£8,000 - £15,000",
     yearlySaving: "£350",
     epcImpact: "+ 10 pts",
-    estimatedValueImpact: "Upgrade to unlock",
+    estimatedValueImpact: "£20,000 - £40,000",
+    totalPaybackPeriod: "0.5 years",
     locked: true,
   },
 ];
@@ -91,6 +95,7 @@ const LockIcon = () => (
 
 const RecommendationsTable = ({ data, addressId }) => {
   const { user, currentAddress } = useAuth();
+
   const [recommendations, setRecommendations] = useState(
     data || address1Recommendations
   );
@@ -130,37 +135,37 @@ const RecommendationsTable = ({ data, addressId }) => {
             <tr>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora'] tracking-wider"
               >
                 Measure
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
               >
                 Cost
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
               >
                 Potential Yearly Bills Saving
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
               >
                 EPC Impact
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
               >
                 Estimated Value Impact
               </th>
               <th
                 scope="col"
-                className="px-1 py-3 text-left text-black text-xs font-bold font-['Sora'] uppercase tracking-wider"
+                className="px-1 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
               >
                 Total Payback Period
               </th>
@@ -190,9 +195,9 @@ const RecommendationsTable = ({ data, addressId }) => {
                 </td>
                 <td
                   className="row-span-2 px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']"
-                  colSpan={row.locked ? "2" : "1"}
+                  colSpan={user.plan === "Basic" && row.locked ? "2" : "1"}
                 >
-                  {row.locked ? (
+                  {user.plan === "Basic" && row.locked ? (
                     <Link to="/pricing">
                       <div className="flex flex-col items-center text-center">
                         <LockIcon />
