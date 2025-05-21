@@ -387,8 +387,8 @@ const DashboardCard = () => {
   return (
     <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl ">
       {/* Property Info */}
-      <div className="flex flex-col lg:flex-row justify-between">
-        <div className="md:w-[100%] lg:w-[45%] flex flex-col gap-4">
+      <div className="flex flex-col xl:flex-row justify-between">
+        <div className="md:w-[100%] xl:w-[45%] flex flex-col gap-4">
           <div className="flex items-center gap-2">
             <h2 className="text-base text-primary font-semibold">
               Your Property
@@ -540,15 +540,15 @@ const DashboardCard = () => {
         </div>
 
         {/* Circular Progress Indicators */}
-        <div className="flex flex-col items-center lg:flex-row md:flex-wrap lg:flex-nowrap lg:gap-10 md:justify-end">
-          <div className="w-36">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap items-center gap-6 xl:gap-10 sm:justify-center xl:justify-end mt-6 xl:mt-0">
+          <div className="w-36 sm:mb-4 xl:mb-0">
             <p className="text-center mt-2 font-medium">Current</p>
             <SegmentedCircularGauge
               value={71}
               size={142}
             />
           </div>
-          <div className=" w-36">
+          <div className="w-36 sm:mb-4 xl:mb-0">
             <p className="text-center mt-2 font-medium">Potential</p>
             <SegmentedCircularGauge
               value={82}
@@ -602,7 +602,7 @@ const DashboardCard = () => {
                 </div>
               )}
               {/* Gray button removed */}
-              <div className="w-62 bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg">
+              <div className="w-62 bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg h-[98px] flex flex-col">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 miles
@@ -611,8 +611,8 @@ const DashboardCard = () => {
                     10 miles
                   </p>
                 </div>
-                <div>
-                  <div className="">
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
                     <input
                       type="range"
                       id="distance"
@@ -625,19 +625,19 @@ const DashboardCard = () => {
                     <span className="text-neutral-400 text-xs">
                       within <strong>{filter.distance} miles</strong>
                     </span>
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => {
-                          console.log(
-                            "Distance apply clicked for range:",
-                            filter.distance
-                          );
-                        }}
-                        className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
-                      >
-                        Apply
-                      </button>
-                    </div>
+                  </div>
+                  <div className="flex justify-end mt-auto">
+                    <button
+                      onClick={() => {
+                        console.log(
+                          "Distance apply clicked for range:",
+                          filter.distance
+                        );
+                      }}
+                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
+                    >
+                      Apply
+                    </button>
                   </div>
                 </div>
               </div>
@@ -682,27 +682,39 @@ const DashboardCard = () => {
                 </div>
               )}
               {/* Size Range Slider */}
-              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg">
-                <DualRangeSlider
-                  min={0}
-                  max={5000}
-                  step={10}
-                  minValue={filter.size.min}
-                  maxValue={filter.size.max}
-                  onChange={handleSizeRangeChange}
-                  formatLabel={(value) =>
-                    `${value}${value === 5000 ? "+" : ""} sqm`
-                  }
-                />
-                <div className="flex justify-end mt-2">
-                  <button
-                    onClick={() => {
-                      console.log("Size range apply clicked:", filter.size);
-                    }}
-                    className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
-                  >
-                    Apply
-                  </button>
+              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg h-[98px] flex flex-col">
+                <div className="flex justify-between">
+                  <p className="text-neutral-400 text-xs font-semibold">
+                    0 sqm
+                  </p>
+                  <p className="text-neutral-400 text-xs font-semibold">
+                    5000+ sqm
+                  </p>
+                </div>
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <DualRangeSlider
+                      min={0}
+                      max={5000}
+                      step={10}
+                      minValue={filter.size.min}
+                      maxValue={filter.size.max}
+                      onChange={handleSizeRangeChange}
+                      formatLabel={(value) =>
+                        `${value}${value === 5000 ? "+" : ""} sqm`
+                      }
+                    />
+                  </div>
+                  <div className="flex justify-end mt-auto">
+                    <button
+                      onClick={() => {
+                        console.log("Size range apply clicked:", filter.size);
+                      }}
+                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
+                    >
+                      Apply
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -746,12 +758,10 @@ const DashboardCard = () => {
                 </div>
               )}
               {/* Gray button removed */}
-              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg">
-                <div>
-                  <div className="">
-                    {" "}
-                    {/* Ensure className is used, was class previously */}
-                    <div className="flex gap-1 font-semibold ">
+              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg h-[98px] flex flex-col">
+                <div className="flex-1 flex flex-col">
+                  <div className="h-[64px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
                       <input
                         type="checkbox"
                         name="detachedHouse"
@@ -767,7 +777,7 @@ const DashboardCard = () => {
                         Detached House
                       </label>
                     </div>
-                    <div className="flex gap-1 font-semibold">
+                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
                       <input
                         type="checkbox"
                         name="terracedHouse"
@@ -783,7 +793,7 @@ const DashboardCard = () => {
                         Terraced House
                       </label>
                     </div>
-                    <div className="flex gap-1 font-semibold">
+                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
                       <input
                         type="checkbox"
                         name="parkHouse"
@@ -799,7 +809,7 @@ const DashboardCard = () => {
                         Park House
                       </label>
                     </div>
-                    <div className="flex gap-1 font-semibold">
+                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
                       <input
                         type="checkbox"
                         name="flat"
@@ -815,19 +825,19 @@ const DashboardCard = () => {
                         Flat
                       </label>
                     </div>
-                    <div className="flex justify-end">
-                      <button
-                        onClick={() => {
-                          console.log(
-                            "Type apply clicked. Current types:",
-                            filter.type
-                          );
-                        }}
-                        className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
-                      >
-                        Apply
-                      </button>
-                    </div>
+                  </div>
+                  <div className="flex justify-end mt-auto">
+                    <button
+                      onClick={() => {
+                        console.log(
+                          "Type apply clicked. Current types:",
+                          filter.type
+                        );
+                      }}
+                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
+                    >
+                      Apply
+                    </button>
                   </div>
                 </div>
               </div>

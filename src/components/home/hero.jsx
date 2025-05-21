@@ -16,11 +16,11 @@ const Hero = ({ onCtaClick }) => {
               <br />
               <br /> See how your property compares to others in your
               neighbourhood, and discover which energy-saving improvements could
-              work best for you — all from just your house address.
+              work best for you, all from just your house address.
               <br />
               <br /> We combine trusted public data with our own proprietary
               insights to show the potential value increase of making
-              recommended energy upgrades — personalised for your home, in your
+              recommended energy upgrades, personalised for your home, in your
               local area.
             </p>
             <div className="flex justify-center">
