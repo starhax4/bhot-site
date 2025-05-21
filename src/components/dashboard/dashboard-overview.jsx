@@ -387,10 +387,10 @@ const DashboardCard = () => {
   return (
     <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl ">
       {/* Property Info */}
-      <div className="flex flex-col md:flex-row justify-between">
-        <div className="md:w-[40%] flex flex-col gap-4">
+      <div className="flex flex-col lg:flex-row justify-between">
+        <div className="md:w-[100%] lg:w-[45%] flex flex-col gap-4">
           <div className="flex items-center gap-2">
-            <h2 className="text-lg text-primary font-semibold">
+            <h2 className="text-base text-primary font-semibold">
               Your Property
             </h2>
             {currentAddress && currentAddress.id && (
@@ -540,7 +540,7 @@ const DashboardCard = () => {
         </div>
 
         {/* Circular Progress Indicators */}
-        <div className="flex flex-col items-center md:flex-row gap-10">
+        <div className="flex flex-col items-center flex-wrap lg:flex-row lg:gap-10 md:justify-end">
           <div className="w-36">
             <p className="text-center mt-2 font-medium">Current</p>
             <SegmentedCircularGauge
@@ -558,11 +558,11 @@ const DashboardCard = () => {
         </div>
       </div>
       <div className="flex flex-col mt-4">
-        <h2 className="flex text-center md:justify-start text-lg  text-primary font-semibold">
+        <h2 className="flex text-center md:justify-start text-base  text-primary font-semibold">
           Neighbourhood benchmarking
         </h2>
         <div className="flex flex-col my-4">
-          <div className="flex flex-col items-center md:items-start gap-4 md:flex-row justify-between w-full">
+          <div className="flex flex-col items-center md:items-start gap-4 md:flex-row justify-between w-full flex-wrap">
             {/* Distance Filter */}
             <div className="flex flex-col gap-2 relative">
               <button
@@ -682,7 +682,7 @@ const DashboardCard = () => {
                 </div>
               )}
               {/* Size Range Slider */}
-              <div className="bg-white shadow-xl md:w-48 px-4 py-3 rounded-lg">
+              <div className="bg-white shadow-xl w-58 md:w-36 px-2 py-2 rounded-lg">
                 <DualRangeSlider
                   min={0}
                   max={5000}

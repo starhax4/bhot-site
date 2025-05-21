@@ -4,7 +4,7 @@ const Brands = () => {
   return (
     <div className="mx-auto my-14 flex flex-col gap-4">
       <div>
-        <h2 className="text-black  font-normal text-xl  text-center">
+        <h2 className="text-black  font-normal text-xl text-center mx-auto px-2">
           Data sources from the following resources:
         </h2>
       </div>

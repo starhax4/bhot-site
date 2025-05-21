@@ -120,14 +120,14 @@ const RecommendationsTable = ({ data, addressId }) => {
   return (
     <div className="w-full bg-white px-4 py-2 sm:py-6 sm:px-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] md:w-[45vw] mx-auto">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-primary my-2">
+        <h2 className="text-base font-semibold text-primary my-2">
           Recommendations
         </h2>
-        {user && user.plan === "Pro" && currentAddress && (
+        {/* {user && user.plan === "Pro" && currentAddress && (
           <p className="text-sm text-gray-500">
             For: {currentAddress.street}, {currentAddress.city}
           </p>
-        )}
+        )} */}
       </div>
       <div className="overflow-x-scroll overflow-y-auto md:overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">

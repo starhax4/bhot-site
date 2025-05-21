@@ -155,9 +155,9 @@ const Dashboard = () => {
           ) : null}
 
           {/* Mobile address selector for pro users */}
-          <div className="md:hidden">
+          {/* <div className="md:hidden">
             {user && user.plan === "Pro" && <AddressSelector />}
-          </div>
+          </div> */}
 
           {/* Display error message if there's an error */}
           {error && (
