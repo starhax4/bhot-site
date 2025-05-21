@@ -63,7 +63,7 @@ const ScatterPlot = ({
 }) => {
   // Default Tailwind classes for styling (can be customized)
   const lightPurple = "fill-purple-300"; // Lighter purple for regular points
-  const darkPurple = "fill-purple-600"; // Darker purple for highlighted point
+  const darkPurple = "fill-violet-700"; // Darker purple for highlighted point
   const axisColor = "text-gray-600";
   const gridColor = "stroke-gray-200";
   const labelColor = "text-neutral-400";
@@ -104,7 +104,7 @@ const ScatterPlot = ({
               value={xAxisLabel}
               offset={-30}
               position="insideBottomRight"
-              style={{ fill: "#94a3b8", fontSize: 14 , fontWeight : 600}}
+              style={{ fill: "#94a3b8", fontSize: 14, fontWeight: 600 }}
             />
           </XAxis>
           <YAxis
@@ -143,7 +143,7 @@ const ScatterPlot = ({
                 className={
                   entry.id === highlightedPointId ? darkPurple : lightPurple
                 }
-                stroke={entry.id === highlightedPointId ? "#581c87" : "#a855f7"} // Tailwind purple-800 and purple-500 for borders
+                stroke={entry.id === highlightedPointId ? "#6928db" : "#a855f7"} // Tailwind purple-800 and purple-500 for borders
                 strokeWidth={1}
               />
             ))}
