@@ -18,11 +18,11 @@ const ValueCard = ({
         )}
       </div>
       <div className={`flex flex-col gap-4 px-8 ${desc ? "mt-0" : "mt-6"}`}>
-        <div className="flex flex-wrap sm:gap-13 md:gap-5 lg:gap-13">
+        <div className="flex flex-wrap sm:gap-13 md:gap-2 lg:gap-13">
           <p className="text-neutral-400 text-sm font-semibold">Low:</p>
           <p className="text-neutral-400 text-sm ">£{lowValue}</p>
         </div>
-        <div className="flex flex-wrap gap-5">
+        <div className="flex flex-wrap sm:gap-5 md:gap-2 lg:gap-5">
           <p className="text-primary font-semibold">Estimate:</p>
           <p className="text-primary">£{estimate}</p>
         </div>

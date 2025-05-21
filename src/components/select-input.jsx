@@ -2,9 +2,9 @@ import React, { forwardRef, useState, useRef, useEffect } from "react";
 
 // Reusable SelectInput with floating label, object options, default value, and async support
 const sizeStyles = {
-  small: "px-2 pt-3 pb-1.5 text-base",
-  medium: "px-3 pt-4 pb-2 text-base",
-  large: "px-4 pt-5 pb-3 text-lg",
+  small: "px-3 pt-3 pb-1.5 text-base",
+  medium: "px-4 pt-4 pb-2 text-base",
+  large: "px-5 pt-5 pb-3 text-lg",
 };
 
 const SelectInput = forwardRef(
@@ -171,7 +171,7 @@ const SelectInput = forwardRef(
           {label && (
             <label
               htmlFor={id || name}
-              className={`absolute left-3 px-1 bg-white transition-all pointer-events-none
+              className={`absolute left-3 px-1 bg-white transition-all pointer-events-none z-10
               ${
                 focused || displayValue
                   ? `-top-2 text-xs ${focused ? "text-primary" : "text-black"}`
@@ -188,7 +188,7 @@ const SelectInput = forwardRef(
             type="text"
             placeholder={""}
             disabled={disabled}
-            className="flex-1 bg-transparent outline-none disabled:cursor-not-allowed disabled:opacity-50 z-0"
+            className="flex-1 bg-transparent outline-none disabled:cursor-not-allowed disabled:opacity-50 whitespace-nowrap overflow-hidden pr-2 max-w-full"
             onFocus={handleFocus}
             onChange={handleInputChange}
             value={displayValue}

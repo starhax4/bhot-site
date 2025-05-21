@@ -16,8 +16,8 @@ const DashboardCard = () => {
   const [filter, setFilter] = useState({
     distance: "2", // Initial value for distance
     size: {
-      min: 0,
-      max: 50,
+      min: 201,
+      max: 300,
     }, // Initial range 0-50 sqm
     type: {
       detachedHouse: false,
