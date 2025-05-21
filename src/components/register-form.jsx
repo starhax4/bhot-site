@@ -18,8 +18,25 @@ const RegisterForm = ({ closeModal, nextModal }) => {
 
   const handleRegisterSubmit = (e) => {
     e.preventDefault();
+    const form = e.target;
+
+    // Check only the second step fields
+    const secondStepFields = document.querySelectorAll(
+      ".second-step-fields input, .second-step-fields select"
+    );
+    let isValid = true;
+
+    secondStepFields.forEach((field) => {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        isValid = false;
+      }
+    });
+
+    if (!isValid) return;
+
     setIsLoading(true);
-    const formData = new FormData(e.target);
+    const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
     // If "Other" was selected for hear-from, use the text from the additional input
@@ -36,7 +53,23 @@ const RegisterForm = ({ closeModal, nextModal }) => {
     // nextModal("register-2");
   };
 
-  const handleNext = () => {
+  const handleNext = (e) => {
+    e.preventDefault();
+    // Get only the visible first step fields
+    const firstStepFields = document.querySelectorAll(
+      ".first-step-fields input, .first-step-fields select"
+    );
+    let isValid = true;
+
+    // Check validity of only the first step fields
+    firstStepFields.forEach((field) => {
+      if (!field.checkValidity()) {
+        field.reportValidity();
+        isValid = false;
+      }
+    });
+
+    if (!isValid) return;
     setIsFirst(false);
   };
 
@@ -74,7 +107,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
         onSubmit={handleRegisterSubmit}
         className="flex flex-col"
       >
-        <div className={`${isFirst ? "block" : "hidden"}`}>
+        <div className={`first-step-fields ${isFirst ? "block" : "hidden"}`}>
           <div>
             <h2 className="text-primary text-2xl md:text-3xl font-semibold">
               Register
@@ -126,6 +159,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                   { label: "46-55", value: "46-55" },
                   { label: "56+", value: "56-100" },
                 ]}
+                required
                 // defaultValue="18-24"
                 // searchEnabled={true}
                 // onSearch={handleSearch}
@@ -206,6 +240,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 label="Create account and continue"
                 fullWidth
                 onClickHandler={handleNext}
+                type="submit"
                 className=""
                 isLoading={isLoading}
                 disabled={isPasswordDifferent()}
@@ -232,7 +267,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.9 }}
           transition={{ duration: 0.3 }}
-          className={`${isFirst ? "hidden" : "block"}`}
+          className={`second-step-fields ${isFirst ? "hidden" : "block"}`}
         >
           <div>
             <h2 className="text-primary text-5xl font-bold">Register</h2>
@@ -253,6 +288,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 ]}
                 searchEnabled={true}
                 // onSearch={handleSearch}
+                required
                 fullWidth
               />
               <SelectInput
@@ -265,6 +301,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                   },
                 ]}
                 searchEnabled={true}
+                required
                 // onSearch={handleSearch}
                 fullWidth
               />

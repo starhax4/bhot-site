@@ -198,7 +198,7 @@ const SelectInput = forwardRef(
 
         {/* Options dropdown */}
         {showList && filtered.length > 0 && !disabled && (
-          <ul className="absolute mt-1 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg z-50">
+          <ul className="absolute mt-10 w-full max-h-60 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg z-50">
             {filtered.map((opt) => (
               <li
                 key={opt.value}
