@@ -126,10 +126,10 @@ const Dashboard = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <div className="flex flex-col md:flex-row py-10 px-4 md:px-6 xl:px-12 justify-between gap-8 md:gap-0">
+      <div className="flex flex-col md:flex-row py-10 px-4 md:px-6 xl:px-16 justify-between gap-8 md:gap-4">
         <DashboardCard />
-        <div className="flex flex-col gap-12">
-          {user && user.plan === "Pro" ? (
+        <div className="flex flex-col gap-8">
+          {/* {user && user.plan === "Pro" ? (
             <></>
           ) : user ? (
             <div className="bg-[#F8FAFC] border border-gray-100 rounded-lg p-4 mb-4">
@@ -152,7 +152,7 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-          ) : null}
+          ) : null} */}
 
           {/* Mobile address selector for pro users */}
           {/* <div className="md:hidden">
@@ -168,14 +168,14 @@ const Dashboard = () => {
           )}
 
           {/* Loading indicator */}
-          {loading && (
+          {/* {loading && (
             <div className="flex justify-center items-center p-4 bg-white rounded-lg shadow mb-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="ml-2 text-gray-600">
                 Loading property data...
               </span>
             </div>
-          )}
+          )} */}
 
           <div className="flex flex-col md:flex-row md:justify-between gap-9">
             <ValueCard

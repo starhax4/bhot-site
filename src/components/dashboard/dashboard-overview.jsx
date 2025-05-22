@@ -24,12 +24,17 @@ const DashboardCard = () => {
       terracedHouse: false,
       parkHouse: false,
       flat: false,
+      SemiDetachedHouse: false,
+      bungalow: false,
+      maisonette: false,
+      studioApartment: false,
     },
   });
 
   const { user, switchAddress, addAddress, currentAddress } = useAuth();
   const [showAddForm, setShowAddForm] = useState(false);
   const [newAddress, setNewAddress] = useState("");
+  const [postCode, setPostCode] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
@@ -168,7 +173,10 @@ const DashboardCard = () => {
     { label: "Detached House", value: "detachedHouse" },
     { label: "Terraced House", value: "terracedHouse" },
     { label: "Park House", value: "parkHouse" },
-    { label: "Flat", value: "flat" },
+    { label: "Semi-Detached House", value: "SemiDetachedHouse" },
+    { label: "Bungalow", value: "bungalow" },
+    { label: "Maisonette", value: "maisonette" },
+    { label: "Studio Apartment ", value: "studioApartment " },
   ];
 
   const handleDropdownToggle = (dropdownId) => {
@@ -288,8 +296,11 @@ const DashboardCard = () => {
       };
 
       // Call addAddress from context
+      // also , handle zip code logic postCode
       await addAddress(addressData);
       setNewAddress("");
+      setPostCode("");
+
       setSelectedAddress(null);
       setAddressSuggestions([]);
       setShowAddForm(false);
@@ -298,6 +309,10 @@ const DashboardCard = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handlePostCodeChange = (e) => {
+    setPostCode(e.target.value);
   };
 
   // Dummy address suggestions data
@@ -393,25 +408,25 @@ const DashboardCard = () => {
             <h2 className="text-base text-primary font-semibold">
               Your Property
             </h2>
-            {currentAddress && currentAddress.id && (
+            {/* {currentAddress && currentAddress.id && (
               <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
                 {currentAddress.id === "addr1" ? "Primary" : "Secondary"}
               </span>
-            )}
-            {user &&
-              user.plan === "Pro" &&
-              user.addresses &&
-              user.addresses.length < 5 && (
-                <button
-                  onClick={() => {
-                    setShowAddForm(!showAddForm);
-                    setNewAddress("");
-                    setSelectedAddress(null);
-                    setAddressSuggestions([]);
-                  }}
-                  className="ml-auto text-primary hover:text-blue-800 text-sm"
-                  title="Add a new address"
-                >
+            )} */}
+            {user && user.plan === "Pro" && user.addresses && (
+              <button
+                onClick={() => {
+                  setShowAddForm(!showAddForm);
+                  setNewAddress("");
+                  setSelectedAddress(null);
+                  setAddressSuggestions([]);
+                }}
+                className="ml-auto text-primary hover:text-blue-800 text-sm"
+                title="Add a new address"
+              >
+                <span className="flex ">
+                  <p className="text-xs text-nowrap">Add to your portfolio</p>
+
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-4 w-4"
@@ -426,8 +441,9 @@ const DashboardCard = () => {
                       d="M12 4v16m8-8H4"
                     />
                   </svg>
-                </button>
-              )}
+                </span>
+              </button>
+            )}
           </div>
 
           {/* Pro user address selector */}
@@ -456,7 +472,14 @@ const DashboardCard = () => {
           {/* Inline add address form with search functionality */}
           {showAddForm && (
             <div className="mb-3 p-2 bg-gray-50 rounded-md border border-gray-200">
-              <div className="mb-2">
+              <div className="flex flex-col gap-2 mb-2">
+                <Input
+                  label="Postcode"
+                  onChange={handlePostCodeChange}
+                  value={postCode}
+                  size="small"
+                  className="text-sm"
+                />
                 <SelectInput
                   label="Address"
                   placeholder="Type to search for an address"
@@ -499,6 +522,7 @@ const DashboardCard = () => {
                   onClick={() => {
                     setShowAddForm(false);
                     setNewAddress("");
+                    setPostCode("");
                     setSelectedAddress(null);
                     setAddressSuggestions([]);
                   }}
@@ -520,15 +544,25 @@ const DashboardCard = () => {
 
           <div className="flex gap-2">
             <div className="flex flex-col gap-10">
-              <p className="text-neutral-400 text-sm font-semibold">Address:</p>
+              {user && user.plan === "Pro" ? (
+                ""
+              ) : (
+                <p className="text-neutral-400 text-sm font-semibold">
+                  Address:
+                </p>
+              )}
               <p className="text-neutral-400 text-sm font-semibold">Type:</p>
               <p className="text-neutral-400 text-sm font-semibold">Area: </p>
             </div>
 
             <div className="flex flex-col gap-5 w-48">
-              <p className="text-neutral-400 text-sm font-semibold h-10">
-                {propertyOverview.address}
-              </p>
+              {user && user.plan === "Pro" ? (
+                ""
+              ) : (
+                <p className="text-neutral-400 text-sm font-semibold h-10">
+                  {propertyOverview.address}
+                </p>
+              )}
               <p className="text-neutral-400 text-sm font-semibold h-10">
                 {propertyOverview.type}
               </p>
@@ -540,16 +574,16 @@ const DashboardCard = () => {
         </div>
 
         {/* Circular Progress Indicators */}
-        <div className="flex flex-col sm:flex-row sm:flex-wrap xl:flex-nowrap items-center gap-6 xl:gap-6 sm:justify-center xl:justify-end mt-6 xl:mt-0">
+        <div className="flex flex-col sm:flex-row sm:items-start md:justify-around md:items-start sm:flex-wrap xl:flex-nowrap items-center gap-6 xl:gap-6 sm:justify-center xl:justify-end mt-6 md:mt-0 xl:mt-0">
           <div className="w-36 sm:mb-4 xl:mb-0">
-            <p className="text-center mt-2 font-medium">Current</p>
+            <p className="text-center mt-2  md:mt-0 font-medium">Current</p>
             <SegmentedCircularGauge
               value={71}
               size={142}
             />
           </div>
           <div className="w-36 sm:mb-4 xl:mb-0">
-            <p className="text-center mt-2 font-medium">Potential</p>
+            <p className="text-center mt-2 md:mt-0 font-medium">Potential</p>
             <SegmentedCircularGauge
               value={82}
               size={142}
@@ -558,17 +592,17 @@ const DashboardCard = () => {
         </div>
       </div>
       <div className="flex flex-col mt-4">
-        <h2 className="flex text-center justify-center md:justify-start text-base  text-primary font-semibold">
+        <h2 className="flex text-center justify-center md:justify-start text-base text-primary font-semibold">
           Neighbourhood benchmarking
         </h2>
         <div className="flex flex-col my-4">
-          <div className="flex flex-col items-center md:items-start gap-4 md:flex-row justify-between w-full flex-wrap">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 place-items-center sm:place-items-start w-full">
             {/* Distance Filter */}
-            <div className="flex flex-col gap-2 relative">
+            <div className="flex flex-col gap-2 relative w-full max-w-[280px] sm:max-w-[160px] lg:max-w-none">
               <button
                 type="button"
                 onClick={() => handleDropdownToggle("distance")}
-                className={`w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
+                className="w-full sm:w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer"
               >
                 <p className="text-nowrap text-xs">{distanceButtonLabel}</p>
                 <div className="flex my-auto items-center">
@@ -589,7 +623,7 @@ const DashboardCard = () => {
                 </div>
               </button>
               {openDropdown === "distance" && (
-                <div className="absolute top-[20%] mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[25%] left-0 sm:left-auto w-full sm:w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {distanceOptions.map((opt) => (
                     <div
                       key={opt.value}
@@ -601,8 +635,7 @@ const DashboardCard = () => {
                   ))}
                 </div>
               )}
-              {/* Gray button removed */}
-              <div className="w-62 bg-white shadow-xl md:w-36 px-2 py-2 rounded-lg h-[98px] flex flex-col">
+              <div className="w-full sm:w-[160px] lg:w-36 bg-white shadow-xl px-3 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 miles
@@ -611,7 +644,7 @@ const DashboardCard = () => {
                     10 miles
                   </p>
                 </div>
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between min-h-[80px]">
                   <div>
                     <input
                       type="range"
@@ -626,16 +659,8 @@ const DashboardCard = () => {
                       within <strong>{filter.distance} miles</strong>
                     </span>
                   </div>
-                  <div className="flex justify-end mt-auto">
-                    <button
-                      onClick={() => {
-                        console.log(
-                          "Distance apply clicked for range:",
-                          filter.distance
-                        );
-                      }}
-                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
-                    >
+                  <div className="flex justify-end mt-2">
+                    <button className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800">
                       Apply
                     </button>
                   </div>
@@ -644,11 +669,11 @@ const DashboardCard = () => {
             </div>
 
             {/* Size Filter */}
-            <div className="flex flex-col gap-2 relative">
+            <div className="flex flex-col gap-2 relative w-full max-w-[280px] sm:max-w-[160px] lg:max-w-none">
               <button
                 type="button"
                 onClick={() => handleDropdownToggle("size")}
-                className={`w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
+                className="w-full sm:w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer"
               >
                 <p className="text-nowrap text-xs">{sizeButtonLabel}</p>
                 <div className="flex my-auto items-center">
@@ -669,7 +694,7 @@ const DashboardCard = () => {
                 </div>
               </button>
               {openDropdown === "size" && (
-                <div className="absolute top-[20%] mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[25%] left-0 sm:left-auto w-full sm:w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {sizeOptions.map((opt) => (
                     <div
                       key={opt.value}
@@ -681,8 +706,7 @@ const DashboardCard = () => {
                   ))}
                 </div>
               )}
-              {/* Size Range Slider */}
-              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg h-[98px] flex flex-col">
+              <div className="w-full sm:w-[160px] lg:w-36 bg-white shadow-xl px-3 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 sqm
@@ -691,7 +715,7 @@ const DashboardCard = () => {
                     5000+ sqm
                   </p>
                 </div>
-                <div className="flex-1 flex flex-col justify-between">
+                <div className="flex-1 flex flex-col justify-between min-h-[80px]">
                   <div>
                     <DualRangeSlider
                       min={0}
@@ -705,13 +729,8 @@ const DashboardCard = () => {
                       }
                     />
                   </div>
-                  <div className="flex justify-end mt-auto">
-                    <button
-                      onClick={() => {
-                        console.log("Size range apply clicked:", filter.size);
-                      }}
-                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
-                    >
+                  <div className="flex justify-end mt-2">
+                    <button className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800">
                       Apply
                     </button>
                   </div>
@@ -720,11 +739,11 @@ const DashboardCard = () => {
             </div>
 
             {/* Type Filter */}
-            <div className="flex flex-col gap-2 relative">
+            <div className="flex flex-col gap-2 relative w-full max-w-[280px] sm:max-w-[160px] lg:max-w-none">
               <button
                 type="button"
                 onClick={() => handleDropdownToggle("type")}
-                className={`w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer `}
+                className="w-full sm:w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer"
               >
                 <p className="text-nowrap text-xs">{typeButtonLabel}</p>
                 <div className="flex my-auto items-center">
@@ -745,7 +764,7 @@ const DashboardCard = () => {
                 </div>
               </button>
               {openDropdown === "type" && (
-                <div className="absolute top-[20%] mt-1 w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[25%] left-0 sm:left-auto w-full sm:w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {typeOptions.map((opt) => (
                     <div
                       key={opt.value}
@@ -757,85 +776,147 @@ const DashboardCard = () => {
                   ))}
                 </div>
               )}
-              {/* Gray button removed */}
-              <div className="bg-white shadow-xl w-62 md:w-36 px-2 py-2 rounded-lg h-[98px] flex flex-col">
-                <div className="flex-1 flex flex-col">
-                  <div className="h-[64px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
-                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
-                      <input
-                        type="checkbox"
-                        name="detachedHouse"
-                        id="detachedHouse"
-                        className="accent-primary"
-                        checked={filter.type.detachedHouse}
-                        onChange={() => handleCheckboxChange("detachedHouse")}
-                      />
-                      <label
-                        htmlFor="detachedHouse"
-                        className="text-sm text-neutral-400"
-                      >
-                        Detached House
-                      </label>
-                    </div>
-                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
-                      <input
-                        type="checkbox"
-                        name="terracedHouse"
-                        id="terracedHouse"
-                        className="accent-primary"
-                        checked={filter.type.terracedHouse}
-                        onChange={() => handleCheckboxChange("terracedHouse")}
-                      />
-                      <label
-                        htmlFor="terracedHouse"
-                        className="text-sm text-neutral-400"
-                      >
-                        Terraced House
-                      </label>
-                    </div>
-                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
-                      <input
-                        type="checkbox"
-                        name="parkHouse"
-                        id="parkHouse"
-                        className="accent-primary"
-                        checked={filter.type.parkHouse}
-                        onChange={() => handleCheckboxChange("parkHouse")}
-                      />
-                      <label
-                        htmlFor="parkHouse"
-                        className="text-sm text-neutral-400"
-                      >
-                        Park House
-                      </label>
-                    </div>
-                    <div className="flex gap-1 font-semibold mb-2 items-baseline">
-                      <input
-                        type="checkbox"
-                        name="flat"
-                        id="flat"
-                        className="accent-primary"
-                        checked={filter.type.flat}
-                        onChange={() => handleCheckboxChange("flat")}
-                      />
-                      <label
-                        htmlFor="flat"
-                        className="text-sm text-neutral-400"
-                      >
-                        Flat
-                      </label>
+              <div className="w-full sm:w-[160px] lg:w-36 bg-white shadow-xl px-3 py-2 rounded-lg">
+                <div className="flex-1 flex flex-col min-h-[80px]">
+                  <div className="h-[70px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                    {/* Type checkboxes */}
+                    <div className="space-y-2">
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="detachedHouse"
+                          id="detachedHouse"
+                          className="accent-primary"
+                          checked={filter.type.detachedHouse}
+                          onChange={() => handleCheckboxChange("detachedHouse")}
+                        />
+                        <label
+                          htmlFor="detachedHouse"
+                          className="text-xs text-neutral-400"
+                        >
+                          Detached House
+                        </label>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="terracedHouse"
+                          id="terracedHouse"
+                          className="accent-primary"
+                          checked={filter.type.terracedHouse}
+                          onChange={() => handleCheckboxChange("terracedHouse")}
+                        />
+                        <label
+                          htmlFor="terracedHouse"
+                          className="text-xs text-neutral-400"
+                        >
+                          Terraced House
+                        </label>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="parkHouse"
+                          id="parkHouse"
+                          className="accent-primary"
+                          checked={filter.type.parkHouse}
+                          onChange={() => handleCheckboxChange("parkHouse")}
+                        />
+                        <label
+                          htmlFor="parkHouse"
+                          className="text-xs text-neutral-400"
+                        >
+                          Park House
+                        </label>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="flat"
+                          id="flat"
+                          className="accent-primary"
+                          checked={filter.type.flat}
+                          onChange={() => handleCheckboxChange("flat")}
+                        />
+                        <label
+                          htmlFor="flat"
+                          className="text-xs text-neutral-400"
+                        >
+                          Flat
+                        </label>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="SemiDetachedHouse"
+                          id="SemiDetachedHouse"
+                          className="accent-primary"
+                          checked={filter.type.SemiDetachedHouse}
+                          onChange={() =>
+                            handleCheckboxChange("SemiDetachedHouse")
+                          }
+                        />
+                        <label
+                          htmlFor="SemiDetachedHouse"
+                          className="text-xs text-neutral-400"
+                        >
+                          Semi-Detached House
+                        </label>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="bungalow"
+                          id="bungalow"
+                          className="accent-primary"
+                          checked={filter.type.bungalow}
+                          onChange={() => handleCheckboxChange("bungalow")}
+                        />
+                        <label
+                          htmlFor="bungalow"
+                          className="text-xs text-neutral-400"
+                        >
+                          Bungalow
+                        </label>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="maisonette"
+                          id="maisonette"
+                          className="accent-primary"
+                          checked={filter.type.maisonette}
+                          onChange={() => handleCheckboxChange("maisonette")}
+                        />
+                        <label
+                          htmlFor="maisonette"
+                          className="text-xs text-neutral-400"
+                        >
+                          Maisonette
+                        </label>
+                      </div>
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="checkbox"
+                          name="studioApartment"
+                          id="studioApartment"
+                          className="accent-primary"
+                          checked={filter.type.studioApartment}
+                          onChange={() =>
+                            handleCheckboxChange("studioApartment")
+                          }
+                        />
+                        <label
+                          htmlFor="studioApartment"
+                          className="text-xs text-neutral-400"
+                        >
+                          Studio Apartment
+                        </label>
+                      </div>
                     </div>
                   </div>
-                  <div className="flex justify-end mt-auto">
-                    <button
-                      onClick={() => {
-                        console.log(
-                          "Type apply clicked. Current types:",
-                          filter.type
-                        );
-                      }}
-                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
-                    >
+                  <div className="flex justify-end mt-2">
+                    <button className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800">
                       Apply
                     </button>
                   </div>

@@ -118,54 +118,49 @@ const RecommendationsTable = ({ data, addressId }) => {
   }, [currentAddress, user, data]);
 
   return (
-    <div className="w-full bg-white px-4 py-2 sm:py-6 sm:px-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] md:w-[45vw] mx-auto">
-      <div className="flex justify-between items-center">
-        <h2 className="text-base font-semibold text-primary my-2">
+    <div className="w-full bg-white px-2 py-2 sm:py-4 sm:px-4 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] md:w-[45vw] mx-auto">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-sm sm:text-base font-semibold text-primary">
           Recommendations
         </h2>
-        {/* {user && user.plan === "Pro" && currentAddress && (
-          <p className="text-sm text-gray-500">
-            For: {currentAddress.street}, {currentAddress.city}
-          </p>
-        )} */}
       </div>
       <div className="overflow-x-scroll overflow-y-auto md:overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
+        <table className="min-w-full divide-y divide-gray-600">
           <thead className="bg-white">
             <tr>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora'] tracking-wider"
+                className="px-2 py-3 text-left text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider"
               >
                 Measure
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
+                className="px-2 py-3 text-left text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider w-2"
               >
                 Cost
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
+                className="px-1 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider whitespace-normal w-1"
               >
                 Potential Yearly Bills Saving
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
+                className="px-1 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider max-w-[80px]"
               >
                 EPC Impact
               </th>
               <th
                 scope="col"
-                className="px-4 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
+                className="px-2 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider w-1"
               >
-                Estimated Value Impact
+                Value Impact
               </th>
               <th
                 scope="col"
-                className="px-1 py-3 text-left text-black text-sm font-bold font-['Sora']  tracking-wider"
+                className="px-2 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider whitespace-normal w-1"
               >
                 Total Payback Period
               </th>
@@ -175,33 +170,29 @@ const RecommendationsTable = ({ data, addressId }) => {
             {recommendations.map((row, index) => (
               <tr
                 key={row.id}
-                className={
-                  index % 2 === 0
-                    ? "bg-white"
-                    : "bg-white" /* Alternating rows not in image, so keeping white */
-                }
+                className={index % 2 === 0 ? "bg-white" : "bg-white"}
               >
-                <td className="px-4 py-6 text-wrap text-sm font-bold font-['Sora']">
+                <td className="px-2 py-4 text-wrap text-[11px] sm:text-xs font-bold font-['Sora']">
                   {row.measure}
                 </td>
-                <td className="px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td className="px-2 py-4 text-wrap text-black text-[11px] sm:text-xs font-normal font-['Sora']">
                   {row.cost}
                 </td>
-                <td className="px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
                   {row.yearlySaving}
                 </td>
-                <td className="px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
                   {row.epcImpact}
                 </td>
                 <td
-                  className="row-span-2 px-4 py-6 text-wrap text-black text-sm font-normal font-['Sora']"
+                  className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']"
                   colSpan={user.plan === "Basic" && row.locked ? "2" : "1"}
                 >
                   {user.plan === "Basic" && row.locked ? (
                     <Link to="/pricing">
                       <div className="flex flex-col items-center text-center">
                         <LockIcon />
-                        <span className="text-xs text-gray-500 mt-1">
+                        <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
                           Upgrade to unlock
                         </span>
                       </div>
@@ -210,51 +201,31 @@ const RecommendationsTable = ({ data, addressId }) => {
                     row.estimatedValueImpact
                   )}
                 </td>
-                <td className="px-4 py-4 text-wrap text-black text-sm font-normal font-['Sora']">
+                <td className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
                   {row.totalPaybackPeriod || ""}
                 </td>
               </tr>
             ))}
             <tr className="">
-              <td className="px-4 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
+              <td className="px-2 py-4">
+                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-600 rounded-full"></div>
               </td>
-              <td className="px-2 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              <td className="px-2 py-4">
+                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full"></div>
               </td>
-              <td className="px-2 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              <td className="px-1 py-4">
+                <div className="w-12 h-5 sm:w-14 sm:h-6 bg-gray-300 rounded-full"></div>
               </td>
-              <td className="px-2 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              <td className="px-1 py-4">
+                <div className="w-10 h-5 sm:w-12 sm:h-6 bg-gray-300 rounded-full"></div>
               </td>
-              <td className="px-4 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              <td className="px-2 py-4">
+                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full"></div>
               </td>
-              <td className="py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
+              <td className="px-2 py-4">
+                <div className="w-12 h-5 sm:w-14 sm:h-6 bg-gray-300 rounded-full"></div>
               </td>
             </tr>
-            {/* <tr>
-              <td className="px-4 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-600 rounded-full"></div>
-              </td>
-              <td className="px-2 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-              </td>
-              <td className="px-2 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-              </td>
-              <td className="px-2 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-              </td>
-              <td className="px-4 py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-              </td>
-              <td className="py-6">
-                <div className="w-16 h-6 sm:w-20 sm:h-8 bg-gray-300 rounded-full"></div>
-              </td>
-            </tr> */}
           </tbody>
         </table>
       </div>

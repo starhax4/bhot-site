@@ -62,8 +62,8 @@ const ScatterPlot = ({
   xAxisLabel = "Frequency",
 }) => {
   // Default Tailwind classes for styling (can be customized)
-  const lightPurple = "fill-purple-300"; // Lighter purple for regular points
-  const darkPurple = "fill-violet-700"; // Darker purple for highlighted point
+  const lightGreen = "fill-green-300"; // Lighter green for regular points
+  const darkGreen = "fill-primary"; // Primary green for highlighted point using the theme color
   const axisColor = "text-gray-600";
   const gridColor = "stroke-gray-200";
   const labelColor = "text-neutral-400";
@@ -141,9 +141,9 @@ const ScatterPlot = ({
               <Cell
                 key={`cell-${index}`}
                 className={
-                  entry.id === highlightedPointId ? darkPurple : lightPurple
+                  entry.id === highlightedPointId ? darkGreen : lightGreen
                 }
-                stroke={entry.id === highlightedPointId ? "#6928db" : "#a855f7"} // Tailwind purple-800 and purple-500 for borders
+                stroke={entry.id === highlightedPointId ? "#005000" : "#dcfce7"} // Primary green and green-100 for borders
                 strokeWidth={1}
               />
             ))}
