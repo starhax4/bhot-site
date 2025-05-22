@@ -124,6 +124,20 @@ const PrivacyText = () => {
         },
       ],
     },
+    {
+      id: 9,
+      title: "Contact Us",
+      content: [
+        {
+          type: "paragraph",
+          text: "If you have any questions or concerns about this policy or how we handle your data, please contact:",
+        },
+        {
+          type: "paragraph",
+          text: "Best House on the Street Limited\ncontact@bhots.co.uk\n3rd Floor, 86-90 Paul Street, London, England, United Kingdom, EC2A 4NE",
+        },
+      ],
+    },
   ];
 
   return (
