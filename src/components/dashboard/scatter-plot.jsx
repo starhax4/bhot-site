@@ -62,7 +62,7 @@ const ScatterPlot = ({
   xAxisLabel = "Frequency",
 }) => {
   // Default Tailwind classes for styling (can be customized)
-  const lightGreen = "fill-green-300"; // Lighter green for regular points
+  const lightGreen = "fill-green-600"; // Lighter green for regular points
   const darkGreen = "fill-primary"; // Primary green for highlighted point using the theme color
   const axisColor = "text-gray-600";
   const gridColor = "stroke-gray-200";
