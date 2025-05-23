@@ -169,7 +169,7 @@ const DashboardCard = () => {
 
   const typeOptions = [
     { label: "Type", value: "default_type" },
-    { label: "Any Type", value: "any_type" },
+    { label: "Flat", value: "flat" },
     { label: "Detached House", value: "detachedHouse" },
     { label: "Terraced House", value: "terracedHouse" },
     { label: "Park House", value: "parkHouse" },

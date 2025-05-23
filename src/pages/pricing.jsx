@@ -32,12 +32,12 @@ const Pricing = () => {
           </p>
           <p className="text-sm font-medium leading-relaxed">
             We would love to hear your feedback{" "}
-            <a
-              href="/"
+            <button
+              onClick={() => setSelectedModal("contact")}
               className="text-primary hover:underline font-semibold"
             >
               here!
-            </a>
+            </button>
           </p>
         </div>
         <PricingTable />
