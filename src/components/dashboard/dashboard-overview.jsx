@@ -421,7 +421,7 @@ const DashboardCard = () => {
                   setSelectedAddress(null);
                   setAddressSuggestions([]);
                 }}
-                className="ml-auto text-primary hover:text-blue-800 text-sm"
+                className="ml-auto text-primary hover:text-green-800 text-sm"
                 title="Add a new address"
               >
                 <span className="flex ">

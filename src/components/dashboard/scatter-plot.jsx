@@ -83,8 +83,8 @@ const ScatterPlot = ({
           margin={{
             top: 20,
             right: 30, // Increased right margin for X-axis label
-            bottom: 40, // Increased bottom margin for X-axis label
-            left: 10,
+            bottom: 30, // Increased bottom margin for X-axis label
+            left: 0,
           }}
         >
           <CartesianGrid
