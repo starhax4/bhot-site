@@ -217,7 +217,7 @@ const UserAddressManager = () => {
       </h2>
 
       {/* Email Search Section */}
-      <div className="flex flex-col md:flex-row  gap-4 mb-6">
+      <div className="flex flex-col md:flex-row  gap-4 mb-6 items-center">
         <Input
           label="User Email"
           name="userEmail"
@@ -230,7 +230,7 @@ const UserAddressManager = () => {
         <button
           onClick={handleEmailSearch}
           disabled={loading}
-          className="px-4 py-2 bg-primary text-white rounded-md h-[38px] mt-auto hover:bg-green-700 transition-colors disabled:bg-gray-300"
+          className="px-4 py-2 bg-primary text-white rounded-md h-11  hover:bg-green-700 transition-colors disabled:bg-gray-300"
         >
           {loading ? "Searching..." : "Search"}
         </button>
