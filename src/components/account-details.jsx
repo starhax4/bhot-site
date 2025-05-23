@@ -147,7 +147,7 @@ const AccountDetails = ({ closeModal, nextModal }) => {
                 type="email"
                 value={userData.email}
                 onChange={handleDataChange}
-                className="mt-3.5 bg-[#F9F9F9]"
+                className="mt-3.5"
                 disabled={!isAuthenticated || loading}
                 required
                 error={
@@ -169,9 +169,9 @@ const AccountDetails = ({ closeModal, nextModal }) => {
                 type="password"
                 value={userData.password}
                 onChange={handleDataChange}
-                disabled={true}
-                className="mt-3.5 bg-[#F9F9F9]"
-                helperText="Contact support to change password"
+                disabled={!isAuthenticated}
+                className="mt-3.5 "
+                
               />
             </div>
             <div className="grid md:grid-cols-2 gap-8">

@@ -134,7 +134,15 @@ const PrivacyText = () => {
         },
         {
           type: "paragraph",
-          text: "Best House on the Street Limited\ncontact@bhots.co.uk\n3rd Floor, 86-90 Paul Street, London, England, United Kingdom, EC2A 4NE",
+          text: "Best House on the Street Limited",
+        },
+        {
+          type: "paragraph",
+          text: "contact@bhots.co.uk",
+        },
+        {
+          type: "paragraph",
+          text: "3rd Floor, 86-90 Paul Street, London, England, United Kingdom, EC2A 4NE",
         },
       ],
     },

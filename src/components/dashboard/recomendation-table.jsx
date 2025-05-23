@@ -156,7 +156,7 @@ const RecommendationsTable = ({ data, addressId }) => {
                 scope="col"
                 className="px-2 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider w-1"
               >
-                Value Impact
+                Estimated Value Impact
               </th>
               <th
                 scope="col"
@@ -172,7 +172,7 @@ const RecommendationsTable = ({ data, addressId }) => {
                 key={row.id}
                 className={index % 2 === 0 ? "bg-white" : "bg-white"}
               >
-                <td className="px-2 py-4 text-wrap text-[11px] sm:text-xs font-bold font-['Sora']">
+                <td className="px-2 py-4 text-wrap text-primary text-[11px] sm:text-xs font-bold font-['Sora']">
                   {row.measure}
                 </td>
                 <td className="px-2 py-4 text-wrap text-black text-[11px] sm:text-xs font-normal font-['Sora']">
@@ -207,23 +207,23 @@ const RecommendationsTable = ({ data, addressId }) => {
               </tr>
             ))}
             <tr className="">
-              <td className="px-2 py-4">
+              <td className="px-2 py-4 text-left">
                 <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-600 rounded-full"></div>
               </td>
-              <td className="px-2 py-4">
+              <td className="px-2 py-4 text-left">
                 <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full"></div>
               </td>
-              <td className="px-1 py-4">
-                <div className="w-12 h-5 sm:w-14 sm:h-6 bg-gray-300 rounded-full"></div>
+              <td className="px-1 py-4 text-center">
+                <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
               </td>
-              <td className="px-1 py-4">
-                <div className="w-10 h-5 sm:w-12 sm:h-6 bg-gray-300 rounded-full"></div>
+              <td className="px-1 py-4 text-center">
+                <div className="w-10 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
               </td>
-              <td className="px-2 py-4">
-                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full"></div>
+              <td className="px-2 py-4 text-center">
+                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
               </td>
-              <td className="px-2 py-4">
-                <div className="w-12 h-5 sm:w-14 sm:h-6 bg-gray-300 rounded-full"></div>
+              <td className="px-2 py-4 text-center">
+                <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
               </td>
             </tr>
           </tbody>
