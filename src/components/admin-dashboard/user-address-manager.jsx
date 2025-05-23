@@ -211,7 +211,7 @@ const UserAddressManager = () => {
   };
 
   return (
-    <div className="bg-white px-16 py-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)]">
+    <div className="bg-white px-16 py-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] md:w-[93vw] mx-auto">
       <h2 className="text-lg font-semibold text-primary mb-4">
         User Address Management
       </h2>
