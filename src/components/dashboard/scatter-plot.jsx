@@ -102,7 +102,7 @@ const ScatterPlot = ({
           >
             <Label
               value={xAxisLabel}
-              offset={-30}
+              offset={-10}
               position="insideBottomRight"
               style={{ fill: "#94a3b8", fontSize: 14, fontWeight: 600 }}
             />
