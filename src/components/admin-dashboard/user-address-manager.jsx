@@ -11,6 +11,7 @@ const UserAddressManager = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [newAddress, setNewAddress] = useState("");
+  const [postCode, setPostCode] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -143,29 +144,47 @@ const UserAddressManager = () => {
         );
         setSuccess("Address deleted successfully");
       } else {
-        if (!newAddress) {
+        if (!newAddress && !selectedAddress) {
           throw new Error("Please select or enter an address");
         }
 
-        // Parse the address - assuming format: "Street, City, Zip"
-        const parts = newAddress.split(",").map((part) => part.trim());
-        if (parts.length < 2) {
-          throw new Error(
-            "Please enter a complete address (Street, City, Postcode)"
-          );
-        }
+        // Use selected address if available, otherwise parse the manual input
+        let addressData;
+        if (selectedAddress) {
+          // Parse the selected address - format: "Street, City, Postcode"
+          const parts = selectedAddress.label
+            .split(",")
+            .map((part) => part.trim());
+          addressData = {
+            id: Date.now().toString(),
+            street: parts[0],
+            city: parts[1],
+            zip: postCode || parts[2] || "",
+            country: "United Kingdom",
+            isPrimary: userAddresses.length === 0,
+          };
+        } else {
+          // Parse manually entered address
+          const parts = newAddress.split(",").map((part) => part.trim());
+          if (parts.length < 2) {
+            throw new Error(
+              "Please enter a complete address (Street, City, Postcode)"
+            );
+          }
 
-        const addressData = {
-          id: Date.now().toString(),
-          street: parts[0],
-          city: parts[1],
-          zip: parts[2] || "",
-          country: "United Kingdom",
-          isPrimary: userAddresses.length === 0,
-        };
+          addressData = {
+            id: Date.now().toString(),
+            street: parts[0],
+            city: parts[1],
+            zip: postCode || parts[2] || "",
+            country: "United Kingdom",
+            isPrimary: userAddresses.length === 0,
+          };
+        }
 
         setUserAddresses((prev) => [...prev, addressData]);
         setNewAddress("");
+        setPostCode("");
         setSelectedAddress(null);
         setAddressSuggestions([]);
         setShowAddressForm(false);
@@ -178,8 +197,21 @@ const UserAddressManager = () => {
     }
   };
 
+  const handlePostCodeChange = (e) => {
+    setPostCode(e.target.value);
+    // Reset address fields when postcode changes
+    setNewAddress("");
+    setSelectedAddress(null);
+    setAddressSuggestions([]);
+
+    // If postcode is long enough, trigger address search
+    if (e.target.value.length >= 5) {
+      searchAddresses(e.target.value);
+    }
+  };
+
   return (
-    <div className="bg-white px-14 py-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)]">
+    <div className="bg-white px-16 py-6 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)]">
       <h2 className="text-lg font-semibold text-primary mb-4">
         User Address Management
       </h2>
@@ -198,7 +230,7 @@ const UserAddressManager = () => {
         <button
           onClick={handleEmailSearch}
           disabled={loading}
-          className="px-4 py-2 bg-primary text-white rounded-md h-[38px] mt-auto hover:bg-blue-700 transition-colors disabled:bg-gray-300"
+          className="px-4 py-2 bg-primary text-white rounded-md h-[38px] mt-auto hover:bg-green-700 transition-colors disabled:bg-gray-300"
         >
           {loading ? "Searching..." : "Search"}
         </button>
@@ -298,7 +330,14 @@ const UserAddressManager = () => {
           <h4 className="text-sm font-medium text-gray-700 mb-3">
             Add New Address
           </h4>
-          <div className="mb-2">
+          <div className="flex flex-col gap-2 mb-2">
+            <Input
+              label="Postcode"
+              value={postCode}
+              onChange={handlePostCodeChange}
+              placeholder="Enter postcode"
+              className="text-sm"
+            />
             <SelectInput
               label="Address"
               placeholder="Type to search for an address"
@@ -341,6 +380,7 @@ const UserAddressManager = () => {
               onClick={() => {
                 setShowAddressForm(false);
                 setNewAddress("");
+                setPostCode("");
                 setSelectedAddress(null);
                 setAddressSuggestions([]);
               }}
@@ -351,7 +391,7 @@ const UserAddressManager = () => {
             </button>
             <button
               onClick={() => handleAddressUpdate()}
-              disabled={loading}
+              disabled={loading || (!selectedAddress && !newAddress)}
               className="px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300"
             >
               {loading ? "Adding..." : "Add Address"}

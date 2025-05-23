@@ -13,7 +13,7 @@ const ValueCard = ({
         <p className="text-base font-semibold text-primary">{title}</p>
         {desc && (
           <p className="text-xs font-semibold text-neutral-400">
-            If all recommendations implemented
+            If all recommendations are implemented
           </p>
         )}
       </div>
