@@ -723,3 +723,101 @@ export const adminReplaceUserAddresses = async ({ email, addresses }) => {
     };
   }
 };
+
+// Admin: Get dashboard summary (users, sales, etc)
+export const adminGetDashboardSummary = async () => {
+  const token = getAuthToken();
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("authToken");
+    delete axios.defaults.headers.common["Authorization"];
+    return {
+      success: false,
+      message: "Session expired or invalid token. Please log in again.",
+      error: null,
+      status: 401,
+      data: null,
+    };
+  }
+  try {
+    const url = `${API_URL}/api/admin/dashboard/summary`;
+    const res = await axios.get(url, { timeout: 30000 }); // 30s timeout for heavy calculation
+    return {
+      success: true,
+      data: res.data,
+      message: "Dashboard summary fetched successfully.",
+      error: null,
+      status: 200,
+    };
+  } catch (error) {
+    let errorMessage = "Failed to fetch dashboard summary";
+    let errorData = null;
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        `Server error (${error.response.status})`;
+      errorData = error.response.data;
+    } else if (error.request) {
+      errorMessage =
+        "Unable to connect to server. Please check your connection.";
+    } else {
+      errorMessage = error.message || "An unexpected error occurred";
+    }
+    return {
+      success: false,
+      data: null,
+      message: errorMessage,
+      error: errorData || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+// Admin: Get dashboard analytics (visits, conversions, etc)
+export const adminGetDashboardAnalytics = async () => {
+  const token = getAuthToken();
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("authToken");
+    delete axios.defaults.headers.common["Authorization"];
+    return {
+      success: false,
+      message: "Session expired or invalid token. Please log in again.",
+      error: null,
+      status: 401,
+      data: null,
+    };
+  }
+  try {
+    const url = `${API_URL}/api/admin/dashboard/analytics`;
+    const res = await axios.get(url, { timeout: 30000 }); // 30s timeout for heavy calculation
+    return {
+      success: true,
+      data: res.data,
+      message: "Dashboard analytics fetched successfully.",
+      error: null,
+      status: 200,
+    };
+  } catch (error) {
+    let errorMessage = "Failed to fetch dashboard analytics";
+    let errorData = null;
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        `Server error (${error.response.status})`;
+      errorData = error.response.data;
+    } else if (error.request) {
+      errorMessage =
+        "Unable to connect to server. Please check your connection.";
+    } else {
+      errorMessage = error.message || "An unexpected error occurred";
+    }
+    return {
+      success: false,
+      data: null,
+      message: errorMessage,
+      error: errorData || error.message,
+      status: error.response?.status,
+    };
+  }
+};
