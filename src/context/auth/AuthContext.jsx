@@ -19,7 +19,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 const AuthContext = createContext();
 
-const MAX_PRO_ADDRESSES = 5;
+const MAX_PRO_ADDRESSES = 100;
 const DEFAULT_ADDRESS = {
   id: "default",
   address: "1",
@@ -47,6 +47,7 @@ export const AuthProvider = ({ children }) => {
             : user.name || "",
         email: user.email || "",
         plan: user.plan || user.subscriptionPlan || PLANS.free,
+        role: user.role || "user", // Default to 'user' if not present
         addresses: [],
         currentAddressId: null,
       };
@@ -65,10 +66,13 @@ export const AuthProvider = ({ children }) => {
           .map((addr) => ({
             id: addr.id || crypto.randomUUID(),
             address: (addr.address || addr.street || "").trim(),
-            zip: (addr.postcode || addr.zip || "").trim(),
-            city: (addr.city || "").trim(),
-            country: (addr.country || "UK").trim(),
-            isCurrent: false,
+            zip: (addr.zip || addr.postcode || "").trim(),
+            postcode: (addr.postcode || addr.zip || "").trim(),
+            city: addr.city || "", // fallback to empty string if not present
+            country: addr.country || "UK", // fallback to UK if not present
+            isCurrent:
+              typeof addr.isCurrent === "boolean" ? addr.isCurrent : false,
+            _id: addr._id, // preserve backend _id if present
           }));
 
         // Enforce plan limitations
@@ -428,6 +432,7 @@ export const AuthProvider = ({ children }) => {
 
   const contextValue = {
     user,
+    setUser, // <-- Expose setUser for direct user updates
     currentAddress,
     error,
     loading,

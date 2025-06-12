@@ -9,7 +9,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, user } = useAuth();
 
   const handleLoginSubmit = async (e) => {
     e.preventDefault();
@@ -23,7 +23,18 @@ const RegisterForm = ({ closeModal, nextModal }) => {
       const res = await login(data);
       if (res && res.success) {
         if (closeModal) closeModal(); // Only close modal on success
-        navigate("/dashboard");
+        // Check for redirectAfterLogin
+        const redirectPath = localStorage.getItem("redirectAfterLogin");
+        if (redirectPath) {
+          localStorage.removeItem("redirectAfterLogin");
+          navigate(redirectPath);
+          return;
+        }
+        if (user && user.role === "admin") {
+          navigate("/admin-dashboard");
+        } else {
+          navigate("/dashboard");
+        }
       } else {
         setError(res?.message || "Login failed. Please try again.");
         // Do NOT close modal or navigate

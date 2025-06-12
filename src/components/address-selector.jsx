@@ -38,7 +38,7 @@ export default function AddressSelector() {
                 key={addr.id}
                 value={addr.id}
               >
-                {addr.street}, {addr.city}
+                {addr.address}, {addr.postcode}
                 {addr.id === "addr1" ? " (Primary)" : " (Secondary)"}
               </option>
             ))}

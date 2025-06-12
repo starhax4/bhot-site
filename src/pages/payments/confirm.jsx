@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
 import Modal from "../../components/modal";
@@ -11,7 +11,7 @@ import { createStripeSubscription } from "../../api/serices/api_utils";
 export default function ConfirmPage() {
   const [selectedModal, setSelectedModal] = useState(null);
   const { selectedPlan } = usePlan();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,6 +53,15 @@ export default function ConfirmPage() {
       navigate("/payments/cancel");
     }
   }, [navigate]);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.setItem("redirectAfterLogin", "/checkout/confirm");
+      window.dispatchEvent(new CustomEvent("open-login-modal"));
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) return null;
 
   return (
     <>

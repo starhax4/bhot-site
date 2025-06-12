@@ -1,17 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
 import Modal from "../../components/modal";
 import { useNavigate } from "react-router";
 import CheckoutStepper from "../../components/payments/checkout-stepper";
 import PaymentSection from "../../components/payments/payment-section";
+import { useAuth } from "../../context/auth/AuthContext";
 
 export default function PaymentPage() {
   const [selectedModal, setSelectedModal] = useState(null);
-
-  const handleCloseModal = () => {
-    setSelectedModal(null);
-  };
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   const steps = ["Cart", "Billing Information", "Payment", "Confirm"];
@@ -23,6 +21,19 @@ export default function PaymentPage() {
 
   const handleBack = () => {
     navigate("/checkout/billing");
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.setItem("redirectAfterLogin", "/checkout/payment");
+      window.dispatchEvent(new CustomEvent("open-login-modal"));
+    }
+  }, [isAuthenticated]);
+
+  if (!isAuthenticated) return null;
+
+  const handleCloseModal = () => {
+    setSelectedModal(null);
   };
 
   return (

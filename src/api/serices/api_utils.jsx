@@ -572,3 +572,154 @@ export const createStripeSubscription = async (plan, userId) => {
     };
   }
 };
+
+// Add user address via POST /api/user/address
+export const addUserAddress = async ({ address, postcode, userId }) => {
+  try {
+    // Try to get userId from argument, or from localStorage user object
+    let finalUserId = userId;
+    if (!finalUserId) {
+      const user = JSON.parse(localStorage.getItem("user"));
+      finalUserId = user?.id || user?._id || user?.userId;
+    }
+    if (!finalUserId) {
+      return { success: false, message: "User ID not found in client" };
+    }
+    const url = `${API_URL}/api/user/address`;
+    const res = await axios.post(
+      url,
+      { address, postcode, userId: finalUserId },
+      { headers: { "Content-Type": "application/json" }, timeout: 15000 }
+    );
+    return { success: true, ...res.data };
+  } catch (error) {
+    let errorMessage = "Failed to add address";
+    let errorData = null;
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        `Server error (${error.response.status})`;
+      errorData = error.response.data;
+    } else if (error.request) {
+      errorMessage =
+        "Unable to connect to server. Please check your connection.";
+    } else {
+      errorMessage = error.message || "An unexpected error occurred";
+    }
+    return {
+      success: false,
+      message: errorMessage,
+      error: errorData || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+// Admin: Get all addresses for a user by email
+export const adminGetUserAddresses = async (email) => {
+  const token = getAuthToken();
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("authToken");
+    delete axios.defaults.headers.common["Authorization"];
+    return {
+      success: false,
+      message: "Session expired or invalid token. Please log in again.",
+      error: null,
+      status: 401,
+    };
+  }
+  if (!email) {
+    return {
+      success: false,
+      message: "Email is required",
+      error: null,
+      status: 400,
+    };
+  }
+  try {
+    const url = `${API_URL}/api/admin/user/${encodeURIComponent(
+      email
+    )}/addresses`;
+    const res = await axios.get(url, { timeout: 15000 });
+    return { success: true, addresses: res.data.addresses };
+  } catch (error) {
+    let errorMessage = "Failed to fetch user addresses";
+    let errorData = null;
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        `Server error (${error.response.status})`;
+      errorData = error.response.data;
+    } else if (error.request) {
+      errorMessage =
+        "Unable to connect to server. Please check your connection.";
+    } else {
+      errorMessage = error.message || "An unexpected error occurred";
+    }
+    return {
+      success: false,
+      message: errorMessage,
+      error: errorData || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+// Admin: Replace all addresses for a user by email
+export const adminReplaceUserAddresses = async ({ email, addresses }) => {
+  const token = getAuthToken();
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("authToken");
+    delete axios.defaults.headers.common["Authorization"];
+    return {
+      success: false,
+      message: "Session expired or invalid token. Please log in again.",
+      error: null,
+      status: 401,
+    };
+  }
+  if (!email || !Array.isArray(addresses)) {
+    return {
+      success: false,
+      message: "Email and addresses array are required",
+      error: null,
+      status: 400,
+    };
+  }
+  try {
+    const url = `${API_URL}/api/admin/user/addresses/replace`;
+    const res = await axios.post(
+      url,
+      { email, addresses },
+      { headers: { "Content-Type": "application/json" }, timeout: 15000 }
+    );
+    return {
+      success: true,
+      addresses: res.data.addresses,
+      message: res.data.message,
+    };
+  } catch (error) {
+    let errorMessage = "Failed to replace user addresses";
+    let errorData = null;
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        `Server error (${error.response.status})`;
+      errorData = error.response.data;
+    } else if (error.request) {
+      errorMessage =
+        "Unable to connect to server. Please check your connection.";
+    } else {
+      errorMessage = error.message || "An unexpected error occurred";
+    }
+    return {
+      success: false,
+      message: errorMessage,
+      error: errorData || error.message,
+      status: error.response?.status,
+    };
+  }
+};

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Navbar from "../../components/navbar";
 import Footer from "../../components/footer";
 import Modal from "../../components/modal";
@@ -10,8 +10,15 @@ import { useAuth } from "../../context/auth/AuthContext";
 const CartPage = () => {
   const [selectedModal, setSelectedModal] = useState(null);
   const { selectedPlan } = usePlan();
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      localStorage.setItem("redirectAfterLogin", "/checkout/cart");
+      window.dispatchEvent(new CustomEvent("open-login-modal"));
+    }
+  }, [isAuthenticated]);
 
   const handleCloseModal = () => {
     setSelectedModal(null);
@@ -23,6 +30,8 @@ const CartPage = () => {
   const handleProceed = () => {
     navigate("/checkout/billing");
   };
+
+  if (!isAuthenticated) return null;
 
   return (
     <>

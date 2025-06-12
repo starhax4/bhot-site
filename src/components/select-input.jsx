@@ -70,14 +70,18 @@ const SelectInput = forwardRef(
       }
     }, [inputText]);
 
-    // Filter options based on input
+    // Only filter if searchEnabled is true
     useEffect(() => {
-      const searchTerm = internalInputText.toLowerCase();
-      const filteredOptions = options.filter((opt) =>
-        opt.label.toLowerCase().includes(searchTerm)
-      );
-      setFiltered(filteredOptions);
-    }, [options, internalInputText]);
+      if (searchEnabled) {
+        const searchTerm = internalInputText.toLowerCase();
+        const filteredOptions = options.filter((opt) =>
+          opt.label.toLowerCase().includes(searchTerm)
+        );
+        setFiltered(filteredOptions);
+      } else {
+        setFiltered(options);
+      }
+    }, [options, internalInputText, searchEnabled]);
 
     // Handle outside clicks
     useEffect(() => {
@@ -192,6 +196,7 @@ const SelectInput = forwardRef(
             onFocus={handleFocus}
             onChange={handleInputChange}
             value={displayValue}
+            readOnly={!searchEnabled}
             {...props}
           />
         </div>

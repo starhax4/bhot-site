@@ -396,14 +396,16 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 maxLength="8"
                 type="text"
                 required
+                helperText="City and country will be inferred from postcode."
               />
               <Input
                 name="address"
-                label="Address"
-                placeholder="Enter your street address, city will be assumed from Postcode"
+                label="Street Address"
+                placeholder="Enter your street address (city will be assumed from postcode)"
                 minLength="10"
                 title="Please enter your complete street address"
                 required
+                helperText="Only enter your street address. City and country will be inferred from postcode."
               />
             </div>
 

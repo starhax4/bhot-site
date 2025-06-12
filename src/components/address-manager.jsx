@@ -8,10 +8,8 @@ export default function AddressManager() {
   const { user, switchAddress, addAddress, currentAddress } = useAuth();
   const [showAddAddressForm, setShowAddAddressForm] = useState(false);
   const [newAddress, setNewAddress] = useState({
-    street: "",
-    city: "",
-    zip: "",
-    country: "",
+    address: "",
+    postcode: "",
   });
 
   // Early return for Basic users - show only current address
@@ -38,14 +36,9 @@ export default function AddressManager() {
   };
 
   const handleAddNewAddress = () => {
-    if (
-      newAddress.street &&
-      newAddress.city &&
-      newAddress.zip &&
-      newAddress.country
-    ) {
+    if (newAddress.address && newAddress.postcode) {
       addAddress(newAddress);
-      setNewAddress({ street: "", city: "", zip: "", country: "" });
+      setNewAddress({ address: "", postcode: "" });
       setShowAddAddressForm(false);
     } else {
       alert("Please fill in all address fields.");
@@ -86,41 +79,25 @@ export default function AddressManager() {
         </Button>
       </div>
 
-      <div
-        className={`transition-all duration-300 ease-in-out overflow-hidden ${
-          showAddAddressForm
-            ? "max-h-[500px] opacity-100 mt-4"
-            : "max-h-0 opacity-0"
-        }`}
-      >
+      {showAddAddressForm && (
         <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-4">
           <Input
             label="Street Address"
-            name="street"
-            value={newAddress.street}
+            name="address"
+            value={newAddress.address || ""}
             onChange={handleInputChange}
-            placeholder="123 Main St"
+            placeholder="Enter your street address (city will be assumed from postcode)"
+            helperText="Only enter your street address. City and country will be inferred from postcode."
+            required
           />
           <Input
-            label="City"
-            name="city"
-            value={newAddress.city}
+            label="Postcode"
+            name="postcode"
+            value={newAddress.postcode || ""}
             onChange={handleInputChange}
-            placeholder="Anytown"
-          />
-          <Input
-            label="ZIP / Postal Code"
-            name="zip"
-            value={newAddress.zip}
-            onChange={handleInputChange}
-            placeholder="12345"
-          />
-          <Input
-            label="Country"
-            name="country"
-            value={newAddress.country}
-            onChange={handleInputChange}
-            placeholder="USA"
+            placeholder="Enter postcode (e.g., SW1A 0AA)"
+            helperText="City and country will be inferred from postcode."
+            required
           />
           <div className="flex justify-end gap-2 mt-6">
             <Button
@@ -132,7 +109,7 @@ export default function AddressManager() {
             <Button onClick={handleAddNewAddress}>Save Address</Button>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

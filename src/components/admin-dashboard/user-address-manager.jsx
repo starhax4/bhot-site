@@ -2,6 +2,10 @@ import React, { useState } from "react";
 import Input from "../input";
 import SelectInput from "../select-input";
 import { useAuth } from "../../context/auth/AuthContext";
+import {
+  adminGetUserAddresses,
+  adminReplaceUserAddresses,
+} from "../../api/serices/api_utils";
 
 const UserAddressManager = () => {
   const { user } = useAuth();
@@ -99,96 +103,104 @@ const UserAddressManager = () => {
     setSuccess("");
 
     try {
-      // TODO: Replace with actual API call
-      // Simulated API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      const mockAddresses = [
-        {
-          id: "1",
-          street: "123 Mock St",
-          city: "London",
-          zip: "SW1 1AA",
-          country: "United Kingdom",
-          isPrimary: true,
-        },
-        {
-          id: "2",
-          street: "456 Test Rd",
-          city: "Manchester",
-          zip: "M1 1BB",
-          country: "United Kingdom",
-          isPrimary: false,
-        },
-      ];
-      setUserAddresses(mockAddresses);
-      setShowAddressForm(false);
+      // Call admin API to get addresses by email
+      const res = await adminGetUserAddresses(userEmail);
+      if (res.success && Array.isArray(res.addresses)) {
+        // Map backend addresses to UI format (address, postcode, id)
+        setUserAddresses(
+          res.addresses.map((a, idx) => ({
+            id: a.id || idx.toString(),
+            address: a.address || "", // Only use address
+            postcode: a.postcode || "", // Only use postcode
+          }))
+        );
+        setShowAddressForm(false);
+      } else {
+        setUserAddresses([]);
+        setError(res.message || "No addresses found for this user.");
+      }
     } catch (err) {
-      setError("Error fetching user addresses. Please try again.");
+      setError(
+        err.message || "Error fetching user addresses. Please try again."
+      );
+      setUserAddresses([]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleAddressUpdate = async (addressId, isDelete = false) => {
+    // Confirm before add or delete
+    if (isDelete) {
+      if (!window.confirm("Are you sure you want to delete this address?"))
+        return;
+    } else {
+      if (!window.confirm("Are you sure you want to add this address?")) return;
+    }
     setLoading(true);
     setError("");
     setSuccess("");
-
     try {
-      // TODO: Replace with actual API call
-      await new Promise((resolve) => setTimeout(resolve, 600));
-
       if (isDelete) {
-        setUserAddresses((prev) =>
-          prev.filter((addr) => addr.id !== addressId)
+        const updatedAddresses = userAddresses.filter(
+          (addr) => addr.id !== addressId
         );
-        setSuccess("Address deleted successfully");
+        const res = await adminReplaceUserAddresses({
+          email: userEmail,
+          addresses: updatedAddresses.map((a) => ({
+            id: a.id,
+            address: a.address, // FIX: use correct property
+            postcode: a.postcode, // FIX: use correct property
+          })),
+        });
+        if (res.success) {
+          setUserAddresses(updatedAddresses);
+          setSuccess("Address deleted successfully");
+        } else {
+          setError(res.message || "Failed to update addresses");
+        }
       } else {
         if (!newAddress && !selectedAddress) {
           throw new Error("Please select or enter an address");
         }
-
-        // Use selected address if available, otherwise parse the manual input
         let addressData;
         if (selectedAddress) {
-          // Parse the selected address - format: "Street, City, Postcode"
-          const parts = selectedAddress.label
-            .split(",")
-            .map((part) => part.trim());
+          // Only use address and zip (postcode)
+          const parts = selectedAddress.label.split(",");
           addressData = {
             id: Date.now().toString(),
-            street: parts[0],
-            city: parts[1],
-            zip: postCode || parts[2] || "",
-            country: "United Kingdom",
-            isPrimary: userAddresses.length === 0,
+            address: parts[0]?.trim() || selectedAddress.label,
+            postcode: postCode || parts[1]?.trim() || "",
           };
         } else {
-          // Parse manually entered address
-          const parts = newAddress.split(",").map((part) => part.trim());
-          if (parts.length < 2) {
-            throw new Error(
-              "Please enter a complete address (Street, City, Postcode)"
-            );
-          }
-
+          // Only use address and zip (postcode), no validation
           addressData = {
             id: Date.now().toString(),
-            street: parts[0],
-            city: parts[1],
-            zip: postCode || parts[2] || "",
-            country: "United Kingdom",
-            isPrimary: userAddresses.length === 0,
+            address: newAddress,
+            postcode: postCode,
           };
         }
-
-        setUserAddresses((prev) => [...prev, addressData]);
-        setNewAddress("");
-        setPostCode("");
-        setSelectedAddress(null);
-        setAddressSuggestions([]);
-        setShowAddressForm(false);
-        setSuccess("Address added successfully");
+        // Add to END of list and update backend
+        const updatedAddresses = [...userAddresses, addressData];
+        const res = await adminReplaceUserAddresses({
+          email: userEmail,
+          addresses: updatedAddresses.map((a) => ({
+            id: a.id,
+            address: a.address,
+            postcode: a.postcode,
+          })),
+        });
+        if (res.success) {
+          setUserAddresses(updatedAddresses);
+          setSuccess("Address added successfully");
+          setShowAddressForm(false);
+          setNewAddress("");
+          setPostCode("");
+          setSelectedAddress(null);
+          setAddressSuggestions([]);
+        } else {
+          setError(res.message || "Failed to update addresses");
+        }
       }
     } catch (err) {
       setError(err.message || "Error updating address. Please try again.");
@@ -248,6 +260,94 @@ const UserAddressManager = () => {
         </div>
       )}
 
+      {/* Add New Address Form */}
+      {showAddressForm && (
+        <div className="p-4 bg-gray-50 rounded-md border border-gray-200 mb-6">
+          <h4 className="text-sm font-medium text-gray-700 mb-3">
+            Add New Address
+          </h4>
+          <div className="flex flex-col gap-2 mb-2">
+            <Input
+              label="Street Address"
+              placeholder="Enter your street address (city will be assumed from postcode)"
+              helperText="Only enter your street address. City and country will be inferred from postcode."
+              value={newAddress}
+              onChange={(e) => setNewAddress(e.target.value)}
+              className="text-sm"
+              size="small"
+              required
+            />
+            <Input
+              label="Postcode"
+              value={postCode}
+              onChange={handlePostCodeChange}
+              placeholder="Enter postcode (e.g., SW1A 0AA)"
+              helperText="City and country will be inferred from postcode."
+              className="text-sm"
+              size="small"
+              required
+            />
+            <SelectInput
+              label="Address (optional search)"
+              placeholder="Type to search for a street address"
+              value={selectedAddress?.value || ""}
+              onChange={handleAddressSelect}
+              options={addressSuggestions}
+              searchEnabled={true}
+              onSearch={searchAddresses}
+              className="text-sm"
+              size="small"
+              inputText={newAddress}
+              onInputChange={(e) => {
+                const value = e.target.value;
+                setNewAddress(value);
+                if (selectedAddress && value !== selectedAddress.label) {
+                  setSelectedAddress(null);
+                }
+                if (value && value.length >= 2) {
+                  searchAddresses(value);
+                }
+              }}
+              helperText="Search for a street address or enter manually. City/country will be inferred from postcode."
+            />
+            {isSearching && (
+              <div className="text-xs text-gray-500 mt-1">Searching...</div>
+            )}
+            {!isSearching &&
+              newAddress &&
+              newAddress.length >= 2 &&
+              addressSuggestions.length === 0 && (
+                <div className="text-xs text-gray-500 mt-1">
+                  No addresses found. Enter your street address (city/country
+                  will be inferred from postcode).
+                </div>
+              )}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <button
+              onClick={() => {
+                setShowAddressForm(false);
+                setNewAddress("");
+                setPostCode("");
+                setSelectedAddress(null);
+                setAddressSuggestions([]);
+              }}
+              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => handleAddressUpdate()}
+              disabled={loading || (!selectedAddress && !newAddress)}
+              className="px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300"
+            >
+              {loading ? "Adding..." : "Add Address"}
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Addresses List */}
       {userAddresses.length > 0 && (
         <div className="mb-6">
@@ -285,18 +385,12 @@ const UserAddressManager = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">
-                      {address.street}
+                      {address.address}
                     </span>
-                    {address.isPrimary && (
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs rounded-full">
-                        Primary
-                      </span>
-                    )}
                   </div>
                   <div className="text-sm text-gray-600">
-                    {address.city}, {address.zip}
+                    {address.postcode}
                   </div>
-                  <div className="text-sm text-gray-500">{address.country}</div>
                 </div>
                 <button
                   onClick={() => handleAddressUpdate(address.id, true)}
@@ -320,82 +414,6 @@ const UserAddressManager = () => {
                 </button>
               </div>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* Add New Address Form */}
-      {showAddressForm && (
-        <div className="p-4 bg-gray-50 rounded-md border border-gray-200">
-          <h4 className="text-sm font-medium text-gray-700 mb-3">
-            Add New Address
-          </h4>
-          <div className="flex flex-col gap-2 mb-2">
-            <Input
-              label="Postcode"
-              value={postCode}
-              onChange={handlePostCodeChange}
-              placeholder="Enter postcode"
-              className="text-sm"
-            />
-            <SelectInput
-              label="Address"
-              placeholder="Type to search for an address"
-              value={selectedAddress?.value || ""}
-              onChange={handleAddressSelect}
-              options={addressSuggestions}
-              searchEnabled={true}
-              onSearch={searchAddresses}
-              className="text-sm"
-              size="small"
-              inputText={newAddress}
-              onInputChange={(e) => {
-                const value = e.target.value;
-                setNewAddress(value);
-                // Reset selected address when user types
-                if (selectedAddress && value !== selectedAddress.label) {
-                  setSelectedAddress(null);
-                }
-                // Start search when the user has typed at least 2 characters
-                if (value && value.length >= 2) {
-                  searchAddresses(value);
-                }
-              }}
-            />
-            {isSearching && (
-              <div className="text-xs text-gray-500 mt-1">Searching...</div>
-            )}
-            {!isSearching &&
-              newAddress &&
-              newAddress.length >= 2 &&
-              addressSuggestions.length === 0 && (
-                <div className="text-xs text-gray-500 mt-1">
-                  No addresses found. Type a complete address (Street, City,
-                  Postcode).
-                </div>
-              )}
-          </div>
-          <div className="flex justify-end gap-2 mt-4">
-            <button
-              onClick={() => {
-                setShowAddressForm(false);
-                setNewAddress("");
-                setPostCode("");
-                setSelectedAddress(null);
-                setAddressSuggestions([]);
-              }}
-              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-              disabled={loading}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => handleAddressUpdate()}
-              disabled={loading || (!selectedAddress && !newAddress)}
-              className="px-3 py-1.5 text-sm bg-primary text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300"
-            >
-              {loading ? "Adding..." : "Add Address"}
-            </button>
           </div>
         </div>
       )}

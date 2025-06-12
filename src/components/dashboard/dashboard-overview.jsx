@@ -5,7 +5,10 @@ import { useAuth } from "../../context/auth/AuthContext";
 import SelectInput from "../select-input";
 import Input from "../input";
 import DualRangeSlider from "../dual-range-slider";
-import { fetchNeighbourhoodBenchmarking } from "../../api/serices/api_utils";
+import {
+  fetchNeighbourhoodBenchmarking,
+  addUserAddress,
+} from "../../api/serices/api_utils";
 
 // Dummy data for scatter plot
 const scatterData = Array.from({ length: 50 }, () => ({
@@ -45,9 +48,10 @@ const DashboardCard = ({ propertyData, energyData }) => {
     },
   });
 
-  const { user, switchAddress, addAddress, currentAddress } = useAuth();
+  const { user, switchAddress, addAddress, currentAddress, setUser } =
+    useAuth();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [newAddress, setNewAddress] = useState("");
+  const [newAddress, setNewAddress] = useState({});
   const [postCode, setPostCode] = useState("");
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -136,6 +140,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
   const [benchmarkingData, setBenchmarkingData] = useState([]);
   const [benchmarkingLoading, setBenchmarkingLoading] = useState(false);
   const [benchmarkingError, setBenchmarkingError] = useState(null);
+  const [addressNotFound, setAddressNotFound] = useState(false); // NEW: Track address not found
 
   // --- SIZE CATEGORY MAPPING ---
   function mapSizeToCategory(min, max) {
@@ -194,6 +199,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
     async (customFilter) => {
       setBenchmarkingLoading(true);
       setBenchmarkingError(null);
+      setAddressNotFound(false); // Reset on new fetch
       const filterToUse = customFilter || filter;
       // If size is an object (from range), calculate covered categories
       let sizeCategories = [];
@@ -272,13 +278,29 @@ const DashboardCard = ({ propertyData, energyData }) => {
         });
         if (res.success) {
           setBenchmarkingData(res.data);
+        } else if (
+          res.status === 404 ||
+          res.message?.toLowerCase().includes("not found")
+        ) {
+          setBenchmarkingData([]);
+          setAddressNotFound(true); // Set address not found
+          setBenchmarkingError(null);
         } else {
           setBenchmarkingData([]);
           setBenchmarkingError(res.message || "No data found");
         }
       } catch (err) {
-        setBenchmarkingData([]);
-        setBenchmarkingError(err.message || "Error fetching data");
+        if (
+          err?.response?.status === 404 ||
+          err?.message?.toLowerCase().includes("not found")
+        ) {
+          setBenchmarkingData([]);
+          setAddressNotFound(true);
+          setBenchmarkingError(null);
+        } else {
+          setBenchmarkingData([]);
+          setBenchmarkingError(err.message || "Error fetching data");
+        }
       } finally {
         setBenchmarkingLoading(false);
       }
@@ -321,12 +343,13 @@ const DashboardCard = ({ propertyData, energyData }) => {
         );
         return;
       }
-      let attempts = 0;
-      const maxAttempts = 3;
-      const fetchWithRetry = async () => {
+      // Only one attempt, no retry if 404 or addressNotFound
+      let did404 = false;
+      const fetchOnce = async () => {
         try {
           setBenchmarkingLoading(true);
           setBenchmarkingError(null);
+          setAddressNotFound(false); // Reset on new fetch
           const res = await fetchNeighbourhoodBenchmarking({
             postcode,
             "floor-area": sizeCategory,
@@ -334,14 +357,27 @@ const DashboardCard = ({ propertyData, energyData }) => {
           });
           if (res.success) {
             setBenchmarkingData(res.data);
+          } else if (
+            res.status === 404 ||
+            res.message?.toLowerCase().includes("not found")
+          ) {
+            setBenchmarkingData([]);
+            setAddressNotFound(true);
+            setBenchmarkingError(null);
+            did404 = true;
           } else {
             setBenchmarkingData([]);
             setBenchmarkingError(res.message || "No data found");
           }
         } catch (err) {
-          if (attempts < maxAttempts - 1) {
-            attempts++;
-            setTimeout(fetchWithRetry, 1000);
+          if (
+            err?.response?.status === 404 ||
+            err?.message?.toLowerCase().includes("not found")
+          ) {
+            setBenchmarkingData([]);
+            setAddressNotFound(true);
+            setBenchmarkingError(null);
+            did404 = true;
           } else {
             setBenchmarkingData([]);
             setBenchmarkingError(err.message || "Error fetching data");
@@ -350,35 +386,53 @@ const DashboardCard = ({ propertyData, energyData }) => {
           setBenchmarkingLoading(false);
         }
       };
-      fetchWithRetry();
+      if (!did404) fetchOnce();
     }
   }, [propertyData]);
 
   // Handle adding a new address
-  const handleAddAddress1 = () => {
-    if (!newAddress || newAddress.trim() === "") {
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    // Parse the address - assuming format: "Street, City, Zip"
-    const parts = newAddress.split(",").map((part) => part.trim());
-    const addressData = {
-      street: parts[0] || "New Address",
-      city: parts[1] || "City",
-      zip: parts[2] || "Zip",
-      country: "United Kingdom",
-    };
-
-    // Simulate API call delay
-    setTimeout(() => {
-      addAddress(addressData);
-      setNewAddress("");
-      setShowAddForm(false);
-      setIsSubmitting(false);
-    }, 800);
-  };
+  // const handleAddAddress = async () => {
+  //   if (!newAddress.address || !newAddress.postcode) return;
+  //   setIsSubmitting(true);
+  //   try {
+  //     // Call the backend API to add the address
+  //     const response = await addUserAddress({
+  //       address: newAddress.address,
+  //       postcode: newAddress.postcode,
+  //     });
+  //     if (response && response.success && response.user) {
+  //       // Update user context and localStorage
+  //       setUser(response.user);
+  //       localStorage.setItem("user", JSON.stringify(response.user));
+  //     } else if (response && response.success && response.addresses) {
+  //       // Fallback: update addresses array if returned
+  //       const updatedUser = { ...user, addresses: response.addresses };
+  //       setUser(updatedUser);
+  //       localStorage.setItem("user", JSON.stringify(updatedUser));
+  //     } else {
+  //       // Fallback: manually add to user context and localStorage
+  //       const updatedAddresses = [
+  //         ...(user.addresses || []),
+  //         {
+  //           address: newAddress.address,
+  //           postcode: newAddress.postcode,
+  //           id: `addr-${Date.now()}`,
+  //         },
+  //       ];
+  //       const updatedUser = { ...user, addresses: updatedAddresses };
+  //       setUser(updatedUser);
+  //       localStorage.setItem("user", JSON.stringify(updatedUser));
+  //     }
+  //     setNewAddress({});
+  //     setSelectedAddress(null);
+  //     setAddressSuggestions([]);
+  //     setShowAddForm(false);
+  //   } catch (error) {
+  //     console.error("Error adding address:", error);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
   // Address options for Pro users
   const getAddressOptions = () => {
@@ -386,9 +440,9 @@ const DashboardCard = ({ propertyData, energyData }) => {
 
     return user.addresses.map((addr) => ({
       value: addr.id,
-      label: `${addr.street}, ${addr.city}${
-        addr.id === "addr1" ? " (Primary)" : " (Secondary)"
-      }`,
+      label: `${addr.id === "addr1" ? "Primary" : "Secondary"}: ${
+        addr.address
+      }, ${addr.postcode}`,
     }));
   };
 
@@ -528,123 +582,64 @@ const DashboardCard = ({ propertyData, energyData }) => {
     }));
   };
 
+  // --- Add Address Handler ---
   const handleAddAddress = async () => {
-    if (!newAddress) return;
-
+    if (!newAddress.address || !newAddress.postcode) return;
     setIsSubmitting(true);
     try {
-      // Parse the address - assuming format: "Street, City, Zip"
-      const parts = newAddress.split(",").map((part) => part.trim());
-      const addressData = {
-        street: parts[0] || "New Address",
-        city: parts[1] || "City",
-        zip: parts[2] || "Zip",
-        country: "United Kingdom",
-      };
+      // Check for duplicate in current addresses (case-insensitive, trimmed)
+      const exists = (user.addresses || []).some(
+        (a) =>
+          a.address.trim().toLowerCase() ===
+            newAddress.address.trim().toLowerCase() &&
+          a.postcode.trim().toLowerCase() ===
+            newAddress.postcode.trim().toLowerCase()
+      );
+      if (exists) {
+        setAddAddressError("This address already exists in your portfolio.");
+        setIsSubmitting(false);
+        return;
+      }
+      setAddAddressError("");
+      // Call backend API to add address
+      const response = await addUserAddress({
+        address: newAddress.address,
+        postcode: newAddress.postcode,
+        userId: user.id,
+      });
+      if (response && response.success && response.addresses) {
+        // Update user context and localStorage with new addresses
+        const updatedUser = { ...user, addresses: response.addresses };
+        console.log(updatedUser);
 
-      // Call addAddress from context
-      // also , handle zip code logic postCode
-      await addAddress(addressData);
-      setNewAddress("");
-      setPostCode("");
-
-      setSelectedAddress(null);
-      setAddressSuggestions([]);
-      setShowAddForm(false);
+        setUser(updatedUser);
+        localStorage.setItem("user", JSON.stringify(updatedUser));
+        setNewAddress({});
+        setSelectedAddress(null);
+        setAddressSuggestions([]);
+        setShowAddForm(false);
+        setAddAddressError("");
+      } else if (response && response.status === 409) {
+        setAddAddressError(response.message || "Address already exists.");
+      } else if (response && response.message) {
+        setAddAddressError(response.message);
+      } else {
+        setAddAddressError("Failed to add address. Please try again.");
+      }
     } catch (error) {
+      setAddAddressError(
+        error?.response?.data?.message ||
+          error.message ||
+          "Error adding address."
+      );
       console.error("Error adding address:", error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handlePostCodeChange = (e) => {
-    setPostCode(e.target.value);
-  };
-
-  // Dummy address suggestions data
-  const dummyAddressSuggestions = [
-    { label: "10 Downing Street, London, SW1A 2AA", value: "10-downing-st" },
-    { label: "221B Baker Street, London, NW1 6XE", value: "221b-baker-st" },
-    {
-      label: "48 Leicester Square, London, WC2H 7LU",
-      value: "48-leicester-sq",
-    },
-    {
-      label: "1 London Bridge Street, London, SE1 9GF",
-      value: "1-london-bridge",
-    },
-    {
-      label: "20 Fenchurch Street, London, EC3M 8AF",
-      value: "20-fenchurch-st",
-    },
-    { label: "1 Canada Square, London, E14 5AB", value: "1-canada-sq" },
-    { label: "Westminster, London, SW1A 0AA", value: "westminster" },
-    { label: "150 Oxford Street, London, W1D 1DF", value: "150-oxford-st" },
-    {
-      label: "31 Notting Hill Gate, London, W11 3JQ",
-      value: "31-notting-hill",
-    },
-    {
-      label: "25 Hampstead High Street, London, NW3 1RL",
-      value: "25-hampstead",
-    },
-  ];
-
-  // Enhanced Mock function to search addresses with loading state
-  const searchAddresses = useCallback(
-    (searchTerm) => {
-      if (!searchTerm || searchTerm.length < 2) {
-        setAddressSuggestions([]);
-        return;
-      }
-
-      setIsSearching(true);
-
-      // Clear any existing search timeout
-      if (window.addressSearchTimeout) {
-        clearTimeout(window.addressSearchTimeout);
-      }
-
-      // Simulated API call with debounce
-      window.addressSearchTimeout = setTimeout(() => {
-        // Simulated server delay
-        const filteredSuggestions = dummyAddressSuggestions.filter((addr) =>
-          addr.label.toLowerCase().includes(searchTerm.toLowerCase())
-        );
-
-        // Add the current input as a custom option if it's not in the results
-        // and has comma-separated format (street, city, zip)
-        const parts = searchTerm.split(",");
-        if (
-          parts.length >= 2 &&
-          !filteredSuggestions.some(
-            (s) => s.label.toLowerCase() === searchTerm.toLowerCase()
-          )
-        ) {
-          filteredSuggestions.push({
-            label: searchTerm,
-            value: `custom-${Date.now()}`, // Generate a unique value
-          });
-        }
-
-        setAddressSuggestions(filteredSuggestions);
-        setIsSearching(false);
-      }, 300);
-    },
-    [dummyAddressSuggestions]
-  );
-
-  // Handle selection of an address from the suggestions
-  const handleAddressSelect = (event) => {
-    const selectedValue = event.target.value;
-    const selected = addressSuggestions.find((s) => s.value === selectedValue);
-
-    if (selected) {
-      setSelectedAddress(selected);
-      setNewAddress(selected.label);
-    }
-  };
+  // Add state for add address error
+  const [addAddressError, setAddAddressError] = useState("");
 
   return (
     <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl ">
@@ -655,63 +650,69 @@ const DashboardCard = ({ propertyData, energyData }) => {
             <h2 className="text-base text-primary font-semibold">
               Your Property
             </h2>
-            {/* {currentAddress && currentAddress.id && (
-              <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full">
-                {currentAddress.id === "addr1" ? "Primary" : "Secondary"}
-              </span>
-            )} */}
-            {user && user.plan === "Pro" && user.addresses && (
-              <button
-                onClick={() => {
-                  setShowAddForm(!showAddForm);
-                  setNewAddress("");
-                  setSelectedAddress(null);
-                  setAddressSuggestions([]);
-                }}
-                className="ml-auto text-primary hover:text-green-800 text-sm"
-                title="Add a new address"
-              >
-                <span className="flex ">
-                  <p className="text-xs text-nowrap">Add to your portfolio</p>
-
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-4 w-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 4v16m8-8H4"
-                    />
-                  </svg>
-                </span>
-              </button>
-            )}
+            {/* DEBUG: Show user and plan info for troubleshooting Pro features
+            <pre className="text-xs text-gray-400 bg-gray-100 rounded px-2 py-1 max-w-xs overflow-x-auto">
+              {JSON.stringify(user)}
+            </pre> */}
+            {user &&
+              user.plan &&
+              user.plan.toLowerCase() === "pro" &&
+              user.addresses && (
+                <button
+                  onClick={() => {
+                    setShowAddForm(!showAddForm);
+                    setNewAddress({});
+                    setSelectedAddress(null);
+                    setAddressSuggestions([]);
+                  }}
+                  className="ml-auto text-primary hover:text-green-800 text-sm"
+                  title="Add a new address"
+                >
+                  <span className="flex ">
+                    <p className="text-xs text-nowrap">Add to your portfolio</p>
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-4 w-4"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </span>
+                </button>
+              )}
           </div>
 
           {/* Pro user address selector */}
           {user &&
-            user.plan === "Pro" &&
+            user.plan &&
+            user.plan.toLowerCase() === "pro" &&
             user.addresses &&
             user.addresses.length > 1 && (
               <div className="mb-3">
                 <SelectInput
                   label="Select Address"
-                  options={user.addresses.map((addr) => ({
+                  options={user.addresses.map((addr, idx) => ({
                     value: addr.id,
-                    label: `${addr.street}, ${addr.city}${
-                      addr.id === "addr1" ? " (Primary)" : " (Secondary)"
-                    }`,
+                    label:
+                      `${addr.address || addr.street || ""}, ${
+                        addr.postcode || addr.zip || ""
+                      }` + (idx === 0 ? " (Primary)" : " (Secondary)"),
                   }))}
                   value={currentAddress?.id || ""}
                   onChange={(e) => switchAddress(e.target.value)}
                   name="propertyAddress"
                   className="text-sm"
                   size="small"
+                  searchEnabled={false}
+                  disabled={false}
+                  readOnly={true}
                 />
               </div>
             )}
@@ -721,57 +722,53 @@ const DashboardCard = ({ propertyData, energyData }) => {
             <div className="mb-3 p-2 bg-gray-50 rounded-md border border-gray-200">
               <div className="flex flex-col gap-2 mb-2">
                 <Input
-                  label="Postcode"
-                  onChange={handlePostCodeChange}
-                  value={postCode}
-                  size="small"
-                  className="text-sm"
-                />
-                <SelectInput
-                  label="Address"
-                  placeholder="Type to search for an address"
-                  value={selectedAddress?.value || ""}
-                  onChange={handleAddressSelect}
-                  options={addressSuggestions}
-                  searchEnabled={true}
-                  onSearch={searchAddresses}
-                  className="text-sm"
-                  size="small"
-                  inputText={newAddress}
-                  onInputChange={(e) => {
-                    const value = e.target.value;
-                    setNewAddress(value);
-                    // Reset selected address when user types
-                    if (selectedAddress && value !== selectedAddress.label) {
-                      setSelectedAddress(null);
-                    }
-                    // Start search when the user has typed at least 2 characters
-                    if (value && value.length >= 2) {
-                      searchAddresses(value);
-                    }
+                  label="Street Address"
+                  name="address"
+                  value={newAddress.address || ""}
+                  onChange={(e) => {
+                    setNewAddress((prev) => ({
+                      ...prev,
+                      address: e.target.value,
+                    }));
+                    setAddAddressError("");
                   }}
+                  placeholder="Enter your street address (city will be assumed from postcode)"
+                  helperText="Only enter your street address. City and country will be inferred from postcode."
+                  size="small"
+                  className="text-sm"
+                  required
                 />
-                {isSearching && (
-                  <div className="text-xs text-gray-500 mt-1">Searching...</div>
+                <Input
+                  label="Postcode"
+                  name="postcode"
+                  value={newAddress.postcode || ""}
+                  onChange={(e) => {
+                    setNewAddress((prev) => ({
+                      ...prev,
+                      postcode: e.target.value,
+                    }));
+                    setAddAddressError("");
+                  }}
+                  placeholder="SW1A 0AA"
+                  helperText="City and country will be inferred from postcode."
+                  size="small"
+                  className="text-sm"
+                  required
+                />
+                {addAddressError && (
+                  <div className="text-xs text-red-600 mt-1">
+                    {addAddressError}
+                  </div>
                 )}
-                {!isSearching &&
-                  newAddress &&
-                  newAddress.length >= 2 &&
-                  addressSuggestions.length === 0 && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      No addresses found. Type a complete address (Street, City,
-                      Postcode).
-                    </div>
-                  )}
               </div>
               <div className="flex justify-end gap-2">
                 <button
                   onClick={() => {
                     setShowAddForm(false);
-                    setNewAddress("");
-                    setPostCode("");
+                    setNewAddress({});
                     setSelectedAddress(null);
                     setAddressSuggestions([]);
+                    setAddAddressError("");
                   }}
                   className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
                   disabled={isSubmitting}
@@ -781,7 +778,9 @@ const DashboardCard = ({ propertyData, energyData }) => {
                 <button
                   onClick={handleAddAddress}
                   className="px-2 py-1 text-xs bg-primary text-white rounded hover:bg-blue-700"
-                  disabled={isSubmitting || newAddress.trim() === ""}
+                  disabled={
+                    isSubmitting || !newAddress.address || !newAddress.postcode
+                  }
                 >
                   {isSubmitting ? "Adding..." : "Add"}
                 </button>
@@ -789,38 +788,91 @@ const DashboardCard = ({ propertyData, energyData }) => {
             </div>
           )}
 
-          <div className="flex gap-2">
-            <div className="flex flex-col gap-10">
-              {user && user.plan === "Pro" ? (
-                ""
-              ) : (
-                <p className="text-neutral-400 text-sm font-semibold">
-                  Address:
-                </p>
-              )}
-              <p className="text-neutral-400 text-sm font-semibold">Type:</p>
-              <p className="text-neutral-400 text-sm font-semibold">Area: </p>
-            </div>
+          {/* Show error if propertyData is not found or has a 404 error, OR if addressNotFound is set */}
+          {propertyData &&
+          !propertyData.notFound &&
+          propertyData.status !== 404 &&
+          propertyData.error !== "not_found" &&
+          !addressNotFound ? (
+            <div className="flex gap-2">
+              <div className="flex flex-col gap-10">
+                {user && user.plan === "Pro" ? (
+                  ""
+                ) : (
+                  <p className="text-neutral-400 text-sm font-semibold">
+                    Address:
+                  </p>
+                )}
+                <p className="text-neutral-400 text-sm font-semibold">Type:</p>
+                <p className="text-neutral-400 text-sm font-semibold">Area: </p>
+              </div>
 
-            <div className="flex flex-col gap-5 w-48">
-              {user && user.plan === "Pro" ? (
-                ""
-              ) : (
+              <div className="flex flex-col gap-5 w-48">
+                {user && user.plan === "Pro" ? (
+                  ""
+                ) : (
+                  <p className="text-neutral-400 text-sm font-semibold h-10">
+                    {(propertyData && propertyData.address) ||
+                      propertyOverview.address}
+                  </p>
+                )}
                 <p className="text-neutral-400 text-sm font-semibold h-10">
-                  {(propertyData && propertyData.address) ||
-                    propertyOverview.address}
+                  {(propertyData && propertyData.type) || propertyOverview.type}
                 </p>
-              )}
-              <p className="text-neutral-400 text-sm font-semibold h-10">
-                {(propertyData && propertyData.type) || propertyOverview.type}
-              </p>
-              <p className="text-neutral-400 text-sm font-semibold h-10">
-                {(propertyData && propertyData.area_sqm) ||
-                  propertyOverview.area}{" "}
-                sqm
-              </p>
+                <p className="text-neutral-400 text-sm font-semibold h-10">
+                  {(propertyData && propertyData.area_sqm) ||
+                    propertyOverview.area}{" "}
+                  sqm
+                </p>
+              </div>
             </div>
-          </div>
+          ) : null}
+          {/* Show error only after API response, not before */}
+          {((propertyData &&
+            (propertyData.notFound ||
+              propertyData.status === 404 ||
+              propertyData.error === "not_found")) ||
+            addressNotFound) && (
+            <div className="flex flex-col items-center justify-center min-h-[120px]">
+              <div className="text-red-600 text-sm font-semibold text-center mb-2">
+                Address not found. Please check the address or select another
+                from your portfolio.
+              </div>
+              {/* Placeholder property info */}
+              <div className="flex gap-2 mt-2">
+                <div className="flex flex-col gap-10">
+                  {user && user.plan === "Pro" ? (
+                    ""
+                  ) : (
+                    <p className="text-neutral-400 text-sm font-semibold">
+                      Address:
+                    </p>
+                  )}
+                  <p className="text-neutral-400 text-sm font-semibold">
+                    Type:
+                  </p>
+                  <p className="text-neutral-400 text-sm font-semibold">
+                    Area:{" "}
+                  </p>
+                </div>
+                <div className="flex flex-col gap-5 w-48">
+                  {user && user.plan === "Pro" ? (
+                    ""
+                  ) : (
+                    <p className="text-neutral-400 text-sm font-semibold h-10">
+                      abc street, xyz
+                    </p>
+                  )}
+                  <p className="text-neutral-400 text-sm font-semibold h-10">
+                    Unknown
+                  </p>
+                  <p className="text-neutral-400 text-sm font-semibold h-10">
+                    X sqm
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Circular Progress Indicators */}
@@ -1224,17 +1276,31 @@ const DashboardCard = ({ propertyData, energyData }) => {
           <div className="my-4">
             {(benchmarkingLoading ||
               benchmarkingError ||
+              addressNotFound ||
               (Array.isArray(benchmarkingData) &&
                 benchmarkingData.length === 0)) && (
               <div className="text-center text-neutral-400 text-sm py-2">
-                {benchmarkingLoading
-                  ? "Loading benchmarking data..."
-                  : benchmarkingError ||
-                    "No data found with the current filters."}
+                {benchmarkingLoading ? (
+                  "Loading benchmarking data..."
+                ) : addressNotFound ? (
+                  <span className="text-red-600 font-semibold block mb-2">
+                    Address not found. Please check the address or postcode.
+                  </span>
+                ) : (
+                  benchmarkingError || "No data found with the current filters."
+                )}
+                {/* Placeholder recommendations if no data */}
+                {addressNotFound ||
+                (Array.isArray(benchmarkingData) &&
+                  benchmarkingData.length === 0) ? (
+                  <div className="mt-2 text-xs text-gray-400 italic">
+                    No recommendations available for this address. (Placeholder)
+                  </div>
+                ) : null}
               </div>
             )}
             <ScatterPlot
-              data={benchmarkingData}
+              data={addressNotFound ? [] : benchmarkingData}
               yAxisLabel="Score"
               xAxisLabel="Area (sqm)"
             />

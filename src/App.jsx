@@ -12,7 +12,7 @@ import ConfirmPage from "./pages/payments/confirm";
 import CartPage from "./pages/payments/cart";
 import ResetPasswordPage from "./pages/reset-password";
 import { useAuth } from "./context/auth/AuthContext";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Modal from "./components/modal";
 import { PlanProvider } from "./context/plan-context";
 import PaymentSuccessPage from "./pages/payments/success";
@@ -22,12 +22,25 @@ function App() {
   const [modalType, setModalType] = useState(null);
   const { isAuthenticated, loading } = useAuth();
 
-  function PrivateRoute({ children }) {
+  useEffect(() => {
+    const handler = () => setModalType("login");
+    window.addEventListener("open-login-modal", handler);
+    return () => window.removeEventListener("open-login-modal", handler);
+  }, []);
+
+  function PrivateRoute({ children, adminOnly }) {
     if (loading) return null;
     if (!isAuthenticated) {
       if (modalType !== "login") setModalType("login");
-      // Always keep modal open until successful login
       return null;
+    }
+    // If adminOnly, check user role
+    if (adminOnly) {
+      const { user } = useAuth();
+      if (!user || user.role !== "admin") {
+        window.location.replace("/dashboard");
+        return null;
+      }
     }
     return children;
   }
@@ -57,7 +70,11 @@ function App() {
         />
         <Route
           path="/admin-dashboard"
-          element={<Admin />}
+          element={
+            <PrivateRoute adminOnly>
+              <Admin />
+            </PrivateRoute>
+          }
         />
         <Route
           path="/pricing"

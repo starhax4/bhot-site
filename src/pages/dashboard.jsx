@@ -23,8 +23,10 @@ const Dashboard = () => {
     let retryCount = 0;
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 2000; // 2 seconds
+    let did404 = false;
 
     const fetchData = () => {
+      if (did404) return; // Prevent further retries if 404 encountered
       const postcode = currentAddress?.postcode || currentAddress?.zip;
       if (currentAddress && postcode && currentAddress.address) {
         setLoading(true);
@@ -39,6 +41,18 @@ const Dashboard = () => {
                   ? res.data.recommendations
                   : []
               );
+            } else if (
+              res.status === 404 ||
+              res.message?.toLowerCase().includes("not found")
+            ) {
+              // Stop retrying on 404
+              did404 = true;
+              setError(
+                "Address not found. Please check the address or select another from your portfolio."
+              );
+              setProperty({ notFound: true });
+              setEnergy({});
+              setRecommendations([]);
             } else {
               if (retryCount < MAX_RETRIES) {
                 retryCount++;
@@ -52,7 +66,18 @@ const Dashboard = () => {
             }
           })
           .catch((err) => {
-            if (retryCount < MAX_RETRIES) {
+            if (
+              err?.response?.status === 404 ||
+              err?.message?.toLowerCase().includes("not found")
+            ) {
+              did404 = true;
+              setError(
+                "Address not found. Please check the address or select another from your portfolio."
+              );
+              setProperty({ notFound: true });
+              setEnergy({});
+              setRecommendations([]);
+            } else if (retryCount < MAX_RETRIES) {
               retryCount++;
               setTimeout(fetchData, RETRY_DELAY);
             } else {
