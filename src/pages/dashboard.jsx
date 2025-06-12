@@ -8,115 +8,100 @@ import RecommendationsTable from "../components/dashboard/recomendation-table";
 import AddressSelector from "../components/address-selector";
 import AddressError from "../components/address-error";
 import { useAuth } from "../context/auth/AuthContext";
-
-const dummyData = [
-  {
-    id: "1",
-    measure: "Internal Wall Insulation",
-    cost: "£4,000 - £14,000",
-    yearlySaving: "£271",
-    epcImpact: "+ 8 pts",
-    estimatedValueImpact: "£20,000 - £40,000",
-    totalPaybackPeriod: "0.5 years",
-  },
-  {
-    id: "2",
-    measure: "Solar Water Heating",
-    cost: "£4,000 - £6,000",
-    yearlySaving: "£55",
-    epcImpact: "+ 2 pts",
-    estimatedValueImpact: "Upgrade to unlock",
-    locked: true,
-  },
-  {
-    id: "3",
-    measure: "Solar Electricity System",
-    cost: "£6,000 - £8,000",
-    yearlySaving: "£100",
-    epcImpact: "+ 3 pts",
-    estimatedValueImpact: "Upgrade to unlock",
-    locked: true,
-  },
-  // Add more dummy data rows here if needed
-];
+import { fetchDashboardEpcData } from "../api/serices/api_utils";
 
 const Dashboard = () => {
   const [selectedModal, setSelectedModal] = useState(null);
   const { user, currentAddress } = useAuth();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [valueData, setValueData] = useState({
-    current: {
-      lowValue: "xxx,xxx",
-      estimate: "xxx,xxx",
-      highValue: "xxx,xxx",
-    },
-    potential: {
-      lowValue: "yyy,yyy",
-      estimate: "yyy,yyy",
-      highValue: "yyy,yyy",
-    },
-  });
+  const [property, setProperty] = useState(null);
+  const [energy, setEnergy] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
 
-  // Update value data when currentAddress changes
   useEffect(() => {
-    if (currentAddress) {
-      setLoading(true);
-      setError(null);
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 2000; // 2 seconds
 
-      // Simulate API call with a small delay
-      setTimeout(() => {
-        try {
-          // In a real app, this would fetch data from API based on current address
-          // For now, we'll just generate some random values to simulate
-          const generateValue = () => {
-            const base = 200000 + Math.floor(Math.random() * 50000);
-            return {
-              lowValue: (base - 20000).toLocaleString(),
-              estimate: base.toLocaleString(),
-              highValue: (base + 20000).toLocaleString(),
-            };
-          };
+    const fetchData = () => {
+      const postcode = currentAddress?.postcode || currentAddress?.zip;
+      if (currentAddress && postcode && currentAddress.address) {
+        setLoading(true);
+        setError(null);
+        fetchDashboardEpcData(postcode, currentAddress.address)
+          .then((res) => {
+            if (res.success && res.data) {
+              setProperty(res.data.property || {});
+              setEnergy(res.data.energy || {});
+              setRecommendations(
+                Array.isArray(res.data.recommendations)
+                  ? res.data.recommendations
+                  : []
+              );
+            } else {
+              if (retryCount < MAX_RETRIES) {
+                retryCount++;
+                setTimeout(fetchData, RETRY_DELAY);
+              } else {
+                setError(res.message || "Failed to load property data.");
+                setProperty({});
+                setEnergy({});
+                setRecommendations([]);
+              }
+            }
+          })
+          .catch((err) => {
+            if (retryCount < MAX_RETRIES) {
+              retryCount++;
+              setTimeout(fetchData, RETRY_DELAY);
+            } else {
+              setError(err?.message || "Failed to load property data.");
+              setProperty({});
+              setEnergy({});
+              setRecommendations([]);
+            }
+          })
+          .finally(() => setLoading(false));
+      } else {
+        setProperty(null);
+        setEnergy(null);
+        setRecommendations([]);
+      }
+    };
 
-          setValueData({
-            current: generateValue(),
-            potential: {
-              lowValue: (
-                parseInt(generateValue().estimate.replace(/,/g, "")) + 40000
-              ).toLocaleString(),
-              estimate: (
-                parseInt(generateValue().estimate.replace(/,/g, "")) + 60000
-              ).toLocaleString(),
-              highValue: (
-                parseInt(generateValue().estimate.replace(/,/g, "")) + 80000
-              ).toLocaleString(),
-            },
-          });
-          setLoading(false);
-        } catch (err) {
-          // Simulate error handling - In a real app, this would handle API errors
-          // We'll introduce a "fake" error sometimes for testing
-          if (Math.random() < 0.1) {
-            // 10% chance of error for testing
-            setError("Failed to load property data. Please try again.");
-          }
-          setLoading(false);
-        }
-      }, 500); // Simulate a short API delay
-    }
+    fetchData();
   }, [currentAddress]);
 
   const handleRetry = () => {
-    // Clear error and force a refresh of the data
     setError(null);
-    // This will retrigger the useEffect if we had an error with the current address
-    if (currentAddress) {
-      const tempAddress = { ...currentAddress };
+    const postcode = currentAddress?.postcode || currentAddress?.zip;
+    if (currentAddress && postcode && currentAddress.address) {
       setLoading(true);
-      setTimeout(() => {
-        // Reset loading to trigger effect
-        setLoading(false);
-      }, 10);
+      fetchDashboardEpcData(postcode, currentAddress.address)
+        .then((res) => {
+          if (res.success && res.data) {
+            setProperty(res.data.property || {});
+            setEnergy(res.data.energy || {});
+            setRecommendations(
+              Array.isArray(res.data.recommendations)
+                ? res.data.recommendations
+                : []
+            );
+          } else {
+            setError(res.message || "Failed to load property data.");
+            setProperty({});
+            setEnergy({});
+            setRecommendations([]);
+          }
+        })
+        .catch((err) => {
+          setError(err?.message || "Failed to load property data.");
+          setProperty({});
+          setEnergy({});
+          setRecommendations([]);
+        })
+        .finally(() => setLoading(false));
     }
   };
 
@@ -127,73 +112,51 @@ const Dashboard = () => {
     <>
       <Navbar onNavClick={setSelectedModal} />
       <div className="flex flex-col md:flex-row py-10 px-4 md:px-6 xl:px-16 justify-between gap-8 md:gap-4">
-        <DashboardCard />
+        <DashboardCard
+          propertyData={property}
+          energyData={energy}
+        />
         <div className="flex flex-col gap-8">
-          {/* {user && user.plan === "Pro" ? (
-            <></>
-          ) : user ? (
-            <div className="bg-[#F8FAFC] border border-gray-100 rounded-lg p-4 mb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <span className="text-gray-700 font-bold mr-2">
-                    Basic Plan
-                  </span>
-                  <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full">
-                    Active
-                  </span>
-                </div>
-                <div>
-                  <a
-                    href="/pricing"
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Upgrade to Pro
-                  </a>
-                </div>
-              </div>
-            </div>
-          ) : null} */}
-
-          {/* Mobile address selector for pro users */}
-          {/* <div className="md:hidden">
-            {user && user.plan === "Pro" && <AddressSelector />}
-          </div> */}
-
-          {/* Display error message if there's an error */}
+          {/* Error message */}
           {error && (
             <AddressError
               error={error}
               onRetry={handleRetry}
             />
           )}
-
           {/* Loading indicator */}
-          {/* {loading && (
+          {loading && (
             <div className="flex justify-center items-center p-4 bg-white rounded-lg shadow mb-4">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="ml-2 text-gray-600">
                 Loading property data...
               </span>
             </div>
-          )} */}
-
+          )}
           <div className="flex flex-col md:flex-row md:justify-between gap-9">
             <ValueCard
-              title="Current Value Estimate"
-              lowValue={valueData.current.lowValue}
-              estimate={valueData.current.estimate}
-              highValue={valueData.current.highValue}
+              title="Current Estimate Value"
+              lowValue={"000000"}
+              estimate={"000000"}
+              highValue={"000000"}
             />
             <ValueCard
-              title="Potential Value Estimate"
-              lowValue={valueData.potential.lowValue}
-              estimate={valueData.potential.estimate}
-              highValue={valueData.potential.highValue}
+              title="Potential Estimate Value"
+              lowValue={"000000"}
+              estimate={"000000"}
+              highValue={"000000"}
               desc
             />
           </div>
+          {(!recommendations || recommendations.length === 0) &&
+          !loading &&
+          !error ? (
+            <div className="p-4 bg-white rounded-lg shadow text-center text-gray-500">
+              No recommendations available for this address.
+            </div>
+          ) : null}
           <RecommendationsTable
-            data={dummyData}
+            data={recommendations}
             addressId={currentAddress?.id}
           />
         </div>

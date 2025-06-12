@@ -2,6 +2,8 @@ import { useState } from "react";
 import PaymentCard from "./payment-card";
 import AddCardForm from "./add-card-form";
 import { ArrowLeft, Check, CreditCard } from "lucide-react";
+import { usePlan } from "../../context/plan-context";
+import { useAuth } from "../../context/auth/AuthContext";
 
 const PaymentSection = ({ onProceed, onBack }) => {
   const [savedCards, setSavedCards] = useState([
@@ -25,6 +27,8 @@ const PaymentSection = ({ onProceed, onBack }) => {
 
   const [selectedCardId, setSelectedCardId] = useState(1);
   const [showAddCardForm, setShowAddCardForm] = useState(false);
+  const { selectedPlan } = usePlan();
+  const { user } = useAuth();
 
   const handleSelectCard = (card) => {
     setSelectedCardId(card.id);
@@ -58,6 +62,18 @@ const PaymentSection = ({ onProceed, onBack }) => {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {/* Show selected plan and user ID */}
+      {selectedPlan && (
+        <div className="mb-4">
+          <div className="font-semibold">Selected Plan:</div>
+          <div>
+            {selectedPlan.name} ({selectedPlan.id})
+          </div>
+          <div className="font-semibold mt-2">User ID:</div>
+          <div>{user?.id || "Not logged in"}</div>
+        </div>
+      )}
+
       {/* Selected Card */}
       {selectedCard && !showAddCardForm && (
         <div className="mb-6">

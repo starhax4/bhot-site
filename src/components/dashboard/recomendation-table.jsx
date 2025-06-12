@@ -15,9 +15,9 @@ const RecomendationTable = () => {
 //   measure: string;
 //   cost: string;
 //   yearlySaving: string;
-//   epcImpact: string;
-//   estimatedValueImpact: string;
-//   totalPaybackPeriod?: string;
+//   epc_impact: string;
+//   estimated_value_impact: string;
+//   total_payback_period?: string;
 //   locked?: boolean;
 // }
 
@@ -27,29 +27,29 @@ const address1Recommendations = [
     id: "1a",
     measure: "Internal Wall Insulation",
     cost: "£4,000 - £14,000",
-    yearlySaving: "£271",
-    epcImpact: "+ 8 pts",
-    estimatedValueImpact: "£20,000 - £40,000",
-    totalPaybackPeriod: "0.5 years",
+    potential_yearly_bills_saving: "£271",
+    epc_impact: "+ 8 pts",
+    estimated_value_impact: "£20,000 - £40,000",
+    total_payback_period: "0.5 years",
   },
   {
     id: "2a",
     measure: "Solar Water Heating",
     cost: "£4,000 - £6,000",
-    yearlySaving: "£55",
-    epcImpact: "+ 2 pts",
-    estimatedValueImpact: "£20,000 - £40,000",
-    totalPaybackPeriod: "0.5 years",
+    potential_yearly_bills_saving: "£55",
+    epc_impact: "+ 2 pts",
+    estimated_value_impact: "£20,000 - £40,000",
+    total_payback_period: "0.5 years",
     locked: true,
   },
   {
     id: "3a",
     measure: "Solar Electricity System",
     cost: "£6,000 - £8,000",
-    yearlySaving: "£100",
-    epcImpact: "+ 3 pts",
-    estimatedValueImpact: "£20,000 - £40,000",
-    totalPaybackPeriod: "0.5 years",
+    potential_yearly_bills_saving: "£100",
+    epc_impact: "+ 3 pts",
+    estimated_value_impact: "£20,000 - £40,000",
+    total_payback_period: "0.5 years",
     locked: true,
   },
 ];
@@ -59,29 +59,29 @@ const address2Recommendations = [
     id: "1b",
     measure: "Loft Insulation",
     cost: "£1,500 - £3,000",
-    yearlySaving: "£215",
-    epcImpact: "+ 5 pts",
-    estimatedValueImpact: "£8,000 - £15,000",
-    totalPaybackPeriod: "0.3 years",
+    potential_yearly_bills_saving: "£215",
+    epc_impact: "+ 5 pts",
+    estimated_value_impact: "£8,000 - £15,000",
+    total_payback_period: "0.3 years",
   },
   {
     id: "2b",
     measure: "Double Glazing",
     cost: "£5,000 - £8,000",
-    yearlySaving: "£120",
-    epcImpact: "+ 4 pts",
-    estimatedValueImpact: "£20,000 - £40,000",
-    totalPaybackPeriod: "0.5 years",
+    potential_yearly_bills_saving: "£120",
+    epc_impact: "+ 4 pts",
+    estimated_value_impact: "£20,000 - £40,000",
+    total_payback_period: "0.5 years",
     locked: true,
   },
   {
     id: "3b",
     measure: "Heat Pump",
     cost: "£8,000 - £15,000",
-    yearlySaving: "£350",
-    epcImpact: "+ 10 pts",
-    estimatedValueImpact: "£20,000 - £40,000",
-    totalPaybackPeriod: "0.5 years",
+    potential_yearly_bills_saving: "£350",
+    epc_impact: "+ 10 pts",
+    estimated_value_impact: "£20,000 - £40,000",
+    total_payback_period: "0.5 years",
     locked: true,
   },
 ];
@@ -116,6 +116,19 @@ const RecommendationsTable = ({ data, addressId }) => {
       setRecommendations(data || address1Recommendations);
     }
   }, [currentAddress, user, data]);
+
+  // Fallback for user.plan if user is null
+  const userPlan = user?.plan || "Free";
+  // Ensure userPlan is always lowercase for comparison
+  const isFree = String(userPlan).toLowerCase() === "free";
+  const visibleRows = isFree ? recommendations.slice(0, 3) : recommendations;
+  const hiddenRowsCount = isFree ? Math.max(0, recommendations.length - 3) : 0;
+
+  // Handler for locked cell click
+  const handleLockedClick = (e) => {
+    e.preventDefault();
+    window.location.href = "/pricing";
+  };
 
   return (
     <div className="w-full bg-white px-2 py-2 sm:py-4 sm:px-4 rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] md:w-[45vw] mx-auto">
@@ -167,9 +180,9 @@ const RecommendationsTable = ({ data, addressId }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {recommendations.map((row, index) => (
+            {visibleRows.map((row, index) => (
               <tr
-                key={row.id}
+                key={row.id || index}
                 className={index % 2 === 0 ? "bg-white" : "bg-white"}
               >
                 <td className="px-2 py-4 text-wrap text-primary text-[11px] sm:text-xs font-bold font-['Sora']">
@@ -179,53 +192,74 @@ const RecommendationsTable = ({ data, addressId }) => {
                   {row.cost}
                 </td>
                 <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
-                  {row.yearlySaving}
+                  {row.potential_yearly_bills_saving}
                 </td>
                 <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
-                  {row.epcImpact}
+                  {row.epc_impact}
                 </td>
+                {/* Estimated Value Impact */}
                 <td
-                  className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']"
-                  colSpan={user.plan === "Basic" && row.locked ? "2" : "1"}
+                  className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
+                  onClick={isFree ? handleLockedClick : undefined}
                 >
-                  {user.plan === "Basic" && row.locked ? (
-                    <Link to="/pricing">
-                      <div className="flex flex-col items-center text-center">
-                        <LockIcon />
-                        <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
-                          Upgrade to unlock
-                        </span>
-                      </div>
-                    </Link>
+                  {isFree ? (
+                    <div className="flex flex-col items-center text-center">
+                      <LockIcon />
+                      <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                        Upgrade to unlock
+                      </span>
+                    </div>
                   ) : (
-                    row.estimatedValueImpact
+                    row.estimated_value_impact
                   )}
                 </td>
-                <td className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
-                  {row.totalPaybackPeriod || ""}
+                {/* Total Payback Period */}
+                <td
+                  className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
+                  onClick={isFree ? handleLockedClick : undefined}
+                >
+                  {isFree ? (
+                    <div className="flex flex-col items-center text-center">
+                      <LockIcon />
+                      <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                        Upgrade to unlock
+                      </span>
+                    </div>
+                  ) : (
+                    row.total_payback_period || ""
+                  )}
                 </td>
               </tr>
             ))}
-            <tr className="">
-              <td className="px-2 py-4 text-left">
-                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-600 rounded-full"></div>
-              </td>
-              <td className="px-2 py-4 text-left">
-                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full"></div>
-              </td>
-              <td className="px-1 py-4 text-center">
-                <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
-              </td>
-              <td className="px-1 py-4 text-center">
-                <div className="w-10 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
-              </td>
-              <td className="px-2 py-4 text-center">
-                <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
-              </td>
-              <td className="px-2 py-4 text-center">
-                <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
-              </td>
-            </tr>
+            {/* Render hidden rows as skeletons for Free users */}
+            {isFree &&
+              hiddenRowsCount > 0 &&
+              Array.from({ length: hiddenRowsCount }).map((_, idx) => (
+                <tr
+                  key={`hidden-row-${idx}`}
+                  className="cursor-pointer"
+                  onClick={handleLockedClick}
+                >
+                  <td className="px-2 py-4 text-left">
+                    <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-600 rounded-full"></div>
+                  </td>
+                  <td className="px-2 py-4 text-left">
+                    <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full"></div>
+                  </td>
+                  <td className="px-1 py-4 text-center">
+                    <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  </td>
+                  <td className="px-1 py-4 text-center">
+                    <div className="w-10 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  </td>
+                  <td className="px-2 py-4 text-center">
+                    <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  </td>
+                  <td className="px-2 py-4 text-center">
+                    <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  </td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>

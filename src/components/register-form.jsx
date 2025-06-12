@@ -5,20 +5,21 @@ import { Link } from "react-router";
 import SelectInput from "./select-input";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
+import { registerUser } from "../api/serices/api_utils";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
   const [isFirst, setIsFirst] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
-  const [showOtherHearFromField, setShowOtherHearFromField] = useState(false); // Added state
-  const [otherHearFromText, setOtherHearFromText] = useState(""); // Added state
-  const [error, setError] = useState(false); //
+  const [showOtherHearFromField, setShowOtherHearFromField] = useState(false);
+  const [otherHearFromText, setOtherHearFromText] = useState("");
+  const [error, setError] = useState("");
+  const [postcode, setPostcode] = useState("");
   const navigate = useNavigate();
 
-  const handleRegisterSubmit = (e) => {
+  const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-    const form = e.target;
 
     // Check only the second step fields
     const secondStepFields = document.querySelectorAll(
@@ -35,41 +36,119 @@ const RegisterForm = ({ closeModal, nextModal }) => {
 
     if (!isValid) return;
 
-    setIsLoading(true);
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
-
-    // If "Other" was selected for hear-from, use the text from the additional input
-    if (data["hear-from"] === "other") {
-      data["hear-from"] = data.hear_from_other_text || "other"; // Use specified text or empty string
+    // Additional client-side validation to match backend requirements
+    if (password !== rePassword) {
+      setError("Passwords do not match");
+      return;
     }
-    delete data.hear_from_other_text; // Clean up the temporary field
 
-    //form Submition logic
-    console.log(data);
+    setIsLoading(true);
+    setError("");
 
-    navigate("/dashboard");
+    try {
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
 
-    // nextModal("register-2");
+      // Transform form data to match backend API expectations
+      const apiData = {
+        firstName: data["first-name"],
+        lastName: data["last-name"],
+        email: data.email,
+        ageBracket: data.age,
+        password: data.password,
+        confirmPassword: data["c-password"],
+        hearFrom:
+          data["hear-from"] === "other"
+            ? data.hear_from_other_text || "other"
+            : data["hear-from"],
+        postcode: data.postcode,
+        addresses: [
+          {
+            id: crypto.randomUUID(), // Generate unique ID for the address
+            address: data.address,
+            postcode: data.postcode,
+          },
+        ], // Create address object array matching the schema
+      };
+
+      // Validate all required fields are present
+      const requiredFields = [
+        "firstName",
+        "lastName",
+        "email",
+        "ageBracket",
+        "password",
+        "confirmPassword",
+        "hearFrom",
+        "postcode",
+      ];
+      const missingFields = requiredFields.filter((field) => !apiData[field]);
+
+      if (missingFields.length > 0) {
+        setError(`Missing required fields: ${missingFields.join(", ")}`);
+        return;
+      }
+
+      if (!apiData.addresses[0].address) {
+        setError("Address is required");
+        return;
+      }
+
+      const res = await registerUser(apiData);
+
+      if (res && res.success) {
+        navigate("/dashboard");
+      } else {
+        const errorMessage =
+          res?.message ||
+          res?.error?.message ||
+          "SignUp failed. Please try again.";
+        setError(errorMessage);
+      }
+    } catch (err) {
+      let errorMessage = "An unexpected error occurred. Please try again.";
+
+      // Handle different types of errors
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.error) {
+        errorMessage = err.response.data.error;
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNext = (e) => {
     e.preventDefault();
+
+    // Clear any existing errors
+    setError("");
+
     // Get only the visible first step fields
     const firstStepFields = document.querySelectorAll(
       ".first-step-fields input, .first-step-fields select"
     );
     let isValid = true;
+    let invalidFields = [];
 
     // Check validity of only the first step fields
     firstStepFields.forEach((field) => {
       if (!field.checkValidity()) {
         field.reportValidity();
         isValid = false;
+        invalidFields.push(field.name || field.id || "unnamed field");
       }
     });
 
-    if (!isValid) return;
+    if (!isValid) {
+      return;
+    }
+
     setIsFirst(false);
   };
 
@@ -96,6 +175,30 @@ const RegisterForm = ({ closeModal, nextModal }) => {
     } else {
       setShowOtherHearFromField(false);
       setOtherHearFromText(""); // Clear the text if a non-other option is chosen
+    }
+  };
+
+  // UK Postcode formatter with proper validation
+  const handlePostcodeChange = (e) => {
+    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+
+    // Format UK postcode with space
+    // Outward code: 2-4 characters (letter+number combinations)
+    // Inward code: 3 characters (number+letter+letter)
+    if (value.length > 3) {
+      // Insert space before the last 3 characters (inward code)
+      const outward = value.slice(0, -3);
+      const inward = value.slice(-3);
+      value = outward + " " + inward;
+    }
+
+    // Limit to 8 characters maximum (including space)
+    if (value.length <= 8) {
+      setPostcode(value);
+      // Clear error when user starts typing valid postcode
+      if (error && !isFirst) {
+        setError("");
+      }
     }
   };
 
@@ -128,14 +231,14 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               <Input
                 label="First Name"
                 name="first-name"
-                // placeHolder="John "
+                placeholder="Enter your first name"
                 className=""
                 required
               />
               <Input
                 label="Last Name"
                 name="last-name"
-                // placeHolder="Smith"
+                placeholder="Enter your last name"
                 required
               />
             </div>
@@ -145,7 +248,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               <Input
                 label="Email"
                 name="email"
-                // placeHolder="example@gmail.com"
+                placeholder="Enter your email address"
                 type="email"
                 required
               />
@@ -235,6 +338,11 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 </p>
               </label>
             </div>
+            {error && isFirst && (
+              <div className="text-red-500 text-sm text-center p-2 bg-red-50 rounded-md">
+                {error}
+              </div>
+            )}
             <div>
               <ButtonCTA
                 label="Create account and continue"
@@ -277,35 +385,33 @@ const RegisterForm = ({ closeModal, nextModal }) => {
           </div>
           <div className="flex flex-col gap-[226px] mt-8">
             <div className="flex flex-col gap-6">
-              <SelectInput
-                name="zip-code"
+              <Input
+                name="postcode"
                 label="Postcode"
-                options={[
-                  {
-                    label: "57400",
-                    value: "57400",
-                  },
-                ]}
-                searchEnabled={true}
-                // onSearch={handleSearch}
+                placeholder="Enter your UK postcode (e.g., SW1A 0AA)"
+                value={postcode}
+                onChange={handlePostcodeChange}
+                pattern="^[A-Z]{1,2}[0-9R][0-9A-Z]?\s[0-9][A-Z]{2}$"
+                title="Please enter a valid UK postcode (e.g., SW1A 0AA, M1 9AB)"
+                maxLength="8"
+                type="text"
                 required
-                fullWidth
               />
-              <SelectInput
-                name="adress"
-                label="Select Address"
-                options={[
-                  {
-                    label: "Poole, United Kingdom",
-                    value: "poole",
-                  },
-                ]}
-                searchEnabled={true}
+              <Input
+                name="address"
+                label="Address"
+                placeholder="Enter your street address, city will be assumed from Postcode"
+                minLength="10"
+                title="Please enter your complete street address"
                 required
-                // onSearch={handleSearch}
-                fullWidth
               />
             </div>
+
+            {error && (
+              <div className="text-red-500 text-sm text-center p-2 bg-red-50 rounded-md">
+                {error}
+              </div>
+            )}
 
             <div>
               <ButtonCTA

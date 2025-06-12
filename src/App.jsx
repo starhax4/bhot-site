@@ -10,10 +10,30 @@ import BillingPage from "./pages/payments/billing";
 import PaymentPage from "./pages/payments/payment";
 import ConfirmPage from "./pages/payments/confirm";
 import CartPage from "./pages/payments/cart";
+import ResetPasswordPage from "./pages/reset-password";
+import { useAuth } from "./context/auth/AuthContext";
+import { useState } from "react";
+import Modal from "./components/modal";
+import { PlanProvider } from "./context/plan-context";
+import PaymentSuccessPage from "./pages/payments/success";
+import PaymentCancelPage from "./pages/payments/cancel";
 
 function App() {
+  const [modalType, setModalType] = useState(null);
+  const { isAuthenticated, loading } = useAuth();
+
+  function PrivateRoute({ children }) {
+    if (loading) return null;
+    if (!isAuthenticated) {
+      if (modalType !== "login") setModalType("login");
+      // Always keep modal open until successful login
+      return null;
+    }
+    return children;
+  }
+
   return (
-    <>
+    <PlanProvider>
       <Routes>
         <Route
           path="/"
@@ -29,7 +49,11 @@ function App() {
         />
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
         />
         <Route
           path="/admin-dashboard"
@@ -39,7 +63,7 @@ function App() {
           path="/pricing"
           element={<Pricing />}
         />
-        
+
         <Route
           path="/checkout/cart"
           element={<CartPage />}
@@ -56,8 +80,26 @@ function App() {
           path="/checkout/confirm"
           element={<ConfirmPage />}
         />
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPasswordPage />}
+        />
+        <Route
+          path="/payments/success"
+          element={<PaymentSuccessPage />}
+        />
+        <Route
+          path="/payments/cancel"
+          element={<PaymentCancelPage />}
+        />
       </Routes>
-    </>
+      <Modal
+        open={!!modalType}
+        contentType={modalType}
+        onClose={() => setModalType(null)}
+        selectedModal={setModalType}
+      />
+    </PlanProvider>
   );
 }
 

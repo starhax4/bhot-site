@@ -1,4 +1,6 @@
 import React from "react";
+import { usePlan } from "../../context/plan-context";
+import { useNavigate } from "react-router";
 
 // SVG Check Icon (dark grey as in the image)
 const CheckIcon = () => (
@@ -71,6 +73,13 @@ const pricingData = {
 
 const PricingTable = () => {
   const { features, plans } = pricingData;
+  const { setSelectedPlan } = usePlan();
+  const navigate = useNavigate();
+
+  const handleSelectPlan = (plan) => {
+    setSelectedPlan(plan);
+    navigate("/checkout/cart");
+  };
 
   return (
     // The main container for the pricing table, matching shadow and rounded corners.
@@ -114,12 +123,21 @@ const PricingTable = () => {
                   </span>
                 )}
               </h3>
-              <a
-                href={plan.buttonLink}
-                className="mt-4 inline-block w-full bg-primary text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
-              >
-                {plan.buttonText}
-              </a>
+              {plan.id === "free" ? (
+                <a
+                  href={plan.buttonLink}
+                  className="mt-4 inline-block w-full bg-primary text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+                >
+                  {plan.buttonText}
+                </a>
+              ) : (
+                <button
+                  onClick={() => handleSelectPlan(plan)}
+                  className="mt-4 inline-block w-full bg-primary text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+                >
+                  {plan.buttonText}
+                </button>
+              )}
             </div>
           ))}
 

@@ -114,7 +114,7 @@ const getProgressArcColor = (value, boundaries) => {
   return boundaries[0].color; // Fallback to the lowest grade color
 };
 
-const SegmentedCircularGauge = ({ value, size = 192 }) => {
+const SegmentedCircularGauge = ({ value, grade, size = 192 }) => {
   // Removed 'grade' prop
   // Default size 192px (w-48)
   const viewBoxSize = 100; // SVG internal coordinate system size
@@ -215,7 +215,7 @@ const SegmentedCircularGauge = ({ value, size = 192 }) => {
           <span
             className="font-semibold text-black text-xl" // Ensure text color has good contrast
           >
-            {currentDisplayGrade.toUpperCase()}
+            {grade}
           </span>
         )}
       </div>

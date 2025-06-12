@@ -6,58 +6,25 @@ import React, {
   useCallback,
 } from "react";
 import PropTypes from "prop-types";
+import axios from "axios";
 
 // Constants
 export const PLANS = {
-  BASIC: "Basic",
-  PRO: "Pro",
+  BASIC: "basic",
+  PRO: "pro",
+  free: "free",
 };
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const AuthContext = createContext();
 
 const MAX_PRO_ADDRESSES = 5;
 const DEFAULT_ADDRESS = {
   id: "default",
-  street: "1",
-  city: "City",
+  address: "1",
   zip: "12345",
-  country: "UK",
   isCurrent: true,
-};
-
-// Mock Pro User Data
-const MOCK_PRO_USER = {
-  id: "pro-user-123",
-  name: "John Pro",
-  email: "john.pro@example.com",
-  plan: PLANS.PRO,
-  addresses: [
-    {
-      id: "addr1",
-      street: "123 Main Street",
-      city: "London",
-      zip: "SW1A 1AA",
-      country: "UK",
-      isCurrent: true,
-    },
-    {
-      id: "addr2",
-      street: "456 High Street",
-      city: "Manchester",
-      zip: "M1 1BB",
-      country: "UK",
-      isCurrent: false,
-    },
-    {
-      id: "addr3",
-      street: "789 Market Square",
-      city: "Birmingham",
-      zip: "B1 1CC",
-      country: "UK",
-      isCurrent: false,
-    },
-  ],
-  currentAddressId: "addr1",
 };
 
 export const AuthProvider = ({ children }) => {
@@ -70,48 +37,48 @@ export const AuthProvider = ({ children }) => {
     if (!userData) return null;
 
     try {
-      // Ensure required fields exist
+      const user = userData.user || userData;
+
       const cleanedData = {
-        id: userData.id || crypto.randomUUID(),
-        name: userData.name || "",
-        email: userData.email || "",
-        plan: Object.values(PLANS).includes(userData.plan)
-          ? userData.plan
-          : PLANS.BASIC,
+        id: user._id || crypto.randomUUID(),
+        name:
+          user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user.name || "",
+        email: user.email || "",
+        plan: user.plan || user.subscriptionPlan || PLANS.free,
         addresses: [],
         currentAddressId: null,
       };
 
       // Validate and clean addresses
-      if (Array.isArray(userData.addresses)) {
-        cleanedData.addresses = userData.addresses
+      const addressesSource = user.addresses || userData.addresses || [];
+      if (Array.isArray(addressesSource)) {
+        cleanedData.addresses = addressesSource
           .filter(
             (addr) =>
               addr &&
               typeof addr === "object" &&
-              addr.id &&
-              addr.street &&
-              addr.city &&
-              addr.zip &&
-              addr.country
+              (addr.address || addr.street) &&
+              (addr.postcode || addr.zip)
           )
           .map((addr) => ({
-            id: addr.id,
-            street: addr.street.trim(),
-            city: addr.city.trim(),
-            zip: addr.zip.trim(),
-            country: addr.country.trim(),
+            id: addr.id || crypto.randomUUID(),
+            address: (addr.address || addr.street || "").trim(),
+            zip: (addr.postcode || addr.zip || "").trim(),
+            city: (addr.city || "").trim(),
+            country: (addr.country || "UK").trim(),
             isCurrent: false,
           }));
 
         // Enforce plan limitations
-        if (cleanedData.plan === PLANS.BASIC) {
-          cleanedData.addresses = cleanedData.addresses.slice(0, 1);
-        } else {
+        if (cleanedData.plan === PLANS.PRO) {
           cleanedData.addresses = cleanedData.addresses.slice(
             0,
             MAX_PRO_ADDRESSES
           );
+        } else {
+          cleanedData.addresses = cleanedData.addresses.slice(0, 1);
         }
 
         // Ensure at least one address exists
@@ -146,22 +113,42 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
-  // Always initialize with Pro user for testing
+  // Token management
+  const setAuthToken = useCallback((token) => {
+    if (token) {
+      localStorage.setItem("authToken", token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    } else {
+      localStorage.removeItem("authToken");
+      delete axios.defaults.headers.common["Authorization"];
+    }
+  }, []);
+
+  const getAuthToken = useCallback(() => {
+    return localStorage.getItem("authToken");
+  }, []);
+
+  // Initialize axios with stored token
+  useEffect(() => {
+    const token = getAuthToken();
+    if (token) {
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    }
+  }, [getAuthToken]);
+
+  // Only initialize user from localStorage if a valid token exists
   const [user, setUser] = useState(() => {
     try {
       const stored = localStorage.getItem("user");
-      if (!stored) {
-        // Initialize with mock Pro user if no stored data
-        localStorage.setItem("user", JSON.stringify(MOCK_PRO_USER));
-        return MOCK_PRO_USER;
+      const token = localStorage.getItem("authToken");
+      if (!stored || !token) {
+        return null;
       }
-
       const parsedUser = JSON.parse(stored);
       return validateAndCleanUserData(parsedUser);
     } catch (error) {
       console.error("Error loading user data:", error);
-      // Return mock Pro user as fallback
-      return MOCK_PRO_USER;
+      return null;
     }
   });
 
@@ -185,9 +172,14 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const persistUserData = useCallback(
-    (userData) => {
+    (responseData) => {
       try {
-        const validatedData = validateAndCleanUserData(userData);
+        // Handle token if present in response
+        if (responseData.token) {
+          setAuthToken(responseData.token);
+        }
+
+        const validatedData = validateAndCleanUserData(responseData);
         if (validatedData) {
           localStorage.setItem("user", JSON.stringify(validatedData));
           setUser(validatedData);
@@ -199,17 +191,30 @@ export const AuthProvider = ({ children }) => {
         handleApiError(error);
       }
     },
-    [validateAndCleanUserData, handleApiError]
+    [validateAndCleanUserData, handleApiError, setAuthToken]
   );
 
   // Auth actions
-  const login = async () => {
+  const login = async (userData) => {
     setLoading(true);
+    setError(null);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
-      persistUserData(MOCK_PRO_USER);
+      const loginUrl = `${API_URL}/api/auth/login`;
+      const res = await axios.post(loginUrl, userData, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        timeout: 10000, // 10 second timeout
+      });
+      persistUserData(res.data);
+      return { success: true, data: res.data };
     } catch (error) {
       handleApiError(error);
+      return {
+        success: false,
+        message:
+          error.response?.data?.message || error.message || "Login failed",
+      };
     } finally {
       setLoading(false);
     }
@@ -218,10 +223,10 @@ export const AuthProvider = ({ children }) => {
   const logout = useCallback(async () => {
     setLoading(true);
     try {
-      // Replace with actual API call
-      // await authApi.logout();
-
       localStorage.removeItem("user");
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("lmkKey");
+      setAuthToken(null); // Clear the token
       setUser(null);
       setCurrentAddress(null);
       setError(null);
@@ -230,7 +235,7 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  }, [handleApiError]);
+  }, [handleApiError, setAuthToken]);
 
   // Address management
   const switchAddress = useCallback(
@@ -240,7 +245,7 @@ export const AuthProvider = ({ children }) => {
         return;
       }
 
-      if (user.plan === PLANS.BASIC) {
+      if (user.plan !== PLANS.PRO) {
         setError("Basic plan users cannot switch addresses");
         return;
       }
@@ -433,6 +438,7 @@ export const AuthProvider = ({ children }) => {
     addAddress,
     deleteAddress,
     updatePlan,
+    getAuthToken,
   };
 
   return (

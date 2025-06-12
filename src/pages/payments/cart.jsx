@@ -4,14 +4,18 @@ import Footer from "../../components/footer";
 import Modal from "../../components/modal";
 import { useNavigate } from "react-router";
 import CheckoutStepper from "../../components/payments/checkout-stepper";
+import { usePlan } from "../../context/plan-context";
+import { useAuth } from "../../context/auth/AuthContext";
 
 const CartPage = () => {
   const [selectedModal, setSelectedModal] = useState(null);
+  const { selectedPlan } = usePlan();
+  const { user } = useAuth();
+  const navigate = useNavigate();
 
   const handleCloseModal = () => {
     setSelectedModal(null);
   };
-  const navigate = useNavigate();
 
   const steps = ["Cart", "Billing Information", "Payment", "Confirm"];
   const currentStep = 0; // Cart is the 1st step (index 0)
@@ -32,13 +36,29 @@ const CartPage = () => {
         <div className="max-w-2xl mx-auto">
           <h1 className="text-2xl font-bold mb-6">Your Cart</h1>
 
-          {/* Placeholder for cart items */}
           <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
-            <p className="text-gray-500 mb-4">Cart items would go here</p>
-
+            {selectedPlan ? (
+              <>
+                <div className="mb-4">
+                  <div className="font-semibold">Selected Plan:</div>
+                  <div>
+                    {selectedPlan.name} ({selectedPlan.id})
+                  </div>
+                </div>
+                <div className="mb-4">
+                  <div className="font-semibold">User ID:</div>
+                  <div>{user?.id || "Not logged in"}</div>
+                </div>
+              </>
+            ) : (
+              <p className="text-red-500 mb-4">
+                No plan selected. Please go back to pricing.
+              </p>
+            )}
             <button
               onClick={handleProceed}
               className="w-full bg-green-500 text-white py-3 rounded-md font-medium hover:bg-green-600 transition-colors"
+              disabled={!selectedPlan}
             >
               Continue to Billing
             </button>

@@ -5,6 +5,7 @@ import RegisterForm from "./register-form";
 import RegisterForm2 from "./register-form-2";
 import LoginForm from "./login-form";
 import AccountDetails from "./account-details";
+import ForgotPasswordForm from "./forgot-password-form";
 
 const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
   const getContent = () => {
@@ -34,6 +35,8 @@ const Modal = ({ open, onClose, contentType, className, selectedModal }) => {
             nextModal={selectedModal}
           />
         );
+      case "forgot-password":
+        return <ForgotPasswordForm closeModal={onClose} />;
       default:
         return <p>Default Content</p>;
     }

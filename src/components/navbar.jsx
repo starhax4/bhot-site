@@ -1,9 +1,11 @@
 import { useState } from "react";
 import { Link } from "react-router";
 import AddressManager from "./address-manager"; // Importing AddressManager component
+import { useAuth } from "../context/auth/AuthContext";
 
 export default function Navbar({ onNavClick }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { isAuthenticated, loading } = useAuth();
 
   const handleMenuCLick = () => {
     setIsMenuOpen((prev) => !prev);
@@ -26,7 +28,18 @@ export default function Navbar({ onNavClick }) {
               <Link to="/">Home</Link>
             </li>
             <li>
-              <Link to="/dashboard">Dashboard</Link>
+              {isAuthenticated ? (
+                <Link to="/dashboard">Dashboard</Link>
+              ) : (
+                <button
+                  onClick={() => {
+                    onNavClick("login");
+                  }}
+                  className="cursor-pointer"
+                >
+                  Dashboard
+                </button>
+              )}
             </li>
             <li>
               <Link to="/pricing">Pricing</Link>
@@ -43,7 +56,11 @@ export default function Navbar({ onNavClick }) {
             </li>
             <button
               onClick={() => {
-                onNavClick("account");
+                if (isAuthenticated) {
+                  onNavClick("account");
+                } else {
+                  onNavClick("login");
+                }
               }}
               className="cursor-pointer"
             >
@@ -96,7 +113,18 @@ export default function Navbar({ onNavClick }) {
                     <Link to="/">Home</Link>
                   </li>
                   <li>
-                    <Link to="/dashboard">Dashboard</Link>
+                    {isAuthenticated ? (
+                      <Link to="/dashboard">Dashboard</Link>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          onNavClick("login");
+                        }}
+                        className="cursor-pointer"
+                      >
+                        Dashboard
+                      </button>
+                    )}
                   </li>
                   <li>
                     <Link to="/pricing">Pricing</Link>
@@ -113,7 +141,11 @@ export default function Navbar({ onNavClick }) {
                   </li>
                   <button
                     onClick={() => {
-                      onNavClick("account");
+                      if (isAuthenticated) {
+                        onNavClick("account");
+                      } else {
+                        onNavClick("login");
+                      }
                     }}
                     className="cursor-pointer"
                   >

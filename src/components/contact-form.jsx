@@ -1,19 +1,33 @@
 import React, { useState } from "react";
 import Input from "./input";
 import ButtonCTA from "./button";
+import { submitContactForm } from "../api/serices/api_utils";
 
 const ContactForm = ({ closeModal }) => {
   const [selectedOptions, setSelectedOptions] = useState("data-sources");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleContactSubmit = (e) => {
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
+    try {
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
 
-    //form Submition logic
-    console.log({ option: selectedOptions, ...data });
+      //form Submition logic
+      const contactData = { option: selectedOptions, ...data };
+      const res = await submitContactForm(contactData);
+      if (res && res.success) {
+        console.log("Form Submited Successfully");
+      } else {
+        setError(res?.message || "Form Submittion Failed. Please try again.");
+      }
+    } catch (error) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Contact FOrm Submittion error:", err);
+    } finally {
+      setIsLoading(false);
+    }
 
     closeModal();
   };
@@ -128,7 +142,6 @@ const ContactForm = ({ closeModal }) => {
             >
               <p className="text-nowrap">Careers</p>
             </button>
-            
             <button
               type="button"
               onClick={() => {
@@ -141,7 +154,6 @@ const ContactForm = ({ closeModal }) => {
             >
               <p className="text-nowrap">Other</p>
             </button>
-            
           </div>
         </div>
         <div className="flex flex-col gap-4 mt-5">

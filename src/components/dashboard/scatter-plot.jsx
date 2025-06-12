@@ -22,26 +22,26 @@ import {
 
 // Sample data - this would come from your state, likely filtered
 const sampleData = [
-  { id: "proj1", frequency: 3, projectSuccess: 50 },
-  { id: "proj2", frequency: 4, projectSuccess: 75 },
-  { id: "proj3", frequency: 5, projectSuccess: 60 },
-  { id: "proj4", frequency: 6, projectSuccess: 80 },
-  { id: "proj5", frequency: 7, projectSuccess: 95 },
-  { id: "proj6", frequency: 8, projectSuccess: 105 },
-  { id: "proj7", frequency: 9, projectSuccess: 120 },
-  { id: "proj8", frequency: 10, projectSuccess: 135 },
-  { id: "proj9", frequency: 11, projectSuccess: 150 },
-  { id: "proj10", frequency: 12, projectSuccess: 165 },
-  { id: "proj11", frequency: 13, projectSuccess: 180 },
-  { id: "proj12", frequency: 14, projectSuccess: 195 },
-  { id: "proj13", frequency: 15, projectSuccess: 210 },
-  { id: "proj14", frequency: 16, projectSuccess: 225 },
-  { id: "proj15", frequency: 17, projectSuccess: 240 },
-  { id: "proj16", frequency: 18, projectSuccess: 255 },
-  { id: "proj17", frequency: 19, projectSuccess: 270 },
-  { id: "proj18", frequency: 20, projectSuccess: 285 },
-  { id: "proj19", frequency: 21, projectSuccess: 300 },
-  { id: "proj20", frequency: 22, projectSuccess: 315 },
+  { id: "proj1", area: 30, score: 50 },
+  { id: "proj2", area: 40, score: 75 },
+  { id: "proj3", area: 50, score: 60 },
+  { id: "proj4", area: 60, score: 80 },
+  { id: "proj5", area: 70, score: 95 },
+  { id: "proj6", area: 80, score: 105 },
+  { id: "proj7", area: 90, score: 120 },
+  { id: "proj8", area: 100, score: 135 },
+  { id: "proj9", area: 110, score: 150 },
+  { id: "proj10", area: 120, score: 165 },
+  { id: "proj11", area: 130, score: 180 },
+  { id: "proj12", area: 140, score: 195 },
+  { id: "proj13", area: 150, score: 210 },
+  { id: "proj14", area: 160, score: 225 },
+  { id: "proj15", area: 170, score: 240 },
+  { id: "proj16", area: 180, score: 255 },
+  { id: "proj17", area: 190, score: 270 },
+  { id: "proj18", area: 200, score: 285 },
+  { id: "proj19", area: 210, score: 300 },
+  { id: "proj20", area: 220, score: 315 },
 ];
 
 // interface ScatterPlotComponentProps {
@@ -55,12 +55,28 @@ const sampleData = [
 
 const ScatterPlot = ({
   data,
-  highlightedPointId,
+  highlightedPointId, // not needed, will use lmkKey from localStorage
   width = "100%",
   height = 256,
-  yAxisLabel = "Project Success",
-  xAxisLabel = "Frequency",
+  yAxisLabel = "Score",
+  xAxisLabel = "Area (sqm)",
 }) => {
+  // Get lmkKey from localStorage for highlighting
+  const userLmkKey =
+    typeof window !== "undefined" ? localStorage.getItem("lmkKey") : undefined;
+
+  // Defensive mapping: ensure data is always in the correct format
+  const mappedData = Array.isArray(data)
+    ? data.map((d, i) => ({
+        id: d.lmkKey || d.id || d._id || d.property_id || `point-${i}`,
+        lmkKey: d?.lmkKey,
+        area: d.area ?? d.x ?? 0,
+        score: d.score ?? d.y ?? 0,
+        name: d.name || d.label || undefined,
+        ...d,
+      }))
+    : [];
+
   // Default Tailwind classes for styling (can be customized)
   const lightGreen = "fill-green-600"; // Lighter green for regular points
   const darkGreen = "fill-primary"; // Primary green for highlighted point using the theme color
@@ -93,11 +109,11 @@ const ScatterPlot = ({
           />
           <XAxis
             type="number"
-            dataKey="frequency"
-            name="Frequency"
-            domain={["dataMin - 1", "dataMax + 1"]} // Auto-adjust domain with padding
+            dataKey="area"
+            name="Area (sqm)"
+            domain={["dataMin - 1", "dataMax + 1"]}
             tick={{ fontSize: 12, className: axisColor }}
-            axisLine={{ stroke: "#e5e7eb" }} // Tailwind gray-200
+            axisLine={{ stroke: "#e5e7eb" }}
             tickLine={{ stroke: "#e5e7eb" }}
           >
             <Label
@@ -109,10 +125,9 @@ const ScatterPlot = ({
           </XAxis>
           <YAxis
             type="number"
-            dataKey="projectSuccess"
-            name="Project Success"
-            domain={[0, "dataMax + 20"]} // Start Y-axis at 0, extend slightly beyond max data
-            ticks={[0, 50, 100, 150, 200, 250]} // Define specific ticks as in the image
+            dataKey="score"
+            name="Score"
+            domain={[0, "dataMax + 20"]}
             tick={{ fontSize: 12, className: axisColor }}
             axisLine={{ stroke: "#e5e7eb" }}
             tickLine={{ stroke: "#e5e7eb" }}
@@ -124,7 +139,7 @@ const ScatterPlot = ({
               borderRadius: "0.375rem",
               borderColor: "#e5e7eb",
             }}
-            labelStyle={{ color: "#374151", fontWeight: "bold" }} // Tailwind gray-700
+            labelStyle={{ color: "#374151", fontWeight: "bold" }}
             formatter={(value, name, props) => {
               const pointName = props.payload.name
                 ? ` (${props.payload.name})`
@@ -133,18 +148,28 @@ const ScatterPlot = ({
             }}
           />
           <Scatter
-            name="Projects"
-            data={data}
+            name="Properties"
+            data={mappedData}
             shape="square"
           >
-            {data.map((entry, index) => (
+            {mappedData.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
                 className={
-                  entry.id === highlightedPointId ? darkGreen : lightGreen
+                  entry.lmkKey && userLmkKey && entry.lmkKey === userLmkKey
+                    ? darkGreen
+                    : lightGreen
                 }
-                stroke={entry.id === highlightedPointId ? "#005000" : "#dcfce7"} // Primary green and green-100 for borders
-                strokeWidth={1}
+                stroke={
+                  entry.lmkKey && userLmkKey && entry.lmkKey === userLmkKey
+                    ? "#005000"
+                    : "#dcfce7"
+                }
+                strokeWidth={
+                  entry.lmkKey && userLmkKey && entry.lmkKey === userLmkKey
+                    ? 3
+                    : 1
+                }
               />
             ))}
           </Scatter>

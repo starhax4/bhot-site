@@ -3,23 +3,45 @@ import Input from "./input";
 import { motion } from "motion/react";
 import ButtonCTA from "./button";
 import { useNavigate } from "react-router";
+import { useAuth } from "../context/auth/AuthContext";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleLoginSubmit = (e) => {
+  const handleLoginSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData.entries());
-    //form Submition logic
-    console.log(data);
-    navigate("/dashboard");
+    setError("");
+
+    try {
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+
+      const res = await login(data);
+      if (res && res.success) {
+        if (closeModal) closeModal(); // Only close modal on success
+        navigate("/dashboard");
+      } else {
+        setError(res?.message || "Login failed. Please try again.");
+        // Do NOT close modal or navigate
+      }
+    } catch (err) {
+      setError("An unexpected error occurred. Please try again.");
+      console.error("Login error:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLoginClick = () => {
     nextModal("cta");
+  };
+
+  const handleForgotPasswordClick = () => {
+    nextModal("forgot-password");
   };
 
   return (
@@ -43,7 +65,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
               <div className="flex flex-col gap-6">
                 <Input
                   label="Email"
-                  name="EMAIL"
+                  name="email"
                   type="email"
                   // error={true}
                   // helperText="Wrong Email"
@@ -51,13 +73,19 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 />
                 <Input
                   label="Password"
-                  name="PASSword"
+                  name="password"
                   type="password"
                   // error={true}
                   // helperText="Wrong Password"
                   required
                 />
               </div>
+
+              {error && (
+                <div className="text-red-500 text-sm text-center p-2 bg-red-50 rounded-md">
+                  {error}
+                </div>
+              )}
 
               <div>
                 <div>
@@ -80,7 +108,10 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                     </span>
                   </p>
                   <p>
-                    <span className="text-primary font-semibold cursor-pointer">
+                    <span
+                      className="text-primary font-semibold cursor-pointer"
+                      onClick={handleForgotPasswordClick}
+                    >
                       Forgot your password?
                     </span>
                   </p>

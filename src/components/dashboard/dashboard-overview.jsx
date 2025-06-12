@@ -5,6 +5,7 @@ import { useAuth } from "../../context/auth/AuthContext";
 import SelectInput from "../select-input";
 import Input from "../input";
 import DualRangeSlider from "../dual-range-slider";
+import { fetchNeighbourhoodBenchmarking } from "../../api/serices/api_utils";
 
 // Dummy data for scatter plot
 const scatterData = Array.from({ length: 50 }, () => ({
@@ -12,13 +13,26 @@ const scatterData = Array.from({ length: 50 }, () => ({
   y: Math.random() * 250,
 }));
 
-const DashboardCard = () => {
+// --- SIZE CATEGORY MAPPING ---
+const SIZE_CATEGORIES = [
+  { label: "1-55m²", code: "s", min: 1, max: 55 },
+  { label: "55-70m²", code: "m", min: 56, max: 70 },
+  { label: "70-85m²", code: "l", min: 71, max: 85 },
+  { label: "85-110m²", code: "xl", min: 86, max: 110 },
+  { label: "110m²+", code: "xxl", min: 111, max: 200 },
+];
+
+function getSizeCategoriesFromRange(min, max) {
+  // Return all size codes that overlap with the selected range
+  return SIZE_CATEGORIES.filter((cat) => max >= cat.min && min <= cat.max).map(
+    (cat) => cat.code
+  );
+}
+
+const DashboardCard = ({ propertyData, energyData }) => {
   const [filter, setFilter] = useState({
-    distance: "2", // Initial value for distance
-    size: {
-      min: 201,
-      max: 300,
-    }, // Initial range 0-50 sqm
+    distance: "2",
+    size: [], // Now an array of selected size codes
     type: {
       detachedHouse: false,
       terracedHouse: false,
@@ -102,14 +116,243 @@ const DashboardCard = () => {
 
   // Update property overview when currentAddress changes
   useEffect(() => {
-    if (currentAddress) {
+    if (currentAddress && propertyData) {
       setPropertyOverview({
-        address: `${currentAddress.street}, ${currentAddress.city}, ${currentAddress.zip}`,
-        type: "e.g. Mid-terrace House", // We would fetch this from API in a real app
-        area: "x sqm", // We would fetch this from API in a real app
+        address: propertyData.address || "",
+        type: propertyData.type || "", // We would fetch this from API in a real app
+        area: propertyData.area_sqm || "", // We would fetch this from API in a real app
       });
     }
+  }, [currentAddress, propertyData]);
+
+  // Save lmkKey to localStorage when propertyData changes
+  useEffect(() => {
+    if (propertyData && propertyData.lmkKey) {
+      localStorage.setItem("lmkKey", propertyData.lmkKey);
+    }
+  }, [propertyData]);
+
+  // --- Neighbourhood Benchmarking Data State ---
+  const [benchmarkingData, setBenchmarkingData] = useState([]);
+  const [benchmarkingLoading, setBenchmarkingLoading] = useState(false);
+  const [benchmarkingError, setBenchmarkingError] = useState(null);
+
+  // --- SIZE CATEGORY MAPPING ---
+  function mapSizeToCategory(min, max) {
+    // Use only the max value for mapping
+    if (max === 0) return "unknown";
+    if (max <= 55) return "s";
+    if (max <= 70) return "m";
+    if (max <= 85) return "l";
+    if (max <= 110) return "xl";
+    if (max > 110) return "xxl";
+    return "unknown";
+  }
+
+  // Helper to map a single area value to category
+  function mapAreaToCategory(area) {
+    if (!area || isNaN(area)) return "unknown";
+    if (area >= 1 && area <= 55) return "s";
+    if (area > 55 && area <= 70) return "m";
+    if (area > 70 && area <= 85) return "l";
+    if (area > 85 && area <= 110) return "xl";
+    if (area > 110) return "xxl";
+    return "unknown";
+  }
+
+  // --- Property Type Normalization ---
+  function normalizePropertyType(type) {
+    if (!type || typeof type !== "string") return "";
+    const t = type.toLowerCase();
+    if (t.includes("bungalow")) return "bungalow";
+    if (t.includes("flat") || t.includes("apartment")) return "flat";
+    if (t.includes("maisonette")) return "maisonette";
+    if (
+      t.includes("park home") ||
+      t.includes("parkhouse") ||
+      t.includes("park house")
+    )
+      return "parkHouse";
+    if (t.includes("detached")) return "detachedHouse";
+    if (t.includes("terrace")) return "terracedHouse";
+    if (t.includes("semi-detached")) return "SemiDetachedHouse";
+    if (t.includes("house")) return "detachedHouse";
+    return "";
+  }
+
+  // --- Helper to extract postcode from address string ---
+  function extractPostcode(address) {
+    if (!address || typeof address !== "string") return "";
+    // UK postcode regex (simple version)
+    const postcodeRegex = /([A-Z]{1,2}\d{1,2}[A-Z]? ?\d[A-Z]{2})$/i;
+    const match = address.match(postcodeRegex);
+    return match ? match[1].toUpperCase() : "";
+  }
+
+  // --- Fetch Neighbourhood Benchmarking Data ---
+  const fetchDashboardData = useCallback(
+    async (customFilter) => {
+      setBenchmarkingLoading(true);
+      setBenchmarkingError(null);
+      const filterToUse = customFilter || filter;
+      // If size is an object (from range), calculate covered categories
+      let sizeCategories = [];
+      if (
+        typeof filterToUse.size === "object" &&
+        filterToUse.size.min !== undefined &&
+        filterToUse.size.max !== undefined
+      ) {
+        sizeCategories = getSizeCategoriesFromRange(
+          filterToUse.size.min,
+          filterToUse.size.max
+        );
+      } else if (
+        Array.isArray(filterToUse.size) &&
+        filterToUse.size.length > 0
+      ) {
+        sizeCategories = filterToUse.size;
+      } else if (propertyData && propertyData.area_sqm) {
+        sizeCategories = [mapAreaToCategory(Number(propertyData.area_sqm))];
+      }
+      // Multi-type support
+      const selectedTypes = Object.entries(filterToUse.type)
+        .filter(([_, v]) => v)
+        .map(([k]) => k);
+      let typeCategories =
+        selectedTypes.length > 0
+          ? selectedTypes.map((key) => mapTypeToCategory({ [key]: true }))
+          : propertyData && propertyData.type
+          ? [normalizePropertyType(propertyData.type)]
+          : [];
+      // Remove duplicates and 'propertyType'
+      typeCategories = [...new Set(typeCategories)].filter(
+        (t) => t && t !== "propertyType"
+      );
+      sizeCategories = [...new Set(sizeCategories)].filter(
+        (s) => s && s !== "unknown"
+      );
+      let postcode =
+        currentAddress?.zip ||
+        propertyData?.zip ||
+        propertyData?.postcode ||
+        extractPostcode(propertyData?.address) ||
+        "";
+      if (!postcode) {
+        setBenchmarkingError("Postcode is required");
+        setBenchmarkingLoading(false);
+        setBenchmarkingData([]);
+        return;
+      }
+      if (typeCategories.length === 0) {
+        setBenchmarkingError("Please select at least one property type.");
+        setBenchmarkingLoading(false);
+        setBenchmarkingData([]);
+        return;
+      }
+      if (sizeCategories.length === 0) {
+        setBenchmarkingError("Please select at least one size category.");
+        setBenchmarkingLoading(false);
+        setBenchmarkingData([]);
+        return;
+      }
+      try {
+        // Always include user's property size/type in the API request
+        const res = await fetchNeighbourhoodBenchmarking({
+          postcode,
+          "floor-area": sizeCategories,
+          "property-type": typeCategories,
+          userFloorArea:
+            propertyData && propertyData.area_sqm
+              ? mapAreaToCategory(Number(propertyData.area_sqm))
+              : undefined,
+          userPropertyType:
+            propertyData && propertyData.type
+              ? normalizePropertyType(propertyData.type)
+              : undefined,
+        });
+        if (res.success) {
+          setBenchmarkingData(res.data);
+        } else {
+          setBenchmarkingData([]);
+          setBenchmarkingError(res.message || "No data found");
+        }
+      } catch (err) {
+        setBenchmarkingData([]);
+        setBenchmarkingError(err.message || "Error fetching data");
+      } finally {
+        setBenchmarkingLoading(false);
+      }
+    },
+    [filter, currentAddress, propertyData]
+  );
+
+  useEffect(() => {
+    fetchDashboardData();
   }, [currentAddress]);
+
+  // --- Call benchmarking API with propertyData on first load ---
+  useEffect(() => {
+    // Only run if propertyData is available and has type and area_sqm (allow area_sqm = 0)
+    if (
+      propertyData &&
+      typeof propertyData.type === "string" &&
+      propertyData.type.trim() !== "" &&
+      propertyData.area_sqm !== undefined &&
+      propertyData.area_sqm !== null &&
+      propertyData.area_sqm !== "" &&
+      (propertyData.zip ||
+        propertyData.postcode ||
+        extractPostcode(propertyData.address))
+    ) {
+      const postcode =
+        propertyData.zip ||
+        propertyData.postcode ||
+        extractPostcode(propertyData.address);
+      const sizeCategory = mapAreaToCategory(Number(propertyData.area_sqm));
+      const normalizedType = normalizePropertyType(propertyData.type);
+      const typeCategory = normalizedType
+        ? mapTypeToCategory({ [normalizedType]: true })
+        : "propertyType";
+
+      if (sizeCategory === "unknown" || typeCategory === "propertyType") {
+        console.warn(
+          "[Neighbourhood Benchmarking] Skipping API call due to unmapped size/type",
+          { sizeCategory, typeCategory }
+        );
+        return;
+      }
+      let attempts = 0;
+      const maxAttempts = 3;
+      const fetchWithRetry = async () => {
+        try {
+          setBenchmarkingLoading(true);
+          setBenchmarkingError(null);
+          const res = await fetchNeighbourhoodBenchmarking({
+            postcode,
+            "floor-area": sizeCategory,
+            "property-type": typeCategory,
+          });
+          if (res.success) {
+            setBenchmarkingData(res.data);
+          } else {
+            setBenchmarkingData([]);
+            setBenchmarkingError(res.message || "No data found");
+          }
+        } catch (err) {
+          if (attempts < maxAttempts - 1) {
+            attempts++;
+            setTimeout(fetchWithRetry, 1000);
+          } else {
+            setBenchmarkingData([]);
+            setBenchmarkingError(err.message || "Error fetching data");
+          }
+        } finally {
+          setBenchmarkingLoading(false);
+        }
+      };
+      fetchWithRetry();
+    }
+  }, [propertyData]);
 
   // Handle adding a new address
   const handleAddAddress1 = () => {
@@ -157,27 +400,67 @@ const DashboardCard = () => {
     { label: "Within 10 miles", value: "10", miles: "10" },
   ];
 
-  const sizeOptions = [
-    { label: "Size", value: "default_size" },
-    { label: "0-50 sqm", value: "0-50", min: 0, max: 50 },
-    { label: "51-100 sqm", value: "51-100", min: 51, max: 100 },
-    { label: "101-150 sqm", value: "101-150", min: 101, max: 150 },
-    { label: "151-200 sqm", value: "151-200", min: 151, max: 200 },
-    { label: "201-300 sqm", value: "201-300", min: 201, max: 300 },
-    { label: "301+ sqm", value: "301+", min: 301, max: 5000 },
+  // --- SIZE FILTER LOGIC ---
+  const handleSizeCheckboxChange = (sizeCode) => {
+    setFilter((prev) => {
+      const sizeArr = prev.size.includes(sizeCode)
+        ? prev.size.filter((c) => c !== sizeCode)
+        : [...prev.size, sizeCode];
+      return { ...prev, size: sizeArr };
+    });
+  };
+
+  const handleSizeApply = () => {
+    fetchDashboardData();
+  };
+
+  // --- TYPE FILTER LOGIC ---
+  const typeOptions = [
+    { label: "Property Type", value: "propertyType" },
+    { label: "Bungalow", value: "bungalow" },
+    { label: "Flat", value: "flat" },
+    { label: "House", value: "house" },
+    { label: "Maisonette", value: "maisonette" },
+    { label: "Park Home", value: "parkHome" },
   ];
 
-  const typeOptions = [
-    { label: "Type", value: "default_type" },
-    { label: "Flat", value: "flat" },
-    { label: "Detached House", value: "detachedHouse" },
-    { label: "Terraced House", value: "terracedHouse" },
-    { label: "Park House", value: "parkHouse" },
-    { label: "Semi-Detached House", value: "SemiDetachedHouse" },
-    { label: "Bungalow", value: "bungalow" },
-    { label: "Maisonette", value: "maisonette" },
-    { label: "Studio Apartment ", value: "studioApartment " },
-  ];
+  const handleTypeOptionSelect = (option) => {
+    setTypeButtonLabel(option.label);
+    setFilter((prevFilter) => ({
+      ...prevFilter,
+      type: option.value,
+    }));
+    setOpenDropdown(null);
+  };
+
+  // --- TYPE CATEGORY MAPPING ---
+  function mapTypeToCategory(typeObj) {
+    // If all false or all true, return "propertyType"
+    const selected = Object.entries(typeObj).filter(([_, v]) => v);
+    if (selected.length === 0) return "propertyType";
+    if (selected.length > 1) return "propertyType"; // or handle as needed
+    const key = selected[0][0];
+    switch (key) {
+      case "bungalow":
+        return "bungalow";
+      case "flat":
+        return "flat";
+      case "maisonette":
+        return "maisonette";
+      case "parkHouse":
+        return "park home";
+      case "detachedHouse":
+      case "terracedHouse":
+      case "SemiDetachedHouse":
+        return "house";
+      default:
+        return "propertyType";
+    }
+  }
+
+  const handleTypeApply = () => {
+    fetchDashboardData();
+  };
 
   const handleDropdownToggle = (dropdownId) => {
     setOpenDropdown(openDropdown === dropdownId ? null : dropdownId);
@@ -191,41 +474,6 @@ const DashboardCard = () => {
       setFilter((prevFilter) => ({
         ...prevFilter,
         distance: option.miles,
-      }));
-    }
-    setOpenDropdown(null);
-  };
-
-  const handleSizeOptionSelect = (option) => {
-    setSizeButtonLabel(option.label === "Size" ? "Size" : option.label);
-    if (option.value !== "default_size") {
-      setFilter((prevFilter) => ({
-        ...prevFilter,
-        size: {
-          min: option.min,
-          max: option.max,
-        },
-      }));
-    }
-    setOpenDropdown(null);
-  };
-
-  const handleTypeOptionSelect = (option) => {
-    setTypeButtonLabel(option.label);
-    const newTypeFilterState = {
-      detachedHouse: false,
-      terracedHouse: false,
-      parkHouse: false,
-      flat: false,
-    };
-    if (option.value !== "default_type" && option.value !== "any_type") {
-      newTypeFilterState[option.value] = true;
-    }
-    // For "any_type", all remain false. For "default_type", no change to filter.type from here.
-    if (option.value !== "default_type") {
-      setFilter((prevFilter) => ({
-        ...prevFilter,
-        type: newTypeFilterState,
       }));
     }
     setOpenDropdown(null);
@@ -263,12 +511,11 @@ const DashboardCard = () => {
   };
 
   const handleSizeRangeChange = useCallback(([min, max]) => {
+    // Calculate all covered size categories
+    const covered = getSizeCategoriesFromRange(min, max);
     setFilter((prevFilter) => ({
       ...prevFilter,
-      size: {
-        min,
-        max,
-      },
+      size: covered,
     }));
     setSizeButtonLabel(`${min}-${max === 5000 ? "+" : max} sqm`);
   }, []);
@@ -560,14 +807,17 @@ const DashboardCard = () => {
                 ""
               ) : (
                 <p className="text-neutral-400 text-sm font-semibold h-10">
-                  {propertyOverview.address}
+                  {(propertyData && propertyData.address) ||
+                    propertyOverview.address}
                 </p>
               )}
               <p className="text-neutral-400 text-sm font-semibold h-10">
-                {propertyOverview.type}
+                {(propertyData && propertyData.type) || propertyOverview.type}
               </p>
               <p className="text-neutral-400 text-sm font-semibold h-10">
-                {propertyOverview.area}
+                {(propertyData && propertyData.area_sqm) ||
+                  propertyOverview.area}{" "}
+                sqm
               </p>
             </div>
           </div>
@@ -578,14 +828,16 @@ const DashboardCard = () => {
           <div className="w-36 sm:mb-4 xl:mb-0">
             <p className="text-center mt-2  md:mt-0 font-medium">Current</p>
             <SegmentedCircularGauge
-              value={71}
+              value={energyData?.current_rating?.score || 75}
+              grade={energyData?.current_rating?.band || "B"}
               size={142}
             />
           </div>
           <div className="w-36 sm:mb-4 xl:mb-0">
             <p className="text-center mt-2 md:mt-0 font-medium">Potential</p>
             <SegmentedCircularGauge
-              value={82}
+              value={energyData?.potential_rating?.score || 82}
+              grade={energyData?.potential_rating?.band || "A"}
               size={142}
             />
           </div>
@@ -695,10 +947,19 @@ const DashboardCard = () => {
               </button>
               {openDropdown === "size" && (
                 <div className="absolute top-[25%] left-0 sm:left-auto w-full sm:w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
-                  {sizeOptions.map((opt) => (
+                  {SIZE_CATEGORIES.map((opt) => (
                     <div
-                      key={opt.value}
-                      onClick={() => handleSizeOptionSelect(opt)}
+                      key={opt.code}
+                      onClick={() => {
+                        setFilter((prev) => ({
+                          ...prev,
+                          size: prev.size.includes(opt.code)
+                            ? prev.size.filter((c) => c !== opt.code)
+                            : [...prev.size, opt.code],
+                        }));
+                        setSizeButtonLabel(opt.label);
+                        setOpenDropdown(null);
+                      }}
                       className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-xs text-gray-700"
                     >
                       {opt.label}
@@ -712,25 +973,44 @@ const DashboardCard = () => {
                     0 sqm
                   </p>
                   <p className="text-neutral-400 text-xs font-semibold">
-                    5000+ sqm
+                    200 sqm
                   </p>
                 </div>
                 <div className="flex-1 flex flex-col justify-between min-h-[80px]">
                   <div>
                     <DualRangeSlider
                       min={0}
-                      max={5000}
-                      step={10}
-                      minValue={filter.size.min}
-                      maxValue={filter.size.max}
-                      onChange={handleSizeRangeChange}
-                      formatLabel={(value) =>
-                        `${value}${value === 5000 ? "+" : ""} sqm`
+                      max={200}
+                      step={1}
+                      minValue={
+                        typeof filter.size === "object" &&
+                        filter.size.min !== undefined
+                          ? filter.size.min
+                          : 0
                       }
+                      maxValue={
+                        typeof filter.size === "object" &&
+                        filter.size.max !== undefined
+                          ? filter.size.max
+                          : 200
+                      }
+                      onChange={handleSizeRangeChange}
+                      formatLabel={(value) => {
+                        if (value === 0) return "Unknown";
+                        if (value >= 1 && value <= 55) return "1-55m²";
+                        if (value > 55 && value <= 70) return "55-70m²";
+                        if (value > 70 && value <= 85) return "70-85m²";
+                        if (value > 85 && value <= 110) return "85-110m²";
+                        if (value > 110) return "110m²+";
+                        return `${value}m²`;
+                      }}
                     />
                   </div>
                   <div className="flex justify-end mt-2">
-                    <button className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800">
+                    <button
+                      onClick={handleSizeApply}
+                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
+                    >
                       Apply
                     </button>
                   </div>
@@ -765,15 +1045,29 @@ const DashboardCard = () => {
               </button>
               {openDropdown === "type" && (
                 <div className="absolute top-[25%] left-0 sm:left-auto w-full sm:w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
-                  {typeOptions.map((opt) => (
-                    <div
-                      key={opt.value}
-                      onClick={() => handleTypeOptionSelect(opt)}
-                      className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-xs text-gray-700"
-                    >
-                      {opt.label}
-                    </div>
-                  ))}
+                  {typeOptions
+                    .filter((opt) => opt.value !== "propertyType")
+                    .map((opt) => (
+                      <div
+                        key={opt.value}
+                        onClick={() => {
+                          setFilter((prev) => ({
+                            ...prev,
+                            type: Object.fromEntries(
+                              Object.keys(prev.type).map((k) => [
+                                k,
+                                k === opt.value,
+                              ])
+                            ),
+                          }));
+                          setTypeButtonLabel(opt.label);
+                          setOpenDropdown(null);
+                        }}
+                        className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-xs text-gray-700"
+                      >
+                        {opt.label}
+                      </div>
+                    ))}
                 </div>
               )}
               <div className="w-full sm:w-[160px] lg:w-36 bg-white shadow-xl px-3 py-2 rounded-lg">
@@ -916,7 +1210,10 @@ const DashboardCard = () => {
                     </div>
                   </div>
                   <div className="flex justify-end mt-2">
-                    <button className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800">
+                    <button
+                      onClick={handleTypeApply}
+                      className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
+                    >
                       Apply
                     </button>
                   </div>
@@ -925,13 +1222,21 @@ const DashboardCard = () => {
             </div>
           </div>
           <div className="my-4">
+            {(benchmarkingLoading ||
+              benchmarkingError ||
+              (Array.isArray(benchmarkingData) &&
+                benchmarkingData.length === 0)) && (
+              <div className="text-center text-neutral-400 text-sm py-2">
+                {benchmarkingLoading
+                  ? "Loading benchmarking data..."
+                  : benchmarkingError ||
+                    "No data found with the current filters."}
+              </div>
+            )}
             <ScatterPlot
-              data={sampleData} // Ensure sampleData is correctly formatted for ScatterPlot
-              highlightedPointId={"proj4"} // Example, adjust as needed
-              yAxisLabel="Project Success"
-              xAxisLabel="Frequency"
-              // width="w-full" // ScatterPlot should handle its own width/height or accept props
-              // height={256}  // ScatterPlot should handle its own width/height or accept props
+              data={benchmarkingData}
+              yAxisLabel="Score"
+              xAxisLabel="Area (sqm)"
             />
           </div>
         </div>
