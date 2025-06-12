@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
       const user = userData.user || userData;
 
       const cleanedData = {
-        id: user._id || crypto.randomUUID(),
+        id: user.id || crypto.randomUUID(),
         name:
           user.firstName && user.lastName
             ? `${user.firstName} ${user.lastName}`
