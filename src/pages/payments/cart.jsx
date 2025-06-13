@@ -36,7 +36,10 @@ const CartPage = () => {
   return (
     <>
       <Navbar onNavClick={setSelectedModal} />
-      <div className="container mx-auto px-4 py-8 md:h-[83vh]">
+      <div
+        className="container mx-auto px-4 py-8 "
+        style={{ minHeight: "calc(100vh - 152px)" }}
+      >
         <CheckoutStepper
           steps={steps}
           currentStep={currentStep}

@@ -8,7 +8,10 @@ export default function PaymentCancelPage() {
   return (
     <>
       <Navbar />
-      <div className="container mx-auto px-4 py-16 min-h-[60vh] flex flex-col items-center justify-center">
+      <div
+        className="container mx-auto px-4 py-16  flex flex-col items-center justify-center"
+        style={{ minHeight: "calc(100vh - 152px)" }}
+      >
         <div className="bg-white p-8 rounded-lg shadow-md text-center max-w-lg">
           <h1 className="text-3xl font-bold text-red-600 mb-4">
             Payment Cancelled

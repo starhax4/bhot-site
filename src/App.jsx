@@ -17,6 +17,7 @@ import Modal from "./components/modal";
 import { PlanProvider } from "./context/plan-context";
 import PaymentSuccessPage from "./pages/payments/success";
 import PaymentCancelPage from "./pages/payments/cancel";
+import NotFoundPage from "./pages/NotFound";
 
 function App() {
   const [modalType, setModalType] = useState(null);
@@ -108,6 +109,10 @@ function App() {
         <Route
           path="/payments/cancel"
           element={<PaymentCancelPage />}
+        />
+        <Route
+          path="*"
+          element={<NotFoundPage />}
         />
       </Routes>
       <Modal

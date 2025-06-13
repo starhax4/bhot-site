@@ -55,20 +55,39 @@ const Admin = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col min-h-screen w-full justify-center items-center bg-gray-50">
+      <>
         <Navbar onNavClick={setSelectedModal} />
-        <div className="flex-1 flex flex-col w-full items-center justify-center">
-          <div className="w-full flex flex-col items-center justify-center py-24">
-            <div className="w-full max-w-2xl h-40 bg-white rounded-2xl shadow animate-pulse mb-8" />
-            <div className="w-full max-w-2xl h-80 bg-white rounded-2xl shadow animate-pulse mb-8" />
-            <div className="w-full max-w-2xl h-24 bg-white rounded-2xl shadow animate-pulse" />
+        <div
+          className="flex flex-col w-full justify-center items-center bg-gray-50"
+          style={{ minHeight: "calc(100vh - 180px)" }}
+        >
+          <div className="flex flex-col md:flex-row gap-8 w-full max-w-6xl mt-16 animate-pulse">
+            {/* CardsGrid skeleton */}
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-6 md:gap-14 place-items-center md:px-12 md:py-11">
+              {[...Array(6)].map((_, i) => (
+                <div
+                  key={i}
+                  className="w-64 h-40 bg-white rounded-3xl shadow-lg"
+                />
+              ))}
+            </div>
+            {/* SalesGraphGrid skeleton */}
+            <div className="flex-1 flex flex-col gap-8 px-4 py-4 md:py-11 w-full">
+              {[220, 192, 192].map((h, i) => (
+                <div
+                  key={i}
+                  className={`w-full h-[${h}px] bg-white rounded-xl shadow-lg`}
+                />
+              ))}
+            </div>
           </div>
-          <div className="text-lg font-semibold text-gray-500 mt-4">
+          <div className="w-full max-w-4xl h-32 bg-white rounded-2xl shadow mt-12 animate-pulse" />
+          <div className="text-lg font-semibold text-gray-500 mt-8 animate-pulse">
             Loading admin dashboard...
           </div>
         </div>
         <Footer />
-      </div>
+      </>
     );
   }
   if (error) {

@@ -47,15 +47,14 @@ const DetailCard = ({
             />
           )}
         </div>
-        <div>
-          <p className="text-base text-zinc-600 font-semibold font-['Nunito_Sans']">
-            <span
-              className={`${
-                isDecreasing ? "text-text-rose-500" : "text-teal-500"
-              }`}
-            >
-              {percentage}%
-            </span>
+        <div className="flex-1 min-w-0">
+          <p
+            className={`text-base text-zinc-600 font-semibold font-['Nunito_Sans'] whitespace-nowrap overflow-hidden text-ellipsis ${
+              isDecreasing ? "text-text-rose-500" : "text-teal-500"
+            }`}
+            style={{ maxWidth: "13.5rem" }} // 216px, fits inside w-64
+          >
+            <span>{percentage}%</span>
             {"  "}
             {isDecreasing ? "Down" : "Up  "} from yesterday
           </p>
