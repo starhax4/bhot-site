@@ -17,6 +17,7 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [property, setProperty] = useState(null);
   const [energy, setEnergy] = useState(null);
+  const [value, setValue] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const Dashboard = () => {
                   ? res.data.recommendations
                   : []
               );
+              setValue(res.data.value || {});
             } else if (
               res.status === 404 ||
               res.message?.toLowerCase().includes("not found")
@@ -53,6 +55,7 @@ const Dashboard = () => {
               setProperty({ notFound: true });
               setEnergy({});
               setRecommendations([]);
+              setValue({});
             } else {
               if (retryCount < MAX_RETRIES) {
                 retryCount++;
@@ -62,6 +65,7 @@ const Dashboard = () => {
                 setProperty({});
                 setEnergy({});
                 setRecommendations([]);
+                setValue({});
               }
             }
           })
@@ -77,6 +81,7 @@ const Dashboard = () => {
               setProperty({ notFound: true });
               setEnergy({});
               setRecommendations([]);
+              setValue({});
             } else if (retryCount < MAX_RETRIES) {
               retryCount++;
               setTimeout(fetchData, RETRY_DELAY);
@@ -85,6 +90,7 @@ const Dashboard = () => {
               setProperty({});
               setEnergy({});
               setRecommendations([]);
+              setValue({});
             }
           })
           .finally(() => setLoading(false));
@@ -92,6 +98,7 @@ const Dashboard = () => {
         setProperty(null);
         setEnergy(null);
         setRecommendations([]);
+        setValue({});
       }
     };
 
@@ -113,11 +120,13 @@ const Dashboard = () => {
                 ? res.data.recommendations
                 : []
             );
+            setValue(res.data.value || {});
           } else {
             setError(res.message || "Failed to load property data.");
             setProperty({});
             setEnergy({});
             setRecommendations([]);
+            setValue({});
           }
         })
         .catch((err) => {
@@ -125,6 +134,7 @@ const Dashboard = () => {
           setProperty({});
           setEnergy({});
           setRecommendations([]);
+          setValue({});
         })
         .finally(() => setLoading(false));
     }
@@ -159,17 +169,29 @@ const Dashboard = () => {
             </div>
           )}
           <div className="flex flex-col md:flex-row md:justify-between gap-9">
-            <ValueCard
+            {/* <ValueCard
               title="Current Estimate Value"
-              lowValue={"000000"}
-              estimate={"000000"}
-              highValue={"000000"}
-            />
+              lowValue={value.current_estimate_value.low}
+              estimate={value.current_estimate_value.estimate}
+              highValue={value.current_estimate_value.low}
+            /> */}
             <ValueCard
-              title="Potential Estimate Value"
-              lowValue={"000000"}
-              estimate={"000000"}
-              highValue={"000000"}
+              title="Potential Value Uplift"
+              lowValue={
+                value && value.potential_value_uplift
+                  ? value.potential_value_uplift.low
+                  : "000000"
+              }
+              estimate={
+                value && value.potential_value_uplift
+                  ? value.potential_value_uplift.estimate
+                  : "000000"
+              }
+              highValue={
+                value && value.potential_value_uplift
+                  ? value.potential_value_uplift.high
+                  : "000000"
+              }
               desc
             />
           </div>

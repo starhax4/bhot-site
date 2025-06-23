@@ -24,15 +24,17 @@ const ValueCard = ({
       >
         <div className="flex items-center justify-between sm:justify-start sm:gap-8 md:gap-4 lg:gap-8 md:justify-between">
           <p className="text-neutral-400 text-sm font-semibold">Low:</p>
-          <p className="text-neutral-400 text-sm text-end">£{lowValue}</p>
+          <p className="text-neutral-400 text-sm text-end">{lowValue}</p>
         </div>
         <div className="flex items-center md:flex justify-between sm:justify-start sm:gap-6  md:gap-1 lg:gap-4 md:justify-between">
-          <p className="text-primary sm:text-sm lg:text-base font-semibold">Estimate:</p>
-          <p className="text-primary sm:text-sm lg:text-base">£{estimate}</p>
+          <p className="text-primary sm:text-sm lg:text-base font-semibold">
+            Estimate:
+          </p>
+          <p className="text-primary sm:text-sm lg:text-base">{estimate}</p>
         </div>
         <div className="flex items-center justify-between sm:justify-start sm:gap-8 md:gap-4 lg:gap-8 md:justify-between">
           <p className="text-neutral-400 text-sm font-semibold">High:</p>
-          <p className="text-neutral-400 text-sm">£{highValue}</p>
+          <p className="text-neutral-400 text-sm">{highValue}</p>
         </div>
       </div>
     </div>
