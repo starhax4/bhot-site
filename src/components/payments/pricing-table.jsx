@@ -14,7 +14,7 @@ const pricingData = {
   features: [
     { id: "properties", label: "Number of Properties" },
     { id: "benchmarking", label: "Neighbourhood Benchmarking" },
-    { id: "valuation", label: "Property Valuation Estimate" },
+    
     { id: "efficiency", label: "Energy Efficiency Recommendations" },
     {
       id: "uplift",
@@ -32,7 +32,6 @@ const pricingData = {
       values: {
         properties: "1",
         benchmarking: true,
-        valuation: true,
         efficiency: true,
         uplift: false,
         payback: false,
@@ -47,7 +46,6 @@ const pricingData = {
       values: {
         properties: "1",
         benchmarking: true,
-        valuation: true,
         efficiency: true,
         uplift: true,
         payback: true,
@@ -62,7 +60,6 @@ const pricingData = {
       values: {
         properties: "Unlimited",
         benchmarking: true,
-        valuation: true,
         efficiency: true,
         uplift: true,
         payback: true,

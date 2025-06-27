@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router";
 import AddressManager from "./address-manager"; // Importing AddressManager component
 import { useAuth } from "../context/auth/AuthContext";
+import UserIcon from "./user-icon";
 
 export default function Navbar({ onNavClick }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -65,7 +66,32 @@ export default function Navbar({ onNavClick }) {
               className="cursor-pointer"
             >
               <div className="flex justify-center items-center size-10 rounded-full outline-[3px] outline-primary shadow-[0px_4px_4px_0px_rgba(0,0,0,0.25)] cursor-pointer">
-                <span>GM</span>
+                {isAuthenticated && !!useAuth().user ? (
+                  (() => {
+                    const user = useAuth().user;
+                    let initials = "";
+                    if (user.firstName && user.lastName) {
+                      initials =
+                        `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
+                    } else if (user.name) {
+                      const nameParts = user.name.trim().split(" ");
+                      if (nameParts.length === 1) {
+                        initials = nameParts[0].slice(0, 2).toUpperCase();
+                      } else {
+                        initials = `${nameParts[0][0]}${
+                          nameParts[nameParts.length - 1][0]
+                        }`.toUpperCase();
+                      }
+                    }
+                    return initials ? (
+                      <span>{initials}</span>
+                    ) : (
+                      <UserIcon size={24} />
+                    );
+                  })()
+                ) : (
+                  <UserIcon size={24} />
+                )}
               </div>
             </button>
           </ul>

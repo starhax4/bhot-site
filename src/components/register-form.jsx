@@ -5,7 +5,8 @@ import { Link } from "react-router";
 import SelectInput from "./select-input";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { registerUser } from "../api/serices/api_utils";
+import { registerUser, loginUser } from "../api/serices/api_utils";
+import { useAuth } from "../context/auth/AuthContext";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
   const [isFirst, setIsFirst] = useState(true);
@@ -17,6 +18,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   const [error, setError] = useState("");
   const [postcode, setPostcode] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
@@ -95,9 +97,21 @@ const RegisterForm = ({ closeModal, nextModal }) => {
       }
 
       const res = await registerUser(apiData);
-
       if (res && res.success) {
-        navigate("/dashboard");
+        // Automatically log in the user after successful registration using AuthContext
+        const loginRes = await login({
+          email: apiData.email,
+          password: apiData.password,
+        });
+        if (loginRes && loginRes.success) {
+          navigate("/dashboard");
+        } else {
+          setError(
+            loginRes?.message ||
+              loginRes?.error?.message ||
+              "Account created, but automatic sign-in failed. Please log in manually."
+          );
+        }
       } else {
         const errorMessage =
           res?.message ||

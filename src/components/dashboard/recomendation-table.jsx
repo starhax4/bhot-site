@@ -121,8 +121,7 @@ const RecommendationsTable = ({ data, addressId }) => {
   const userPlan = user?.plan || "Free";
   // Ensure userPlan is always lowercase for comparison
   const isFree = String(userPlan).toLowerCase() === "free";
-  const visibleRows = isFree ? recommendations.slice(0, 3) : recommendations;
-  const hiddenRowsCount = isFree ? Math.max(0, recommendations.length - 3) : 0;
+  const visibleRows = recommendations;
 
   // Handler for locked cell click
   const handleLockedClick = (e) => {
@@ -180,86 +179,62 @@ const RecommendationsTable = ({ data, addressId }) => {
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {visibleRows.map((row, index) => (
-              <tr
-                key={row.id || index}
-                className={index % 2 === 0 ? "bg-white" : "bg-white"}
-              >
-                <td className="px-2 py-4 text-wrap text-primary text-[11px] sm:text-xs font-bold font-['Sora']">
-                  {row.measure}
-                </td>
-                <td className="px-2 py-4 text-wrap text-black text-[11px] sm:text-xs font-normal font-['Sora']">
-                  {row.cost}
-                </td>
-                <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
-                  {row.potential_yearly_bills_saving}
-                </td>
-                <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
-                  {row.epc_impact}
-                </td>
-                {/* Estimated Value Impact */}
-                <td
-                  className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
-                  onClick={isFree ? handleLockedClick : undefined}
-                >
-                  {isFree ? (
-                    <div className="flex flex-col items-center text-center">
-                      <LockIcon />
-                      <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
-                        Upgrade to unlock
-                      </span>
-                    </div>
-                  ) : (
-                    row.estimated_value_impact
-                  )}
-                </td>
-                {/* Total Payback Period */}
-                <td
-                  className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
-                  onClick={isFree ? handleLockedClick : undefined}
-                >
-                  {isFree ? (
-                    <div className="flex flex-col items-center text-center">
-                      <LockIcon />
-                      <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
-                        Upgrade to unlock
-                      </span>
-                    </div>
-                  ) : (
-                    row.total_payback_period || ""
-                  )}
-                </td>
-              </tr>
-            ))}
-            {/* Render hidden rows as skeletons for Free users */}
-            {isFree &&
-              hiddenRowsCount > 0 &&
-              Array.from({ length: hiddenRowsCount }).map((_, idx) => (
+            {visibleRows.map((row, index) => {
+              // For Free users, lock all rows
+              const isLocked = isFree;
+              return (
                 <tr
-                  key={`hidden-row-${idx}`}
-                  className="cursor-pointer"
-                  onClick={handleLockedClick}
+                  key={row.id || index}
+                  className={index % 2 === 0 ? "bg-white" : "bg-white"}
                 >
-                  <td className="px-2 py-4 text-left">
-                    <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-600 rounded-full"></div>
+                  <td className="px-2 py-4 text-wrap text-primary text-[11px] sm:text-xs font-bold font-['Sora']">
+                    {row.measure}
                   </td>
-                  <td className="px-2 py-4 text-left">
-                    <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full"></div>
+                  <td className="px-2 py-4 text-wrap text-black text-[11px] sm:text-xs font-normal font-['Sora']">
+                    {row.cost}
                   </td>
-                  <td className="px-1 py-4 text-center">
-                    <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
+                    {row.potential_yearly_bills_saving}
                   </td>
-                  <td className="px-1 py-4 text-center">
-                    <div className="w-10 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
+                    {row.epc_impact}
                   </td>
-                  <td className="px-2 py-4 text-center">
-                    <div className="w-14 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  {/* Estimated Value Impact */}
+                  <td
+                    className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
+                    onClick={isLocked ? handleLockedClick : undefined}
+                  >
+                    {isLocked ? (
+                      <div className="flex flex-col items-center text-center">
+                        <LockIcon />
+                        <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                          Upgrade to unlock
+                        </span>
+                      </div>
+                    ) : (
+                      row.estimated_value_impact
+                    )}
                   </td>
-                  <td className="px-2 py-4 text-center">
-                    <div className="w-12 h-5 sm:w-16 sm:h-6 bg-gray-300 rounded-full mx-auto"></div>
+                  {/* Total Payback Period */}
+                  <td
+                    className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
+                    onClick={isLocked ? handleLockedClick : undefined}
+                  >
+                    {isLocked ? (
+                      <div className="flex flex-col items-center text-center">
+                        <LockIcon />
+                        <span className="text-[10px] sm:text-xs text-gray-500 mt-1">
+                          Upgrade to unlock
+                        </span>
+                      </div>
+                    ) : (
+                      row.total_payback_period || ""
+                    )}
                   </td>
                 </tr>
-              ))}
+              );
+            })}
+            {/* Placeholders removed as requested */}
           </tbody>
         </table>
       </div>

@@ -177,11 +177,11 @@ const DashboardCard = ({ propertyData, energyData }) => {
       t.includes("parkhouse") ||
       t.includes("park house")
     )
-      return "parkHouse";
-    if (t.includes("detached")) return "detachedHouse";
-    if (t.includes("terrace")) return "terracedHouse";
-    if (t.includes("semi-detached")) return "SemiDetachedHouse";
-    if (t.includes("house")) return "detachedHouse";
+      return "park home";
+    if (t.includes("detached") || t.includes("house")) return "house";
+    if (t.includes("terrace") || t.includes("house")) return "house";
+    if (t.includes("semi-detached") || t.includes("house")) return "house";
+    if (t.includes("house")) return "house";
     return "";
   }
 
@@ -217,9 +217,16 @@ const DashboardCard = ({ propertyData, energyData }) => {
         filterToUse.size.length > 0
       ) {
         sizeCategories = filterToUse.size;
-      } else if (propertyData && propertyData.area_sqm) {
-        sizeCategories = [mapAreaToCategory(Number(propertyData.area_sqm))];
       }
+      // Always include your property size
+      const mySizeCategory =
+        propertyData && propertyData.area_sqm
+          ? mapAreaToCategory(Number(propertyData.area_sqm))
+          : undefined;
+      if (mySizeCategory) sizeCategories.push(mySizeCategory);
+      sizeCategories = [...new Set(sizeCategories)].filter(
+        (s) => s && s !== "unknown"
+      );
       // Multi-type support
       const selectedTypes = Object.entries(filterToUse.type)
         .filter(([_, v]) => v)
@@ -227,15 +234,17 @@ const DashboardCard = ({ propertyData, energyData }) => {
       let typeCategories =
         selectedTypes.length > 0
           ? selectedTypes.map((key) => mapTypeToCategory({ [key]: true }))
-          : propertyData && propertyData.type
-          ? [normalizePropertyType(propertyData.type)]
           : [];
-      // Remove duplicates and 'propertyType'
+      // Always include your property type
+      const myTypeCategory =
+        propertyData && propertyData.type
+          ? mapTypeToCategory({
+              [normalizePropertyType(propertyData.type)]: true,
+            })
+          : undefined;
+      if (myTypeCategory) typeCategories.push(myTypeCategory);
       typeCategories = [...new Set(typeCategories)].filter(
         (t) => t && t !== "propertyType"
-      );
-      sizeCategories = [...new Set(sizeCategories)].filter(
-        (s) => s && s !== "unknown"
       );
       let postcode =
         currentAddress?.zip ||
@@ -249,12 +258,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
         setBenchmarkingData([]);
         return;
       }
-      if (typeCategories.length === 0) {
-        setBenchmarkingError("Please select at least one property type.");
-        setBenchmarkingLoading(false);
-        setBenchmarkingData([]);
-        return;
-      }
+      // Remove the check for typeCategories.length === 0
       if (sizeCategories.length === 0) {
         setBenchmarkingError("Please select at least one size category.");
         setBenchmarkingLoading(false);
@@ -465,6 +469,9 @@ const DashboardCard = ({ propertyData, energyData }) => {
   };
 
   const handleSizeApply = () => {
+    // On apply, ensure filter.size matches the current slider range
+    const covered = getSizeCategoriesFromRange(sizeRange.min, sizeRange.max);
+    setFilter((prev) => ({ ...prev, size: covered }));
     fetchDashboardData();
   };
 
@@ -506,6 +513,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
       case "detachedHouse":
       case "terracedHouse":
       case "SemiDetachedHouse":
+      case "house":
         return "house";
       default:
         return "propertyType";
@@ -565,6 +573,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
   };
 
   const handleSizeRangeChange = useCallback(([min, max]) => {
+    setSizeRange({ min, max });
     // Calculate all covered size categories
     const covered = getSizeCategoriesFromRange(min, max);
     setFilter((prevFilter) => ({
@@ -640,6 +649,28 @@ const DashboardCard = ({ propertyData, energyData }) => {
 
   // Add state for add address error
   const [addAddressError, setAddAddressError] = useState("");
+
+  // Add state to track the slider's min/max
+  const [sizeRange, setSizeRange] = useState({ min: 0, max: 200 });
+
+  // Set initial filter size and slider range to property size category on propertyData load
+  useEffect(() => {
+    if (propertyData && propertyData.area_sqm) {
+      const sizeCode = mapAreaToCategory(Number(propertyData.area_sqm));
+      if (sizeCode && sizeCode !== "unknown") {
+        setFilter((prev) => ({
+          ...prev,
+          size: [sizeCode],
+        }));
+        // Set slider to the min/max for this category
+        const cat = SIZE_CATEGORIES.find((c) => c.code === sizeCode);
+        if (cat) {
+          setSizeRange({ min: cat.min, max: cat.max });
+          setSizeButtonLabel(cat.label);
+        }
+      }
+    }
+  }, [propertyData]);
 
   return (
     <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl ">
@@ -1034,18 +1065,8 @@ const DashboardCard = ({ propertyData, energyData }) => {
                       min={0}
                       max={200}
                       step={1}
-                      minValue={
-                        typeof filter.size === "object" &&
-                        filter.size.min !== undefined
-                          ? filter.size.min
-                          : 0
-                      }
-                      maxValue={
-                        typeof filter.size === "object" &&
-                        filter.size.max !== undefined
-                          ? filter.size.max
-                          : 200
-                      }
+                      minValue={sizeRange.min}
+                      maxValue={sizeRange.max}
                       onChange={handleSizeRangeChange}
                       formatLabel={(value) => {
                         if (value === 0) return "Unknown";
@@ -1256,7 +1277,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                           htmlFor="studioApartment"
                           className="text-xs text-neutral-400"
                         >
-                          Studio Apartment
+                          Other
                         </label>
                       </div>
                     </div>
@@ -1294,7 +1315,8 @@ const DashboardCard = ({ propertyData, energyData }) => {
                 (Array.isArray(benchmarkingData) &&
                   benchmarkingData.length === 0) ? (
                   <div className="mt-2 text-xs text-gray-400 italic">
-                    No recommendations available for this address. (Placeholder)
+                    No recommendations available for this address / No Data on
+                    these filters
                   </div>
                 ) : null}
               </div>
