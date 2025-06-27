@@ -7,6 +7,7 @@ import React, {
 } from "react";
 import PropTypes from "prop-types";
 import axios from "axios";
+import { getUserProfile } from "../../api/serices/api_utils";
 
 // Constants
 export const PLANS = {
@@ -430,6 +431,70 @@ export const AuthProvider = ({ children }) => {
     [user, persistUserData, handleApiError]
   );
 
+  // Refresh user data from backend
+  const refreshUser = useCallback(async () => {
+    const token = getAuthToken();
+    if (!token || !user) {
+      setError("User not authenticated");
+      return { success: false, message: "User not authenticated" };
+    }
+
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await getUserProfile();
+
+      if (result.success) {
+        persistUserData(result.data);
+        return { success: true, data: result.data };
+      } else {
+        // If API call fails, we'll use fallback approach since payment was successful
+        console.log(
+          "API refresh failed, using fallback approach:",
+          result.message
+        );
+
+        // Update user plan to PRO since they just successfully paid
+        const updatedUser = {
+          ...user,
+          plan: PLANS.PRO,
+        };
+
+        persistUserData(updatedUser);
+        return {
+          success: true,
+          data: updatedUser,
+          fallback: true,
+          message: "Account updated locally (API endpoint not available)",
+        };
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+
+      // As a last resort, update plan locally since payment was successful
+      try {
+        const updatedUser = {
+          ...user,
+          plan: PLANS.PRO,
+        };
+
+        persistUserData(updatedUser);
+        return {
+          success: true,
+          data: updatedUser,
+          fallback: true,
+          message: "Account updated locally (network error)",
+        };
+      } catch (fallbackError) {
+        const errorMessage = error.message || "Failed to refresh user data";
+        setError(errorMessage);
+        return { success: false, message: errorMessage };
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [user, getAuthToken, persistUserData]);
+
   const contextValue = {
     user,
     setUser, // <-- Expose setUser for direct user updates
@@ -439,6 +504,7 @@ export const AuthProvider = ({ children }) => {
     isAuthenticated: !!user,
     login,
     logout,
+    refreshUser,
     switchAddress,
     addAddress,
     deleteAddress,

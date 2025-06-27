@@ -6,10 +6,15 @@ import { submitContactForm } from "../api/serices/api_utils";
 const ContactForm = ({ closeModal }) => {
   const [selectedOptions, setSelectedOptions] = useState("data-sources");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setError(null);
+    setSuccess(false);
+
     try {
       const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
@@ -18,18 +23,23 @@ const ContactForm = ({ closeModal }) => {
       const contactData = { option: selectedOptions, ...data };
       const res = await submitContactForm(contactData);
       if (res && res.success) {
+        setSuccess(true);
         console.log("Form Submited Successfully");
+        // Reset form
+        e.target.reset();
+        // Close modal after a short delay to show success message
+        setTimeout(() => {
+          closeModal();
+        }, 2000);
       } else {
         setError(res?.message || "Form Submittion Failed. Please try again.");
       }
     } catch (error) {
       setError("An unexpected error occurred. Please try again.");
-      console.error("Contact FOrm Submittion error:", err);
+      console.error("Contact Form Submittion error:", error);
     } finally {
       setIsLoading(false);
     }
-
-    closeModal();
   };
   return (
     <div className="px-4 md:px-6 py-5 flex justify-between">
@@ -157,7 +167,42 @@ const ContactForm = ({ closeModal }) => {
           </div>
         </div>
         <div className="flex flex-col gap-4 mt-5">
-          {" "}
+          {/* Success Message */}
+          {success && (
+            <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg flex items-center gap-2">
+              <svg
+                className="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-sm font-medium">
+                Message sent successfully! We'll get back to you soon.
+              </span>
+            </div>
+          )}
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-lg flex items-center gap-2">
+              <svg
+                className="w-5 h-5"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-sm font-medium">{error}</span>
+            </div>
+          )}{" "}
           {/* Reduced gap and margin */}
           <Input
             label="Your Name"
@@ -191,11 +236,12 @@ const ContactForm = ({ closeModal }) => {
           </div>
           <div>
             <ButtonCTA
-              label="Send message"
+              label={success ? "Message Sent!" : "Send message"}
               fullWidth
               submit
               className="rounded-full"
               isLoading={isLoading}
+              disabled={success}
             />
           </div>
         </div>

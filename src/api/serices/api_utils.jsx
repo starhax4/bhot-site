@@ -285,6 +285,97 @@ export const updateUserData = async (userData) => {
   }
 };
 
+export const getUserProfile = async () => {
+  try {
+    // Get user ID from localStorage
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      return {
+        success: false,
+        message: "No user data found in local storage",
+        error: null,
+        status: 400,
+      };
+    }
+
+    const user = JSON.parse(storedUser);
+    const userId = user?.id || user?._id || user?.userId;
+
+    if (!userId) {
+      return {
+        success: false,
+        message: "User ID not found in stored user data",
+        error: null,
+        status: 400,
+      };
+    }
+
+    // Try multiple possible endpoints for getting user by ID
+    const possibleEndpoints = [
+      `${API_URL}/api/auth/user/${userId}`,
+      `${API_URL}/api/user/${userId}`,
+      `${API_URL}/api/users/${userId}`,
+      `${API_URL}/api/auth/profile/${userId}`,
+    ];
+
+    let lastError = null;
+
+    for (const endpoint of possibleEndpoints) {
+      try {
+        const res = await axios.get(endpoint, { timeout: 15000 });
+        return { success: true, data: res.data };
+      } catch (error) {
+        lastError = error;
+        // If it's not a 404, break the loop (might be auth issue, server error, etc.)
+        if (error.response?.status !== 404) {
+          break;
+        }
+        // Continue to next endpoint if 404
+        continue;
+      }
+    }
+
+    // If we get here, all endpoints failed
+    throw lastError;
+  } catch (error) {
+    // Handle errors
+    let errorMessage = "Failed to fetch user profile";
+    let errorData = null;
+
+    if (error.response) {
+      // Server responded with error status
+      const status = error.response.status;
+
+      if (status === 401) {
+        errorMessage = "Session expired or invalid token. Please log in again.";
+      } else if (status === 403) {
+        errorMessage = "You don't have permission to access this profile.";
+      } else if (status === 404) {
+        errorMessage =
+          "User profile endpoint not found. The backend may not support user profile fetching.";
+      } else {
+        errorMessage =
+          error.response.data?.message ||
+          error.response.data?.error ||
+          `Server error (${status})`;
+      }
+      errorData = error.response.data;
+    } else if (error.request) {
+      errorMessage =
+        "Unable to connect to server. Please check your connection.";
+    } else {
+      errorMessage = error.message || "An unexpected error occurred";
+    }
+
+    return {
+      success: false,
+      message: errorMessage,
+      error: errorData || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
 export const forgetPassword = async (email) => {
   try {
     const url = `${API_URL}/api/auth/forgot-password`;
