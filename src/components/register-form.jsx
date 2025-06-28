@@ -5,7 +5,11 @@ import { Link } from "react-router";
 import SelectInput from "./select-input";
 import { motion } from "motion/react";
 import { useNavigate } from "react-router";
-import { registerUser, loginUser } from "../api/serices/api_utils";
+import {
+  registerUser,
+  loginUser,
+  fetchAddressesByPostcode,
+} from "../api/serices/api_utils";
 import { useAuth } from "../context/auth/AuthContext";
 
 const RegisterForm = ({ closeModal, nextModal }) => {
@@ -17,6 +21,10 @@ const RegisterForm = ({ closeModal, nextModal }) => {
   const [otherHearFromText, setOtherHearFromText] = useState("");
   const [error, setError] = useState("");
   const [postcode, setPostcode] = useState("");
+  const [addresses, setAddresses] = useState([]);
+  const [selectedAddress, setSelectedAddress] = useState("");
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
+  const [addressError, setAddressError] = useState("");
   const navigate = useNavigate();
   const { login } = useAuth();
 
@@ -36,6 +44,19 @@ const RegisterForm = ({ closeModal, nextModal }) => {
       }
     });
 
+    // Additional validation for address selection
+    if (!selectedAddress) {
+      const manualAddressInput = document.querySelector(
+        'input[name="address"]'
+      );
+      if (!manualAddressInput || !manualAddressInput.value.trim()) {
+        setError(
+          "Please select an address from the list or enter your address manually"
+        );
+        return;
+      }
+    }
+
     if (!isValid) return;
 
     // Additional client-side validation to match backend requirements
@@ -44,12 +65,28 @@ const RegisterForm = ({ closeModal, nextModal }) => {
       return;
     }
 
+    // Validate that hear-from field is properly filled
+    const formData = new FormData(e.target);
+    const hearFromValue = formData.get("hear-from");
+
+    if (!hearFromValue) {
+      setError("Please select how you heard about us");
+      return;
+    }
+
+    if (hearFromValue === "other" && !otherHearFromText.trim()) {
+      setError("Please specify how you heard about us");
+      return;
+    }
+
     setIsLoading(true);
     setError("");
 
     try {
-      const formData = new FormData(e.target);
       const data = Object.fromEntries(formData.entries());
+
+      // Get the address - either from selection or manual input
+      const finalAddress = selectedAddress || data.address;
 
       // Transform form data to match backend API expectations
       const apiData = {
@@ -61,13 +98,13 @@ const RegisterForm = ({ closeModal, nextModal }) => {
         confirmPassword: data["c-password"],
         hearFrom:
           data["hear-from"] === "other"
-            ? data.hear_from_other_text || "other"
+            ? otherHearFromText || "other"
             : data["hear-from"],
         postcode: data.postcode,
         addresses: [
           {
             id: crypto.randomUUID(), // Generate unique ID for the address
-            address: data.address,
+            address: finalAddress, // Use the final address (selected or manual)
             postcode: data.postcode,
           },
         ], // Create address object array matching the schema
@@ -92,7 +129,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
       }
 
       if (!apiData.addresses[0].address) {
-        setError("Address is required");
+        setError("Please select an address or enter your address manually");
         return;
       }
 
@@ -143,7 +180,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
     // Clear any existing errors
     setError("");
 
-    // Get only the visible first step fields
+    // Get only the visible first step fields (including hidden inputs from SelectInput)
     const firstStepFields = document.querySelectorAll(
       ".first-step-fields input, .first-step-fields select"
     );
@@ -152,12 +189,41 @@ const RegisterForm = ({ closeModal, nextModal }) => {
 
     // Check validity of only the first step fields
     firstStepFields.forEach((field) => {
-      if (!field.checkValidity()) {
+      // Skip validation for non-required fields or fields that aren't relevant
+      if (field.type === "hidden" && field.name === "hear_from_other_text") {
+        // Only validate the "other" text field if "Other" is selected
+        if (showOtherHearFromField && !field.value.trim()) {
+          isValid = false;
+          invalidFields.push("Please specify how you heard about us");
+        }
+      } else if (!field.checkValidity()) {
         field.reportValidity();
         isValid = false;
         invalidFields.push(field.name || field.id || "unnamed field");
       }
     });
+
+    // Additional custom validation for required SelectInput fields
+    const hearFromValue = document.querySelector(
+      'input[name="hear-from"]'
+    )?.value;
+    const ageValue = document.querySelector('input[name="age"]')?.value;
+
+    if (!hearFromValue) {
+      setError("Please select how you heard about us");
+      isValid = false;
+    }
+
+    if (!ageValue) {
+      setError("Please select your age bracket");
+      isValid = false;
+    }
+
+    // If "Other" is selected but no text is provided
+    if (hearFromValue === "other" && !otherHearFromText.trim()) {
+      setError("Please specify how you heard about us");
+      isValid = false;
+    }
 
     if (!isValid) {
       return;
@@ -192,8 +258,8 @@ const RegisterForm = ({ closeModal, nextModal }) => {
     }
   };
 
-  // UK Postcode formatter with proper validation
-  const handlePostcodeChange = (e) => {
+  // UK Postcode formatter with proper validation and address fetching
+  const handlePostcodeChange = async (e) => {
     let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
     // Format UK postcode with space
@@ -209,10 +275,63 @@ const RegisterForm = ({ closeModal, nextModal }) => {
     // Limit to 8 characters maximum (including space)
     if (value.length <= 8) {
       setPostcode(value);
+
+      // Clear previous addresses and selected address when postcode changes
+      setAddresses([]);
+      setSelectedAddress("");
+      setAddressError("");
+
       // Clear error when user starts typing valid postcode
       if (error && !isFirst) {
         setError("");
       }
+
+      // Fetch addresses when postcode is complete (has space and correct length)
+      if (value.includes(" ") && value.length >= 6 && value.length <= 8) {
+        setIsLoadingAddresses(true);
+        setAddressError("");
+
+        try {
+          const result = await fetchAddressesByPostcode(value);
+
+          if (result.success && result.data.addresses) {
+            const addressOptions = result.data.addresses.map((addr) => ({
+              label: addr.label,
+              value: addr.value,
+            }));
+            setAddresses(addressOptions);
+
+            if (addressOptions.length === 0) {
+              setAddressError(
+                "No addresses found for this postcode. You may need to enter your address manually."
+              );
+            }
+          } else {
+            setAddressError(
+              result.message || "Unable to fetch addresses for this postcode."
+            );
+            setAddresses([]);
+          }
+        } catch (err) {
+          console.error("Error fetching addresses:", err);
+          setAddressError(
+            "Error fetching addresses. Please try again or enter your address manually."
+          );
+          setAddresses([]);
+        } finally {
+          setIsLoadingAddresses(false);
+        }
+      }
+    }
+  };
+
+  // Handler for address selection
+  const handleAddressChange = (e) => {
+    setSelectedAddress(e.target.value);
+    setAddressError("");
+    // Clear any registration errors
+    if (error && !isFirst) {
+      setError("");
     }
   };
 
@@ -224,6 +343,14 @@ const RegisterForm = ({ closeModal, nextModal }) => {
         onSubmit={handleRegisterSubmit}
         className="flex flex-col"
       >
+        {/* Hidden input for selected address to ensure form submission works */}
+        {selectedAddress && (
+          <input
+            type="hidden"
+            name="address"
+            value={selectedAddress}
+          />
+        )}
         <div className={`first-step-fields ${isFirst ? "block" : "hidden"}`}>
           <div>
             <h2 className="text-primary text-2xl md:text-3xl font-semibold">
@@ -310,6 +437,7 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 { label: "Other", value: "other" },
               ]}
               onChange={handleHearFromChange} // Added onChange handler
+              required
               // searchEnabled={true}
               // onSearch={handleSearch}
               fullWidth
@@ -410,17 +538,85 @@ const RegisterForm = ({ closeModal, nextModal }) => {
                 maxLength="8"
                 type="text"
                 required
-                helperText="City and country will be inferred from postcode."
+                helperText="Enter your postcode to find your address automatically."
               />
-              <Input
-                name="address"
-                label="Street Address"
-                placeholder="Enter your street address (city will be assumed from postcode)"
-                minLength="10"
-                title="Please enter your complete street address"
-                required
-                helperText="Only enter your street address. City and country will be inferred from postcode."
-              />
+
+              {/* Address Selection */}
+              {postcode && (
+                <div className="relative">
+                  {isLoadingAddresses ? (
+                    <div className="flex items-center gap-3 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary"></div>
+                      <span className="text-sm text-blue-700">
+                        Finding addresses for {postcode}...
+                      </span>
+                    </div>
+                  ) : addresses.length > 0 ? (
+                    <SelectInput
+                      name="address"
+                      label="Select Your Address"
+                      options={addresses}
+                      value={selectedAddress}
+                      onChange={handleAddressChange}
+                      placeholder="Choose your address from the list"
+                      searchEnabled={true}
+                      required
+                      fullWidth
+                      helperText={`${addresses.length} address${
+                        addresses.length === 1 ? "" : "es"
+                      } found. Start typing to search or select from the dropdown.`}
+                    />
+                  ) : addressError ? (
+                    <div className="space-y-4">
+                      <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm text-yellow-800">
+                            {addressError}
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handlePostcodeChange({
+                                target: { value: postcode },
+                              })
+                            }
+                            className="text-xs text-yellow-700 hover:text-yellow-900 underline"
+                            disabled={isLoadingAddresses}
+                          >
+                            Retry
+                          </button>
+                        </div>
+                      </div>
+                      <Input
+                        name="address"
+                        label="Street Address"
+                        placeholder="Enter your full street address manually"
+                        minLength="10"
+                        title="Please enter your complete street address"
+                        required
+                        helperText="Please enter your full address including house number and street name."
+                      />
+                    </div>
+                  ) : postcode.includes(" ") && postcode.length >= 6 ? (
+                    <Input
+                      name="address"
+                      label="Street Address"
+                      placeholder="Enter your full street address"
+                      minLength="10"
+                      title="Please enter your complete street address"
+                      required
+                      helperText="Please enter your full address including house number and street name."
+                    />
+                  ) : (
+                    <div className="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                      <p className="text-sm text-gray-600">
+                        Complete your postcode above to automatically find your
+                        address.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {error && (

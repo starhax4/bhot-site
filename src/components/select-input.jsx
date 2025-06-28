@@ -28,6 +28,7 @@ const SelectInput = forwardRef(
       className = "",
       inputText, // Allow direct control of input text from parent
       onInputChange, // Allow parent to handle input changes
+      required = false, // Add required prop
       ...props
     },
     ref
@@ -163,6 +164,7 @@ const SelectInput = forwardRef(
           type="hidden"
           name={name}
           value={selectedValue}
+          required={required}
         />
 
         <div

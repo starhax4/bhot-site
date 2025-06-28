@@ -912,3 +912,81 @@ export const adminGetDashboardAnalytics = async () => {
     };
   }
 };
+
+// Function to fetch addresses by postcode
+export const fetchAddressesByPostcode = async (postcode) => {
+  try {
+    if (!postcode || postcode.trim() === "") {
+      throw new Error("Postcode is required");
+    }
+
+    const trimmedPostcode = postcode.trim();
+
+    // Basic UK postcode validation on frontend
+    const ukPostcodeRegex = /^[A-Z]{1,2}[0-9]{1,2}[A-Z]?\s?[0-9][A-Z]{2}$/i;
+    if (!ukPostcodeRegex.test(trimmedPostcode)) {
+      throw new Error(
+        "Invalid postcode format. Please enter a valid UK postcode."
+      );
+    }
+
+    const response = await axios.get(`${API_URL}/api/addresses-by-postcode`, {
+      params: { postcode: trimmedPostcode },
+    });
+
+    if (response.data && response.data.success) {
+      return {
+        success: true,
+        data: response.data,
+      };
+    } else {
+      return {
+        success: false,
+        message: response.data?.error || "Failed to fetch addresses",
+      };
+    }
+  } catch (error) {
+    console.error("Error fetching addresses:", error);
+
+    // Handle different error types
+    if (error.response) {
+      const { status, data } = error.response;
+
+      if (status === 404) {
+        return {
+          success: false,
+          message:
+            "No addresses found for this postcode. Please check the postcode and try again.",
+          addresses: [],
+        };
+      }
+
+      if (status === 400) {
+        return {
+          success: false,
+          message: data?.error || "Invalid postcode format",
+        };
+      }
+
+      if (status === 429) {
+        return {
+          success: false,
+          message: "Too many requests. Please wait a moment and try again.",
+        };
+      }
+
+      return {
+        success: false,
+        message: data?.error || "Unable to fetch addresses. Please try again.",
+      };
+    }
+
+    // Network or other errors
+    return {
+      success: false,
+      message:
+        error.message ||
+        "Network error. Please check your connection and try again.",
+    };
+  }
+};

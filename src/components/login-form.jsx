@@ -30,7 +30,9 @@ const RegisterForm = ({ closeModal, nextModal }) => {
           navigate(redirectPath);
           return;
         }
-        if (user && user.role === "admin") {
+        // Use the response data directly instead of context user state
+        const userData = res.data.user || res.data;
+        if (userData && userData.role === "admin") {
           navigate("/admin-dashboard");
         } else {
           navigate("/dashboard");

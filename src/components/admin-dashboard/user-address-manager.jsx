@@ -5,6 +5,7 @@ import { useAuth } from "../../context/auth/AuthContext";
 import {
   adminGetUserAddresses,
   adminReplaceUserAddresses,
+  fetchAddressesByPostcode,
 } from "../../api/serices/api_utils";
 
 const UserAddressManager = () => {
@@ -20,67 +21,8 @@ const UserAddressManager = () => {
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const [showAddressForm, setShowAddressForm] = useState(false);
-
-  // Dummy address suggestions data
-  const dummyAddressSuggestions = [
-    { label: "10 Downing Street, London, SW1A 2AA", value: "10-downing-st" },
-    { label: "221B Baker Street, London, NW1 6XE", value: "221b-baker-st" },
-    {
-      label: "48 Leicester Square, London, WC2H 7LU",
-      value: "48-leicester-sq",
-    },
-    {
-      label: "1 London Bridge Street, London, SE1 9GF",
-      value: "1-london-bridge",
-    },
-    {
-      label: "20 Fenchurch Street, London, EC3M 8AF",
-      value: "20-fenchurch-st",
-    },
-    { label: "1 Canada Square, London, E14 5AB", value: "1-canada-sq" },
-    { label: "Westminster, London, SW1A 0AA", value: "westminster" },
-  ];
-
-  // Enhanced Mock function to search addresses with loading state
-  const searchAddresses = React.useCallback((searchTerm) => {
-    if (!searchTerm || searchTerm.length < 2) {
-      setAddressSuggestions([]);
-      return;
-    }
-
-    setIsSearching(true);
-
-    // Clear any existing search timeout
-    if (window.addressSearchTimeout) {
-      clearTimeout(window.addressSearchTimeout);
-    }
-
-    // Simulated API call with debounce
-    window.addressSearchTimeout = setTimeout(() => {
-      // Simulated server delay
-      const filteredSuggestions = dummyAddressSuggestions.filter((addr) =>
-        addr.label.toLowerCase().includes(searchTerm.toLowerCase())
-      );
-
-      // Add the current input as a custom option if it's not in the results
-      // and has comma-separated format (street, city, zip)
-      const parts = searchTerm.split(",");
-      if (
-        parts.length >= 2 &&
-        !filteredSuggestions.some(
-          (s) => s.label.toLowerCase() === searchTerm.toLowerCase()
-        )
-      ) {
-        filteredSuggestions.push({
-          label: searchTerm,
-          value: `custom-${Date.now()}`, // Generate a unique value
-        });
-      }
-
-      setAddressSuggestions(filteredSuggestions);
-      setIsSearching(false);
-    }, 300);
-  }, []);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
+  const [addressError, setAddressError] = useState("");
 
   // Handle selection of an address from the suggestions
   const handleAddressSelect = (event) => {
@@ -90,6 +32,7 @@ const UserAddressManager = () => {
     if (selected) {
       setSelectedAddress(selected);
       setNewAddress(selected.label);
+      setAddressError("");
     }
   };
 
@@ -160,20 +103,20 @@ const UserAddressManager = () => {
           setError(res.message || "Failed to update addresses");
         }
       } else {
-        if (!newAddress && !selectedAddress) {
+        const finalAddress = selectedAddress || newAddress;
+        if (!finalAddress && !newAddress) {
           throw new Error("Please select or enter an address");
         }
         let addressData;
         if (selectedAddress) {
-          // Only use address and zip (postcode)
-          const parts = selectedAddress.label.split(",");
+          // Use the selected address value
           addressData = {
             id: Date.now().toString(),
-            address: parts[0]?.trim() || selectedAddress.label,
-            postcode: postCode || parts[1]?.trim() || "",
+            address: selectedAddress.value,
+            postcode: postCode,
           };
         } else {
-          // Only use address and zip (postcode), no validation
+          // Use manually entered address
           addressData = {
             id: Date.now().toString(),
             address: newAddress,
@@ -198,6 +141,7 @@ const UserAddressManager = () => {
           setPostCode("");
           setSelectedAddress(null);
           setAddressSuggestions([]);
+          setAddressError("");
         } else {
           setError(res.message || "Failed to update addresses");
         }
@@ -209,16 +153,63 @@ const UserAddressManager = () => {
     }
   };
 
-  const handlePostCodeChange = (e) => {
-    setPostCode(e.target.value);
-    // Reset address fields when postcode changes
-    setNewAddress("");
-    setSelectedAddress(null);
-    setAddressSuggestions([]);
+  // UK Postcode formatter with proper validation and address fetching
+  const handlePostCodeChange = async (e) => {
+    let value = e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "");
 
-    // If postcode is long enough, trigger address search
-    if (e.target.value.length >= 5) {
-      searchAddresses(e.target.value);
+    // Format UK postcode with space
+    if (value.length > 3) {
+      const outward = value.slice(0, -3);
+      const inward = value.slice(-3);
+      value = outward + " " + inward;
+    }
+
+    // Limit to 8 characters maximum (including space)
+    if (value.length <= 8) {
+      setPostCode(value);
+
+      // Reset address fields when postcode changes
+      setNewAddress("");
+      setSelectedAddress(null);
+      setAddressSuggestions([]);
+      setAddressError("");
+
+      // Fetch addresses when postcode is complete (has space and correct length)
+      if (value.includes(" ") && value.length >= 6 && value.length <= 8) {
+        setIsLoadingAddresses(true);
+        setAddressError("");
+
+        try {
+          const result = await fetchAddressesByPostcode(value);
+
+          if (result.success && result.data.addresses) {
+            const addressOptions = result.data.addresses.map((addr) => ({
+              label: addr.label,
+              value: addr.value,
+            }));
+            setAddressSuggestions(addressOptions);
+
+            if (addressOptions.length === 0) {
+              setAddressError(
+                "No addresses found for this postcode. You may need to enter your address manually."
+              );
+            }
+          } else {
+            setAddressError(
+              result.message || "Unable to fetch addresses for this postcode."
+            );
+            setAddressSuggestions([]);
+          }
+        } catch (err) {
+          console.error("Error fetching addresses:", err);
+          setAddressError(
+            "Error fetching addresses. Please try again or enter your address manually."
+          );
+          setAddressSuggestions([]);
+        } finally {
+          setIsLoadingAddresses(false);
+        }
+      }
     }
   };
 
@@ -268,60 +259,100 @@ const UserAddressManager = () => {
           </h4>
           <div className="flex flex-col gap-2 mb-2">
             <Input
-              label="Street Address"
-              placeholder="Enter your street address (city will be assumed from postcode)"
-              helperText="Only enter your street address. City and country will be inferred from postcode."
-              value={newAddress}
-              onChange={(e) => setNewAddress(e.target.value)}
-              className="text-sm"
-              size="small"
-              required
-            />
-            <Input
               label="Postcode"
               value={postCode}
               onChange={handlePostCodeChange}
-              placeholder="Enter postcode (e.g., SW1A 0AA)"
-              helperText="City and country will be inferred from postcode."
-              className="text-sm"
-              size="small"
+              placeholder="Enter your UK postcode (e.g., SW1A 0AA)"
+              pattern="^[A-Z]{1,2}[0-9R][0-9A-Z]?\s[0-9][A-Z]{2}$"
+              title="Please enter a valid UK postcode (e.g., SW1A 0AA, M1 9AB)"
+              maxLength="8"
+              type="text"
               required
-            />
-            <SelectInput
-              label="Address (optional search)"
-              placeholder="Type to search for a street address"
-              value={selectedAddress?.value || ""}
-              onChange={handleAddressSelect}
-              options={addressSuggestions}
-              searchEnabled={true}
-              onSearch={searchAddresses}
+              helperText="Enter your postcode to find your address automatically."
               className="text-sm"
               size="small"
-              inputText={newAddress}
-              onInputChange={(e) => {
-                const value = e.target.value;
-                setNewAddress(value);
-                if (selectedAddress && value !== selectedAddress.label) {
-                  setSelectedAddress(null);
-                }
-                if (value && value.length >= 2) {
-                  searchAddresses(value);
-                }
-              }}
-              helperText="Search for a street address or enter manually. City/country will be inferred from postcode."
             />
-            {isSearching && (
-              <div className="text-xs text-gray-500 mt-1">Searching...</div>
+
+            {/* Address Selection */}
+            {postCode && (
+              <div className="relative">
+                {isLoadingAddresses ? (
+                  <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                    <span className="text-xs text-blue-700">
+                      Finding addresses for {postCode}...
+                    </span>
+                  </div>
+                ) : addressSuggestions.length > 0 ? (
+                  <SelectInput
+                    name="selectedAddress"
+                    label="Select Address"
+                    options={addressSuggestions}
+                    value={selectedAddress?.value || ""}
+                    onChange={handleAddressSelect}
+                    placeholder="Choose address from the list"
+                    searchEnabled={true}
+                    required
+                    fullWidth
+                    helperText={`${addressSuggestions.length} address${
+                      addressSuggestions.length === 1 ? "" : "es"
+                    } found. Start typing to search.`}
+                    className="text-sm"
+                    size="small"
+                  />
+                ) : addressError ? (
+                  <div className="space-y-3">
+                    <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <p className="text-xs text-yellow-800">
+                          {addressError}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handlePostCodeChange({
+                              target: { value: postCode },
+                            })
+                          }
+                          className="text-xs text-yellow-700 hover:text-yellow-900 underline"
+                          disabled={isLoadingAddresses}
+                        >
+                          Retry
+                        </button>
+                      </div>
+                    </div>
+                    <Input
+                      label="Street Address"
+                      placeholder="Enter your full street address manually"
+                      helperText="Please enter your full address including house number and street name."
+                      value={newAddress}
+                      onChange={(e) => setNewAddress(e.target.value)}
+                      className="text-sm"
+                      size="small"
+                      required
+                    />
+                  </div>
+                ) : postCode.includes(" ") && postCode.length >= 6 ? (
+                  <Input
+                    label="Street Address"
+                    placeholder="Enter your full street address"
+                    helperText="Please enter your full address including house number and street name."
+                    value={newAddress}
+                    onChange={(e) => setNewAddress(e.target.value)}
+                    className="text-sm"
+                    size="small"
+                    required
+                  />
+                ) : (
+                  <div className="p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                    <p className="text-xs text-gray-600">
+                      Complete your postcode above to automatically find your
+                      address.
+                    </p>
+                  </div>
+                )}
+              </div>
             )}
-            {!isSearching &&
-              newAddress &&
-              newAddress.length >= 2 &&
-              addressSuggestions.length === 0 && (
-                <div className="text-xs text-gray-500 mt-1">
-                  No addresses found. Enter your street address (city/country
-                  will be inferred from postcode).
-                </div>
-              )}
           </div>
           <div className="flex justify-end gap-2 mt-4">
             <button
@@ -331,6 +362,7 @@ const UserAddressManager = () => {
                 setPostCode("");
                 setSelectedAddress(null);
                 setAddressSuggestions([]);
+                setAddressError("");
               }}
               className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
               disabled={loading}

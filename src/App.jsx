@@ -21,7 +21,7 @@ import NotFoundPage from "./pages/NotFound";
 
 function App() {
   const [modalType, setModalType] = useState(null);
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, user } = useAuth();
 
   useEffect(() => {
     const handler = () => setModalType("login");
@@ -37,7 +37,6 @@ function App() {
     }
     // If adminOnly, check user role
     if (adminOnly) {
-      const { user } = useAuth();
       if (!user || user.role !== "admin") {
         window.location.replace("/dashboard");
         return null;
