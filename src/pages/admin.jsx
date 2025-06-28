@@ -115,7 +115,7 @@ const Admin = () => {
         <Navbar onNavClick={setSelectedModal} />
         <div
           className="flex flex-col w-full justify-center items-center bg-gray-50"
-          style={{ minHeight: "calc(100vh - 180px)" }}
+          style={{ minHeight: "calc(100vh - 152px)" }}
         >
           <div className="flex flex-col justify-center items-center space-y-8 max-w-md mx-auto px-6">
             {/* Loading Spinner */}
