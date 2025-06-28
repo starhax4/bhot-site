@@ -133,6 +133,9 @@ const RegisterForm = ({ closeModal, nextModal }) => {
         return;
       }
 
+      console.log(apiData);
+      console.log(selectedAddress);
+
       const res = await registerUser(apiData);
       if (res && res.success) {
         // Automatically log in the user after successful registration using AuthContext

@@ -197,15 +197,51 @@ const Dashboard = () => {
           </div>
           {(!recommendations || recommendations.length === 0) &&
           !loading &&
-          !error ? (
+          !error &&
+          property &&
+          !property.notFound ? (
+            <div className="p-6 bg-white rounded-lg shadow text-center">
+              <div className="mb-3">
+                <svg
+                  className="w-12 h-12 mx-auto text-green-500 mb-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+              </div>
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Great News!
+              </h3>
+              <p className="text-gray-600 mb-4">
+                Your property is already performing well in terms of energy
+                efficiency. No immediate recommendations are needed at this
+                time.
+              </p>
+              <p className="text-sm text-gray-500">
+                We'll continue to monitor for future improvement opportunities.
+              </p>
+            </div>
+          ) : (!recommendations || recommendations.length === 0) &&
+            !loading &&
+            !error ? (
             <div className="p-4 bg-white rounded-lg shadow text-center text-gray-500">
               No recommendations available for this address.
             </div>
           ) : null}
-          <RecommendationsTable
-            data={recommendations}
-            addressId={currentAddress?.id}
-          />
+          {recommendations && recommendations.length > 0 && (
+            <RecommendationsTable
+              data={recommendations}
+              addressId={currentAddress?.id}
+            />
+          )}
         </div>
       </div>
       <Footer />
