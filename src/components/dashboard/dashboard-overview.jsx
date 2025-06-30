@@ -490,10 +490,37 @@ const DashboardCard = ({ propertyData, energyData }) => {
 
   const handleTypeOptionSelect = (option) => {
     setTypeButtonLabel(option.label);
-    setFilter((prevFilter) => ({
-      ...prevFilter,
-      type: option.value,
-    }));
+
+    // If "House" is selected, check all house-related checkboxes
+    if (option.value === "house") {
+      setFilter((prevFilter) => ({
+        ...prevFilter,
+        type: {
+          ...Object.fromEntries(
+            Object.keys(prevFilter.type).map((k) => [k, false])
+          ), // Reset all to false first
+          detachedHouse: true,
+          terracedHouse: true,
+          SemiDetachedHouse: true,
+        },
+      }));
+    } else if (option.value === "parkHome") {
+      // Handle Park Home selection - map to parkHouse in filter state
+      setFilter((prevFilter) => ({
+        ...prevFilter,
+        type: Object.fromEntries(
+          Object.keys(prevFilter.type).map((k) => [k, k === "parkHouse"])
+        ),
+      }));
+    } else {
+      // For other options, set only that specific type
+      setFilter((prevFilter) => ({
+        ...prevFilter,
+        type: Object.fromEntries(
+          Object.keys(prevFilter.type).map((k) => [k, k === option.value])
+        ),
+      }));
+    }
     setOpenDropdown(null);
   };
 
@@ -555,15 +582,36 @@ const DashboardCard = ({ propertyData, energyData }) => {
         .filter(([_, value]) => value)
         .map(([key]) => key);
 
+      // Define house-related types
+      const houseTypes = [
+        "detachedHouse",
+        "terracedHouse",
+        "SemiDetachedHouse",
+      ];
+      const selectedHouseTypes = trueTypes.filter((type) =>
+        houseTypes.includes(type)
+      );
+
       if (trueTypes.length === 0) {
         setTypeButtonLabel("Any Type");
       } else if (trueTypes.length === 1) {
-        const selectedTypeOption = typeOptions.find(
-          (opt) => opt.value === trueTypes[0]
-        );
-        setTypeButtonLabel(
-          selectedTypeOption ? selectedTypeOption.label : "Type"
-        );
+        // Special handling for parkHouse -> Park Home mapping
+        if (trueTypes[0] === "parkHouse") {
+          setTypeButtonLabel("Park Home");
+        } else {
+          const selectedTypeOption = typeOptions.find(
+            (opt) => opt.value === trueTypes[0]
+          );
+          setTypeButtonLabel(
+            selectedTypeOption ? selectedTypeOption.label : "Type"
+          );
+        }
+      } else if (
+        selectedHouseTypes.length === houseTypes.length &&
+        trueTypes.length === houseTypes.length
+      ) {
+        // All house types are selected and nothing else
+        setTypeButtonLabel("House");
       } else {
         setTypeButtonLabel("Multiple Types");
       }
@@ -766,10 +814,10 @@ const DashboardCard = ({ propertyData, energyData }) => {
                     setSelectedAddress(null);
                     setAddressSuggestions([]);
                   }}
-                  className="ml-auto text-primary hover:text-green-800 text-sm"
+                  className="ml-auto text-primary hover:text-green-800 text-sm cursor-pointer"
                   title="Add a new address"
                 >
-                  <span className="flex ">
+                  <span className="flex">
                     <p className="text-xs text-nowrap">Add to your portfolio</p>
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -961,7 +1009,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                 </button>
                 <button
                   onClick={handleAddAddress}
-                  className="px-2 py-1 text-xs bg-primary text-white rounded hover:bg-blue-700"
+                  className="px-2 py-1 text-xs bg-primary text-white rounded cursor-pointer"
                   disabled={
                     isSubmitting ||
                     (!selectedAddress && !newAddress.address) ||
@@ -1278,19 +1326,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                     .map((opt) => (
                       <div
                         key={opt.value}
-                        onClick={() => {
-                          setFilter((prev) => ({
-                            ...prev,
-                            type: Object.fromEntries(
-                              Object.keys(prev.type).map((k) => [
-                                k,
-                                k === opt.value,
-                              ])
-                            ),
-                          }));
-                          setTypeButtonLabel(opt.label);
-                          setOpenDropdown(null);
-                        }}
+                        onClick={() => handleTypeOptionSelect(opt)}
                         className="px-3 py-1.5 hover:bg-gray-100 cursor-pointer text-xs text-gray-700"
                       >
                         {opt.label}
@@ -1348,7 +1384,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                           htmlFor="parkHouse"
                           className="text-xs text-neutral-400"
                         >
-                          Park House
+                          Park Home
                         </label>
                       </div>
                       <div className="flex gap-1 items-center">

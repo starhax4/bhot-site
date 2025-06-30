@@ -341,7 +341,7 @@ const AccountDetails = ({ closeModal, nextModal }) => {
               </span>
               {/* Compact Logout Button */}
               <button
-                className="mt-2 px-3 py-1 text-xs rounded bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 border border-gray-200 transition-colors"
+                className="mt-2 px-3 py-1 text-xs rounded bg-gray-100 hover:bg-red-100 text-gray-500 hover:text-red-600 border border-gray-200 transition-colors cursor-pointer"
                 style={{ minWidth: 0, width: "auto", alignSelf: "center" }}
                 onClick={async () => {
                   await logout();

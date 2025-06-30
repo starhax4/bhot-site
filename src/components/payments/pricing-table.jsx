@@ -14,7 +14,7 @@ const pricingData = {
   features: [
     { id: "properties", label: "Number of Properties" },
     { id: "benchmarking", label: "Neighbourhood Benchmarking" },
-    
+
     { id: "efficiency", label: "Energy Efficiency Recommendations" },
     {
       id: "uplift",
@@ -130,7 +130,7 @@ const PricingTable = () => {
               ) : (
                 <button
                   onClick={() => handleSelectPlan(plan)}
-                  className="mt-4 inline-block w-full bg-primary text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors"
+                  className="mt-4 inline-block w-full bg-primary text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors cursor-pointer"
                 >
                   {plan.buttonText}
                 </button>

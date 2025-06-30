@@ -150,7 +150,7 @@ export default function AddressManager() {
         <Button
           onClick={() => setShowAddAddressForm(!showAddAddressForm)}
           variant="secondary"
-          className="h-10"
+          className="h-10 cursor-pointer"
         >
           {showAddAddressForm ? "Cancel" : "Add New Address"}
         </Button>
@@ -209,7 +209,7 @@ export default function AddressManager() {
                             target: { value: newAddress.postcode },
                           })
                         }
-                        className="text-xs text-yellow-700 hover:text-yellow-900 underline"
+                        className="text-xs text-yellow-700 hover:text-yellow-900 underline cursor-pointer"
                         disabled={isLoadingAddresses}
                       >
                         Retry
