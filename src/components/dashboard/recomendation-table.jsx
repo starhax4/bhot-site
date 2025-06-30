@@ -148,34 +148,34 @@ const RecommendationsTable = ({ data, addressId }) => {
               </th>
               <th
                 scope="col"
-                className="px-2 py-3 text-left text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider w-2"
+                className="px-12 py-4 text-left text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider w-2"
               >
                 Cost
               </th>
-              <th
+              {/* <th
                 scope="col"
                 className="px-1 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider whitespace-normal w-1"
               >
                 Potential Yearly Bills Saving
-              </th>
-              <th
+              </th> */}
+              {/* <th
                 scope="col"
                 className="px-1 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider max-w-[80px]"
               >
                 EPC Impact
-              </th>
+              </th> */}
               <th
                 scope="col"
-                className="px-2 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider w-1"
+                className="px-2 py-4 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider "
               >
                 Estimated Value Impact
               </th>
-              <th
+              {/* <th
                 scope="col"
-                className="px-2 py-3 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider whitespace-normal w-1"
+                className="px-2 py-4 text-center text-black text-[11px] sm:text-sm font-bold font-['Sora'] tracking-wider whitespace-normal "
               >
                 Total Payback Period
-              </th>
+              </th> */}
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -193,12 +193,12 @@ const RecommendationsTable = ({ data, addressId }) => {
                   <td className="px-2 py-4 text-wrap text-black text-[11px] sm:text-xs font-normal font-['Sora']">
                     {row.cost}
                   </td>
-                  <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
+                  {/* <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
                     {row.potential_yearly_bills_saving}
                   </td>
                   <td className="px-1 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora']">
                     {row.epc_impact}
-                  </td>
+                  </td> */}
                   {/* Estimated Value Impact */}
                   <td
                     className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
@@ -216,7 +216,7 @@ const RecommendationsTable = ({ data, addressId }) => {
                     )}
                   </td>
                   {/* Total Payback Period */}
-                  <td
+                  {/* <td
                     className="px-2 py-4 text-center text-black text-[11px] sm:text-xs font-normal font-['Sora'] cursor-pointer"
                     onClick={isLocked ? handleLockedClick : undefined}
                   >
@@ -230,7 +230,7 @@ const RecommendationsTable = ({ data, addressId }) => {
                     ) : (
                       row.total_payback_period || ""
                     )}
-                  </td>
+                  </td> */}
                 </tr>
               );
             })}
