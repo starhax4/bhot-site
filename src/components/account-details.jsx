@@ -254,7 +254,17 @@ const AccountDetails = ({ closeModal, nextModal }) => {
             <div className="grid md:grid-cols-2 gap-8">
               <div>
                 <SelectInput
-                  label="Property(ies)"
+                  label={
+                    user?.addresses?.length > 1
+                      ? `Property(ies) - ${user.addresses.length} total${
+                          user?.plan !== "pro"
+                            ? ` (${
+                                user.addresses.length - 1
+                              } more available with Pro)`
+                            : ""
+                        }`
+                      : "Property(ies)"
+                  }
                   name="property"
                   value={user?.addresses?.[0]?.address || ""}
                   options={
@@ -271,20 +281,35 @@ const AccountDetails = ({ closeModal, nextModal }) => {
                         ]
                   }
                   searchEnabled={false}
-                  disabled={true}
+                  disabled={user?.plan !== "pro"}
                   className="mt-3.5 bg-[#F9F9F9]"
                 />
                 <div className="mt-2">
                   <p className="text-xs">
-                    Updates/Additions to property not available in your pricing
-                    plan. Please{" "}
-                    <span
-                      onClick={handleContactModal}
-                      className="text-primary cursor-pointer hover:underline"
-                    >
-                      contact us here
-                    </span>{" "}
-                    for any errors.
+                    {user?.plan === "pro" ? (
+                      <>
+                        Please{" "}
+                        <span
+                          onClick={handleContactModal}
+                          className="text-primary cursor-pointer hover:underline"
+                        >
+                          contact us here
+                        </span>{" "}
+                        for any errors.
+                      </>
+                    ) : (
+                      <>
+                        Updates/Additions to property not available in your
+                        pricing plan. Please{" "}
+                        <span
+                          onClick={handleContactModal}
+                          className="text-primary cursor-pointer hover:underline"
+                        >
+                          contact us here
+                        </span>{" "}
+                        for any errors.
+                      </>
+                    )}
                   </p>
                 </div>
               </div>

@@ -60,7 +60,7 @@ const ValueCard = ({
           </p>
           {desc && (
             <p className="text-xs font-semibold text-neutral-400">
-              If all recommendations are implemented
+              If all recommendations with value uplift are implemented
             </p>
           )}
         </div>
@@ -77,32 +77,57 @@ const ValueCard = ({
             </span>
           </div>
         ) : (
-          <div className="flex gap-2 md:gap-4 mt-2 md:mt-0">
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-neutral-400 font-semibold">
-                Low
-              </span>
-              <span className="text-base md:text-lg font-bold text-gray-600 bg-gray-50 rounded px-3 py-1 mt-1">
-                {lowValue}
-              </span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-primary font-semibold">
-                Estimate
-              </span>
-              <span className="text-lg md:text-2xl font-extrabold text-primary bg-primary/10 rounded px-4 py-1 mt-1">
-                {estimate}
-              </span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-xs text-neutral-400 font-semibold">
-                High
-              </span>
-              <span className="text-base md:text-lg font-bold text-gray-600 bg-gray-50 rounded px-3 py-1 mt-1">
-                {highValue}
-              </span>
-            </div>
-          </div>
+          (() => {
+            // Check if all values indicate "No Historical Uplift"
+            const isNoHistoricalUplift =
+              lowValue === "£000000" &&
+              estimate === "£000000" &&
+              highValue === "£000000";
+
+            if (isNoHistoricalUplift) {
+              return (
+                <div className="flex justify-center mt-2 md:mt-0">
+                  <div className="flex flex-col items-center">
+                    <span className="ext-lg md:text-2xl font-extrabold text-primary bg-primary/10 rounded px-4 py-1">
+                      No Historical Uplift
+                    </span>
+                    {/* <span className="text-lg md:text-2xl font-extrabold text-primary bg-primary/10 rounded px-4 py-1 mt-1">
+                      {estimate}
+                    </span> */}
+                  </div>
+                </div>
+              );
+            }
+
+            return (
+              <div className="flex gap-2 md:gap-4 mt-2 md:mt-0">
+                <div className="flex flex-col items-center">
+                  <span className="text-xs text-neutral-400 font-semibold">
+                    Low
+                  </span>
+                  <span className="text-base md:text-lg font-bold text-gray-600 bg-gray-50 rounded px-3 py-1 mt-1">
+                    {lowValue}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-xs text-primary font-semibold">
+                    Estimate
+                  </span>
+                  <span className="text-lg md:text-2xl font-extrabold text-primary bg-primary/10 rounded px-4 py-1 mt-1">
+                    {estimate}
+                  </span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-xs text-neutral-400 font-semibold">
+                    High
+                  </span>
+                  <span className="text-base md:text-lg font-bold text-gray-600 bg-gray-50 rounded px-3 py-1 mt-1">
+                    {highValue}
+                  </span>
+                </div>
+              </div>
+            );
+          })()
         )}
       </div>
     </div>

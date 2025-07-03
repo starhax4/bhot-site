@@ -11,8 +11,8 @@ const Hero = ({ onCtaClick }) => {
               Unlock the value hiding in your home.
             </h1>
             <p className="font-normal">
-              At Best House on the Street, we give you everything you need to
-              understand your home’s energy performance.
+              At Best House on the Street, we help you to understand your home’s
+              energy performance.
               <br />
               <br /> See how your property compares to others in your
               neighbourhood, and discover which energy-saving improvements could

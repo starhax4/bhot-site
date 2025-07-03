@@ -21,14 +21,9 @@ const Pricing = () => {
           </h2>
           <p className="text-sm font-medium leading-relaxed mb-4">
             We are currently in our launch phase and offering one-off pricing to
-            keep things simple as we grow. Prices reflect our early-stage
-            product, and your feedback will help shape what comes next.
-          </p>
-          <p className="text-sm font-medium leading-relaxed mb-4">
-            As we add more features (such as ongoing energy tracking, access
-            vetted contractors and tradespeople), we will introduce a monthly
-            subscription model. But for now, you get full access to the features
-            below with a one-off payment.
+            keep things simple as we grow. As we add more features (such as
+            ongoing energy tracking, access to vetted tradespeople and financing
+            options), we will introduce a monthly subscription model.
           </p>
           <p className="text-sm font-medium leading-relaxed">
             We would love to hear your feedback{" "}
@@ -38,6 +33,14 @@ const Pricing = () => {
             >
               here!
             </button>
+          </p>
+          <p className="text-sm font-medium leading-relaxed mb-4">
+            Our real-world data also shows that not every energy upgrade boosts
+            house value in every area. Measures may however still lower your
+            energy bills, reduce your carbon footprint, and improve your EPC
+            rating. Understanding that this can be frustrating, if none of your
+            home’s recommended upgrades show a value uplift, we will refund 50%
+            of your fee. Please contact us to request.
           </p>
         </div>
         <PricingTable />

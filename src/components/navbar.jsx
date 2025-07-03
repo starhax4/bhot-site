@@ -14,14 +14,17 @@ export default function Navbar({ onNavClick }) {
   return (
     <nav className="sticky top-0 mx-auto px-4 py-2 md:px-12 md:h-26  border-b-[0.5px] bg-white border-b-gray-200 shadow-md z-[500]">
       <div className="flex justify-between items-center md:items-end  ">
-        <div>
+        <div className="flex items-center gap-3">
           <Link to="/">
             <img
               className="w-44 md:w-54"
-              src="/BHOTS Logo+Tag 1.png"
+              src="/BHOTS-logo.png"
               alt="BHOTS_logo"
             />
           </Link>
+          <div className="bg-gray-400 text-white text-xs font-bold px-2 py-1 mt-5 rounded">
+            BETA
+          </div>
         </div>
         <div>
           <ul className="hidden md:flex justify-between items-center gap-16 list-none text-base font-bold text-primary hover:text-green-950">

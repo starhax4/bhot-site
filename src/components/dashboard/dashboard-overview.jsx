@@ -221,12 +221,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
       ) {
         sizeCategories = filterToUse.size;
       }
-      // Always include your property size
-      const mySizeCategory =
-        propertyData && propertyData.area_sqm
-          ? mapAreaToCategory(Number(propertyData.area_sqm))
-          : undefined;
-      if (mySizeCategory) sizeCategories.push(mySizeCategory);
+      // Don't automatically include user's property - only use selected filters
       sizeCategories = [...new Set(sizeCategories)].filter(
         (s) => s && s !== "unknown"
       );
@@ -238,14 +233,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
         selectedTypes.length > 0
           ? selectedTypes.map((key) => mapTypeToCategory({ [key]: true }))
           : [];
-      // Always include your property type
-      const myTypeCategory =
-        propertyData && propertyData.type
-          ? mapTypeToCategory({
-              [normalizePropertyType(propertyData.type)]: true,
-            })
-          : undefined;
-      if (myTypeCategory) typeCategories.push(myTypeCategory);
+      // Don't automatically include user's property type - only use selected filters
       typeCategories = [...new Set(typeCategories)].filter(
         (t) => t && t !== "propertyType"
       );
@@ -269,29 +257,30 @@ const DashboardCard = ({ propertyData, energyData }) => {
         return;
       }
       try {
-        // Always include user's property size/type in the API request
+        // Only use selected filters, don't include user's property automatically
         const res = await fetchNeighbourhoodBenchmarking({
           postcode,
           "floor-area": sizeCategories,
           "property-type": typeCategories,
-          userFloorArea:
-            propertyData && propertyData.area_sqm
-              ? mapAreaToCategory(Number(propertyData.area_sqm))
-              : undefined,
-          userPropertyType:
-            propertyData && propertyData.type
-              ? normalizePropertyType(propertyData.type)
-              : undefined,
         });
         if (res.success) {
           setBenchmarkingData(res.data);
+          // Reset error states on successful response
+          setAddressNotFound(false);
+          setBenchmarkingError(null);
+          // If we got a successful response but no data, it's likely a filter issue
+          if (!res.data || (Array.isArray(res.data) && res.data.length === 0)) {
+            setBenchmarkingError("No data. Please review selected filters");
+          }
         } else if (
           res.status === 404 ||
           res.message?.toLowerCase().includes("not found")
         ) {
           setBenchmarkingData([]);
-          setAddressNotFound(true); // Set address not found
-          setBenchmarkingError(null);
+          // Only set addressNotFound if it's clearly an address/postcode issue
+          // Be conservative - most 404s for this API are likely filter-related
+          setAddressNotFound(false);
+          setBenchmarkingError("No data. Please review selected filters");
         } else {
           setBenchmarkingData([]);
           setBenchmarkingError(res.message || "No data found");
@@ -302,8 +291,10 @@ const DashboardCard = ({ propertyData, energyData }) => {
           err?.message?.toLowerCase().includes("not found")
         ) {
           setBenchmarkingData([]);
-          setAddressNotFound(true);
-          setBenchmarkingError(null);
+          // Only set addressNotFound if it's clearly an address/postcode issue
+          // Be conservative - most 404s for this API are likely filter-related
+          setAddressNotFound(false);
+          setBenchmarkingError("No data. Please review selected filters");
         } else {
           setBenchmarkingData([]);
           setBenchmarkingError(err.message || "Error fetching data");
@@ -319,7 +310,20 @@ const DashboardCard = ({ propertyData, energyData }) => {
     fetchDashboardData();
   }, [currentAddress]);
 
+  // Call fetchDashboardData when filters change
+  useEffect(() => {
+    if (
+      propertyData &&
+      (filter.size.length > 0 || Object.values(filter.type).some(Boolean))
+    ) {
+      fetchDashboardData();
+    }
+  }, [filter, propertyData]);
+
   // --- Call benchmarking API with propertyData on first load ---
+  // NOTE: Removed automatic initial call - now handled through filter changes
+  // This ensures that when filters are changed, only matching data is shown (no auto-inclusion of user property)
+  /*
   useEffect(() => {
     // Only run if propertyData is available and has type and area_sqm (allow area_sqm = 0)
     if (
@@ -396,6 +400,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
       if (!did404) fetchOnce();
     }
   }, [propertyData]);
+  */
 
   // Handle adding a new address
   // const handleAddAddress = async () => {
@@ -775,16 +780,58 @@ const DashboardCard = ({ propertyData, energyData }) => {
   useEffect(() => {
     if (propertyData && propertyData.area_sqm) {
       const sizeCode = mapAreaToCategory(Number(propertyData.area_sqm));
+      const normalizedType = normalizePropertyType(propertyData.type);
+
       if (sizeCode && sizeCode !== "unknown") {
         setFilter((prev) => ({
           ...prev,
           size: [sizeCode],
+          // Set the type filter to match the user's property type
+          type: {
+            detachedHouse:
+              normalizedType === "house" &&
+              propertyData.type.toLowerCase().includes("detached"),
+            terracedHouse:
+              normalizedType === "house" &&
+              propertyData.type.toLowerCase().includes("terrace"),
+            parkHouse: normalizedType === "park home",
+            flat: normalizedType === "flat",
+            SemiDetachedHouse:
+              normalizedType === "house" &&
+              propertyData.type.toLowerCase().includes("semi"),
+            bungalow: normalizedType === "bungalow",
+            maisonette: normalizedType === "maisonette",
+            studioApartment: false, // Default to false unless it's an "other" type
+          },
         }));
         // Set slider to the min/max for this category
         const cat = SIZE_CATEGORIES.find((c) => c.code === sizeCode);
         if (cat) {
           setSizeRange({ min: cat.min, max: cat.max });
           setSizeButtonLabel(cat.label);
+        }
+
+        // Set type button label based on the property type
+        if (normalizedType === "house") {
+          if (propertyData.type.toLowerCase().includes("detached")) {
+            setTypeButtonLabel("House");
+          } else if (propertyData.type.toLowerCase().includes("terrace")) {
+            setTypeButtonLabel("House");
+          } else if (propertyData.type.toLowerCase().includes("semi")) {
+            setTypeButtonLabel("House");
+          } else {
+            setTypeButtonLabel("House");
+          }
+        } else if (normalizedType === "flat") {
+          setTypeButtonLabel("Flat");
+        } else if (normalizedType === "bungalow") {
+          setTypeButtonLabel("Bungalow");
+        } else if (normalizedType === "maisonette") {
+          setTypeButtonLabel("Maisonette");
+        } else if (normalizedType === "park home") {
+          setTypeButtonLabel("Park Home");
+        } else {
+          setTypeButtonLabel("Type");
         }
       }
     }
@@ -1134,9 +1181,9 @@ const DashboardCard = ({ propertyData, energyData }) => {
           Neighbourhood benchmarking
         </h2>
         <div className="flex flex-col my-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 place-items-center sm:place-items-start w-full">
-            {/* Distance Filter */}
-            <div className="flex flex-col gap-2 relative w-full max-w-[280px] sm:max-w-[160px] lg:max-w-none">
+          <div className="flex flex-col sm:flex-row gap-8 sm:gap-12 items-center justify-center w-full">
+            {/* Distance Filter - COMMENTED OUT */}
+            {/* <div className="flex flex-col gap-2 relative w-full max-w-[320px] sm:max-w-[220px] lg:max-w-none">
               <button
                 type="button"
                 onClick={() => handleDropdownToggle("distance")}
@@ -1173,7 +1220,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                   ))}
                 </div>
               )}
-              <div className="w-full sm:w-[160px] lg:w-36 bg-white shadow-xl px-3 py-2 rounded-lg">
+              <div className="w-full sm:w-[220px] lg:w-56 bg-white shadow-xl px-3 py-2 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 miles
@@ -1204,14 +1251,14 @@ const DashboardCard = ({ propertyData, energyData }) => {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
 
             {/* Size Filter */}
-            <div className="flex flex-col gap-2 relative w-full max-w-[280px] sm:max-w-[160px] lg:max-w-none">
+            <div className="flex flex-col gap-2 relative w-full max-w-[320px] sm:max-w-[220px] lg:max-w-none">
               <button
                 type="button"
                 onClick={() => handleDropdownToggle("size")}
-                className="w-full sm:w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer"
+                className="w-full sm:w-44 px-3 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer"
               >
                 <p className="text-nowrap text-xs">{sizeButtonLabel}</p>
                 <div className="flex my-auto items-center">
@@ -1232,7 +1279,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                 </div>
               </button>
               {openDropdown === "size" && (
-                <div className="absolute top-[25%] left-0 sm:left-auto w-full sm:w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[25%] left-1/2 transform -translate-x-1/2 w-full sm:w-48 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {SIZE_CATEGORIES.map((opt) => (
                     <div
                       key={opt.code}
@@ -1253,7 +1300,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                   ))}
                 </div>
               )}
-              <div className="w-full sm:w-[160px] lg:w-36 bg-white shadow-xl px-3 py-2 rounded-lg">
+              <div className="w-full sm:w-[220px] lg:w-56 bg-white shadow-xl px-4 py-3 rounded-lg">
                 <div className="flex justify-between">
                   <p className="text-neutral-400 text-xs font-semibold">
                     0 sqm
@@ -1295,11 +1342,11 @@ const DashboardCard = ({ propertyData, energyData }) => {
             </div>
 
             {/* Type Filter */}
-            <div className="flex flex-col gap-2 relative w-full max-w-[280px] sm:max-w-[160px] lg:max-w-none">
+            <div className="flex flex-col gap-2 relative w-full max-w-[320px] sm:max-w-[220px] lg:max-w-none">
               <button
                 type="button"
                 onClick={() => handleDropdownToggle("type")}
-                className="w-full sm:w-32 px-2 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer"
+                className="w-full sm:w-44 px-3 py-2 outline-2 outline-offset-[-1px] outline-primary bg-primary text-white rounded-[50px] inline-flex justify-center items-center gap-2 overflow-hidden cursor-pointer"
               >
                 <p className="text-nowrap text-xs">{typeButtonLabel}</p>
                 <div className="flex my-auto items-center">
@@ -1320,7 +1367,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                 </div>
               </button>
               {openDropdown === "type" && (
-                <div className="absolute top-[25%] left-0 sm:left-auto w-full sm:w-40 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
+                <div className="absolute top-[25%] left-1/2 transform -translate-x-1/2 w-full sm:w-48 bg-white shadow-xl rounded-lg z-20 border border-gray-200 py-1">
                   {typeOptions
                     .filter((opt) => opt.value !== "propertyType")
                     .map((opt) => (
@@ -1334,7 +1381,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                     ))}
                 </div>
               )}
-              <div className="w-full sm:w-[160px] lg:w-36 bg-white shadow-xl px-3 py-2 rounded-lg">
+              <div className="w-full sm:w-[220px] lg:w-56 bg-white shadow-xl px-4 py-3 rounded-lg">
                 <div className="flex-1 flex flex-col min-h-[80px]">
                   <div className="h-[70px] overflow-y-auto pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
                     {/* Type checkboxes */}
@@ -1498,18 +1545,12 @@ const DashboardCard = ({ propertyData, energyData }) => {
                   <span className="text-red-600 font-semibold block mb-2">
                     Address not found. Please check the address or postcode.
                   </span>
+                ) : benchmarkingError ? (
+                  benchmarkingError
                 ) : (
-                  benchmarkingError || "No data found with the current filters."
+                  "No data. Please review selected filters"
                 )}
-                {/* Placeholder recommendations if no data */}
-                {addressNotFound ||
-                (Array.isArray(benchmarkingData) &&
-                  benchmarkingData.length === 0) ? (
-                  <div className="mt-2 text-xs text-gray-400 italic">
-                    No recommendations available for this address / No Data on
-                    these filters
-                  </div>
-                ) : null}
+                {/* No placeholder recommendations when no data */}
               </div>
             )}
             <ScatterPlot

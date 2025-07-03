@@ -20,7 +20,7 @@ const pricingData = {
       id: "uplift",
       label: "Estimated Value Uplift from Implementing Recommendations",
     },
-    { id: "payback", label: "Payback Period Estimation" },
+    // { id: "payback", label: "Payback Period Estimation" },
   ],
   plans: [
     {
@@ -34,7 +34,7 @@ const pricingData = {
         benchmarking: true,
         efficiency: true,
         uplift: false,
-        payback: false,
+        // payback: false,
       },
     },
     {
@@ -48,7 +48,7 @@ const pricingData = {
         benchmarking: true,
         efficiency: true,
         uplift: true,
-        payback: true,
+        // payback: true,
       },
     },
     {
@@ -62,7 +62,7 @@ const pricingData = {
         benchmarking: true,
         efficiency: true,
         uplift: true,
-        payback: true,
+        // payback: true,
       },
     },
   ],
