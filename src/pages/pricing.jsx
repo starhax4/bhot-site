@@ -29,7 +29,7 @@ const Pricing = () => {
             We would love to hear your feedback{" "}
             <button
               onClick={() => setSelectedModal("contact")}
-              className="text-primary hover:underline font-semibold"
+              className="text-primary hover:underline font-semibold cursor-pointer"
             >
               here!
             </button>
