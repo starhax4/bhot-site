@@ -10,6 +10,7 @@ import DetailCard from "../components/admin-dashboard/detail-card";
 import CardsGrid from "../components/admin-dashboard/cards-grid";
 import SalesGraphGrid from "../components/admin-dashboard/SalesGraphGrid";
 import UserAddressManager from "../components/admin-dashboard/user-address-manager";
+import ExportSection from "../components/admin-dashboard/export-section";
 import {
   adminGetDashboardSummary,
   adminGetDashboardAnalytics,
@@ -214,6 +215,19 @@ const Admin = () => {
     <>
       <Navbar onNavClick={setSelectedModal} />
       <div className="flex flex-col gap-6 p-6">
+        {/* Header Section */}
+        {/* <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-4 border-b border-gray-200">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              Admin Dashboard
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Monitor and manage your platform
+            </p>
+          </div>
+        </div> */}
+
+        {/* Dashboard Overview */}
         <div className="flex flex-col md:flex-row gap-6">
           <CardsGrid summary={summary} />
           <SalesGraphGrid
@@ -221,6 +235,11 @@ const Admin = () => {
             analytics={analytics}
           />
         </div>
+
+        {/* Export Section */}
+        <ExportSection summary={summary} />
+
+        {/* User Management */}
         <UserAddressManager />
       </div>
       <Footer />

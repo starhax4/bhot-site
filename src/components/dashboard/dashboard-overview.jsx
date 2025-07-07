@@ -172,6 +172,9 @@ const DashboardCard = ({ propertyData, energyData }) => {
   function normalizePropertyType(type) {
     if (!type || typeof type !== "string") return "";
     const t = type.toLowerCase();
+    if (t.includes("detached") || t.includes("house")) return "bungalow";
+    if (t.includes("terrace") || t.includes("house")) return "bungalow";
+    if (t.includes("semi-detached") || t.includes("house")) return "flat";
     if (t.includes("bungalow")) return "bungalow";
     if (t.includes("flat") || t.includes("apartment")) return "flat";
     if (t.includes("maisonette")) return "maisonette";
@@ -181,9 +184,6 @@ const DashboardCard = ({ propertyData, energyData }) => {
       t.includes("park house")
     )
       return "park home";
-    if (t.includes("detached") || t.includes("house")) return "house";
-    if (t.includes("terrace") || t.includes("house")) return "house";
-    if (t.includes("semi-detached") || t.includes("house")) return "house";
     if (t.includes("house")) return "house";
     return "";
   }

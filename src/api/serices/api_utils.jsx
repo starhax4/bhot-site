@@ -990,3 +990,72 @@ export const fetchAddressesByPostcode = async (postcode) => {
     };
   }
 };
+
+// Admin: Download users as CSV
+export const adminDownloadUsersCsv = async () => {
+  const token = getAuthToken();
+  if (!token || isTokenExpired(token)) {
+    localStorage.removeItem("authToken");
+    delete axios.defaults.headers.common["Authorization"];
+    return {
+      success: false,
+      message: "Session expired or invalid token. Please log in again.",
+      error: null,
+      status: 401,
+    };
+  }
+
+  try {
+    const url = `${API_URL}/api/admin/dashboard/users/csv`;
+    const res = await axios.get(url, {
+      timeout: 45000, // 45s timeout for CSV generation
+      responseType: "blob", // Important for file download
+    });
+
+    // Create blob link to download
+    const blob = new Blob([res.data], { type: "text/csv" });
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+
+    // Generate filename with current date
+    const currentDate = new Date().toISOString().split("T")[0];
+    link.download = `users_export_${currentDate}.csv`;
+
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+
+    return {
+      success: true,
+      message: "Users CSV downloaded successfully.",
+      error: null,
+      status: 200,
+    };
+  } catch (error) {
+    let errorMessage = "Failed to download users CSV";
+    let errorData = null;
+
+    if (error.response) {
+      errorMessage =
+        error.response.data?.message ||
+        error.response.data?.error ||
+        `Server error (${error.response.status})`;
+      errorData = error.response.data;
+    } else if (error.request) {
+      errorMessage =
+        "Unable to connect to server. Please check your connection.";
+    } else {
+      errorMessage = error.message || "An unexpected error occurred";
+    }
+
+    return {
+      success: false,
+      message: errorMessage,
+      error: errorData || error.message,
+      status: error.response?.status,
+    };
+  }
+};
