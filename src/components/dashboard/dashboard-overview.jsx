@@ -1329,14 +1329,14 @@ const DashboardCard = ({ propertyData, energyData }) => {
                       }}
                     />
                   </div>
-                  <div className="flex justify-end mt-2">
+                  {/* <div className="flex justify-end mt-2">
                     <button
                       onClick={handleSizeApply}
                       className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
                     >
                       Apply
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
@@ -1399,10 +1399,10 @@ const DashboardCard = ({ propertyData, energyData }) => {
                           htmlFor="detachedHouse"
                           className="text-xs text-neutral-400"
                         >
-                          Detached House
+                          House
                         </label>
                       </div>
-                      <div className="flex gap-1 items-center">
+                      {/* <div className="flex gap-1 items-center">
                         <input
                           type="checkbox"
                           name="terracedHouse"
@@ -1417,7 +1417,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                         >
                           Terraced House
                         </label>
-                      </div>
+                      </div> */}
                       <div className="flex gap-1 items-center">
                         <input
                           type="checkbox"
@@ -1450,7 +1450,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                           Flat
                         </label>
                       </div>
-                      <div className="flex gap-1 items-center">
+                      {/* <div className="flex gap-1 items-center">
                         <input
                           type="checkbox"
                           name="SemiDetachedHouse"
@@ -1467,7 +1467,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                         >
                           Semi-Detached House
                         </label>
-                      </div>
+                      </div> */}
                       <div className="flex gap-1 items-center">
                         <input
                           type="checkbox"
@@ -1500,7 +1500,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                           Maisonette
                         </label>
                       </div>
-                      <div className="flex gap-1 items-center">
+                      {/* <div className="flex gap-1 items-center">
                         <input
                           type="checkbox"
                           name="studioApartment"
@@ -1515,19 +1515,19 @@ const DashboardCard = ({ propertyData, energyData }) => {
                           htmlFor="studioApartment"
                           className="text-xs text-neutral-400"
                         >
-                          Other
+                          House
                         </label>
-                      </div>
+                      </div> */}
                     </div>
                   </div>
-                  <div className="flex justify-end mt-2">
+                  {/* <div className="flex justify-end mt-2">
                     <button
                       onClick={handleTypeApply}
                       className="text-primary text-xs font-semibold hover:text-green-950 cursor-pointer active:text-green-800"
                     >
                       Apply
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             </div>
