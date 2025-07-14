@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { usePlan } from "../../context/plan-context";
 import { useNavigate } from "react-router";
+import { useAuth } from "../../context/auth/AuthContext";
+import { createStripeSubscription } from "../../api/serices/api_utils";
 
 // SVG Check Icon (dark grey as in the image)
 const CheckIcon = () => (
@@ -72,10 +74,78 @@ const PricingTable = () => {
   const { features, plans } = pricingData;
   const { setSelectedPlan } = usePlan();
   const navigate = useNavigate();
+  const { user, isAuthenticated } = useAuth();
+  const [loading, setLoading] = useState(null); // Track which plan is loading
+  const [error, setError] = useState("");
 
-  const handleSelectPlan = (plan) => {
-    setSelectedPlan(plan);
-    navigate("/checkout/cart");
+  // Handle pending plan selection after login
+  useEffect(() => {
+    const handlePendingPlanSelection = async () => {
+      if (isAuthenticated && user?.id) {
+        const pendingPlan = localStorage.getItem("pendingPlanSelection");
+        if (pendingPlan) {
+          try {
+            const plan = JSON.parse(pendingPlan);
+            localStorage.removeItem("pendingPlanSelection");
+
+            if (plan.id !== "free") {
+              setLoading(plan.id);
+              setSelectedPlan(plan);
+
+              const res = await createStripeSubscription(plan.id, user.id);
+              setLoading(null);
+
+              if (res.success && res.url) {
+                window.location.href = res.url;
+              } else {
+                setError(
+                  res.message || "Failed to initiate payment. Please try again."
+                );
+              }
+            }
+          } catch (e) {
+            console.error("Error processing pending plan selection:", e);
+            localStorage.removeItem("pendingPlanSelection");
+          }
+        }
+      }
+    };
+
+    handlePendingPlanSelection();
+  }, [isAuthenticated, user, setSelectedPlan]);
+
+  const handleSelectPlan = async (plan) => {
+    setError("");
+
+    // Check if user is authenticated
+    if (!isAuthenticated) {
+      // Store which plan they wanted to select
+      localStorage.setItem("pendingPlanSelection", JSON.stringify(plan));
+      // Trigger login modal
+      window.dispatchEvent(new CustomEvent("open-login-modal"));
+      return;
+    }
+
+    // For paid plans, proceed with Stripe
+    if (plan.id !== "free") {
+      setLoading(plan.id);
+      setSelectedPlan(plan);
+
+      const res = await createStripeSubscription(plan.id, user.id);
+      setLoading(null);
+
+      if (res.success && res.url) {
+        window.location.href = res.url;
+      } else {
+        setError(
+          res.message || "Failed to initiate payment. Please try again."
+        );
+      }
+    } else {
+      // For free plan, just navigate normally
+      setSelectedPlan(plan);
+      navigate("/dashboard");
+    }
   };
 
   return (
@@ -130,13 +200,21 @@ const PricingTable = () => {
               ) : (
                 <button
                   onClick={() => handleSelectPlan(plan)}
-                  className="mt-4 inline-block w-full bg-primary text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors cursor-pointer"
+                  disabled={loading === plan.id}
+                  className="mt-4 inline-block w-full bg-primary text-white py-3 px-4 rounded-md text-sm font-medium hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {plan.buttonText}
+                  {loading === plan.id ? "Processing..." : plan.buttonText}
                 </button>
               )}
             </div>
           ))}
+
+          {/* Error message row */}
+          {error && (
+            <div className="col-span-full p-4 text-center">
+              <div className="text-red-600 text-sm">{error}</div>
+            </div>
+          )}
 
           {/* ----- FEATURE ROWS ----- */}
           {features.map((feature, featureIndex) => (

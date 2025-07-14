@@ -87,7 +87,7 @@ export default function BillingPage() {
                 No plan selected. Please go back to pricing.
               </p>
             )}
-            <p className="text-gray-500 mb-4">Billing form would go here</p>
+            {/* <p className="text-gray-500 mb-4">Billing form would go here</p> */}
             {error && (
               <div className="text-red-600 mb-4 text-center">{error}</div>
             )}
