@@ -1065,7 +1065,7 @@ export const adminDownloadUsersCsv = async () => {
 // Plan Management Functions
 export const getCurrentPlanPrices = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/subscriptions/plans`);
+    const response = await axios.get(`${API_URL}/api/subscription/plans`);
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching plan prices:", error);
@@ -1086,7 +1086,7 @@ export const updateAllPlanPrices = async (prices) => {
     }
 
     const response = await axios.put(
-      `${API_URL}/api/subscriptions/plans`,
+      `${API_URL}/api/subscription/plans`,
       prices,
       {
         headers: {
@@ -1125,7 +1125,7 @@ export const updateSinglePlanPrice = async (plan, price) => {
     }
 
     const response = await axios.put(
-      `${API_URL}/api/subscriptions/plans/${plan}`,
+      `${API_URL}/api/subscription/plans/${plan}`,
       { price },
       {
         headers: {
@@ -1180,7 +1180,7 @@ export const createCoupon = async (couponData) => {
     }
 
     const response = await axios.post(
-      `${API_URL}/api/subscriptions/coupons`,
+      `${API_URL}/api/subscription/coupons`,
       couponData,
       {
         headers: {
@@ -1228,7 +1228,7 @@ export const createPromotionCode = async (promotionData) => {
     }
 
     const response = await axios.post(
-      `${API_URL}/api/subscriptions/promotion-codes`,
+      `${API_URL}/api/subscription/promotion-codes`,
       promotionData,
       {
         headers: {
@@ -1269,7 +1269,7 @@ export const getPromotionCodes = async (filters = {}) => {
       queryParams.append("limit", filters.limit);
     }
 
-    const url = `${API_URL}/api/subscriptions/promotion-codes${
+    const url = `${API_URL}/api/subscription/promotion-codes${
       queryParams.toString() ? `?${queryParams.toString()}` : ""
     }`;
 
@@ -1303,7 +1303,7 @@ export const validatePromotionCode = async (code) => {
     }
 
     const response = await axios.get(
-      `${API_URL}/api/subscriptions/promotion-codes/validate/${encodeURIComponent(
+      `${API_URL}/api/subscription/promotion-codes/validate/${encodeURIComponent(
         code
       )}`,
       {
@@ -1363,7 +1363,7 @@ export const createSubscriptionWithPromo = async (
     };
 
     const response = await axios.post(
-      `${API_URL}/api/subscriptions/subscribe`,
+      `${API_URL}/api/subscription/subscribe`,
       requestData,
       {
         headers: {
@@ -1405,7 +1405,7 @@ export const createSubscriptionWithStripePromo = async (userId, plan) => {
     }
 
     const response = await axios.post(
-      `${API_URL}/api/subscriptions/subscribe-with-stripe-codes`,
+      `${API_URL}/api/subscription/subscribe-with-stripe-codes`,
       {
         userId,
         plan,
