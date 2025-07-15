@@ -1059,3 +1059,377 @@ export const adminDownloadUsersCsv = async () => {
     };
   }
 };
+
+// ================== PAYMENT CONTROL FUNCTIONS ==================
+
+// Plan Management Functions
+export const getCurrentPlanPrices = async () => {
+  try {
+    const response = await axios.get(`${API_URL}/api/subscriptions/plans`);
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error fetching plan prices:", error);
+    return {
+      success: false,
+      message: error.response?.data?.error || "Failed to fetch plan prices",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+export const updateAllPlanPrices = async (prices) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    const response = await axios.put(
+      `${API_URL}/api/subscriptions/plans`,
+      prices,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error updating plan prices:", error);
+    return {
+      success: false,
+      message: error.response?.data?.error || "Failed to update plan prices",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+export const updateSinglePlanPrice = async (plan, price) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    if (!["basic", "pro"].includes(plan)) {
+      throw new Error("Invalid plan. Must be 'basic' or 'pro'");
+    }
+
+    if (typeof price !== "number" || price <= 0) {
+      throw new Error("Price must be a positive number");
+    }
+
+    const response = await axios.put(
+      `${API_URL}/api/subscriptions/plans/${plan}`,
+      { price },
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error updating single plan price:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to update plan price",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+// Coupon Management Functions
+export const createCoupon = async (couponData) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    // Validate required fields
+    if (!couponData.id) {
+      throw new Error("Coupon ID is required");
+    }
+
+    if (!couponData.percentOff && !couponData.amountOff) {
+      throw new Error("Either percentOff or amountOff is required");
+    }
+
+    if (
+      couponData.percentOff &&
+      (couponData.percentOff < 1 || couponData.percentOff > 100)
+    ) {
+      throw new Error("Percent off must be between 1 and 100");
+    }
+
+    if (couponData.amountOff && couponData.amountOff <= 0) {
+      throw new Error("Amount off must be a positive number");
+    }
+
+    const response = await axios.post(
+      `${API_URL}/api/subscriptions/coupons`,
+      couponData,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error creating coupon:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to create coupon",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+// Promotion Code Management Functions
+export const createPromotionCode = async (promotionData) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    // Validate required fields
+    if (!promotionData.couponId) {
+      throw new Error("Coupon ID is required");
+    }
+
+    if (!promotionData.code) {
+      throw new Error("Promotion code is required");
+    }
+
+    if (promotionData.code.length < 3) {
+      throw new Error("Promotion code must be at least 3 characters long");
+    }
+
+    const response = await axios.post(
+      `${API_URL}/api/subscriptions/promotion-codes`,
+      promotionData,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error creating promotion code:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to create promotion code",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+export const getPromotionCodes = async (filters = {}) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    const queryParams = new URLSearchParams();
+    if (filters.active !== undefined) {
+      queryParams.append("active", filters.active);
+    }
+    if (filters.limit) {
+      queryParams.append("limit", filters.limit);
+    }
+
+    const url = `${API_URL}/api/subscriptions/promotion-codes${
+      queryParams.toString() ? `?${queryParams.toString()}` : ""
+    }`;
+
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: token,
+      },
+      timeout: 10000,
+    });
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error fetching promotion codes:", error);
+    return {
+      success: false,
+      message: error.response?.data?.error || "Failed to fetch promotion codes",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+export const validatePromotionCode = async (code) => {
+  try {
+    if (!code || code.trim().length === 0) {
+      return {
+        success: false,
+        message: "Promotion code is required",
+        data: { valid: false },
+      };
+    }
+
+    const response = await axios.get(
+      `${API_URL}/api/subscriptions/promotion-codes/validate/${encodeURIComponent(
+        code
+      )}`,
+      {
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error validating promotion code:", error);
+
+    // Handle 404 specifically as invalid code
+    if (error.response?.status === 404) {
+      return {
+        success: true,
+        data: {
+          valid: false,
+          error: "Promotion code not found or expired",
+        },
+      };
+    }
+
+    return {
+      success: false,
+      message:
+        error.response?.data?.error || "Failed to validate promotion code",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+// Subscription Functions with Promotion Codes
+export const createSubscriptionWithPromo = async (
+  userId,
+  plan,
+  promotionCode = null
+) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+
+    if (!["basic", "pro"].includes(plan)) {
+      throw new Error("Invalid plan selected");
+    }
+
+    const requestData = {
+      userId,
+      plan,
+      ...(promotionCode && { promotionCode }),
+    };
+
+    const response = await axios.post(
+      `${API_URL}/api/subscriptions/subscribe`,
+      requestData,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error creating subscription with promo:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to create subscription",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+export const createSubscriptionWithStripePromo = async (userId, plan) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    if (!userId) {
+      throw new Error("User ID is required");
+    }
+
+    if (!["basic", "pro"].includes(plan)) {
+      throw new Error("Invalid plan selected");
+    }
+
+    const response = await axios.post(
+      `${API_URL}/api/subscriptions/subscribe-with-stripe-codes`,
+      {
+        userId,
+        plan,
+      },
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 15000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error creating subscription with Stripe promo:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to create subscription",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};

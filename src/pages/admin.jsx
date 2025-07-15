@@ -11,6 +11,7 @@ import CardsGrid from "../components/admin-dashboard/cards-grid";
 import SalesGraphGrid from "../components/admin-dashboard/SalesGraphGrid";
 import UserAddressManager from "../components/admin-dashboard/user-address-manager";
 import ExportSection from "../components/admin-dashboard/export-section";
+import PaymentControls from "../components/admin-dashboard/payment-controls";
 import {
   adminGetDashboardSummary,
   adminGetDashboardAnalytics,
@@ -238,6 +239,9 @@ const Admin = () => {
 
         {/* Export Section */}
         <ExportSection summary={summary} />
+
+        {/* Payment Controls */}
+        <PaymentControls />
 
         {/* User Management */}
         <UserAddressManager />
