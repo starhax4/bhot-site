@@ -1065,7 +1065,15 @@ export const adminDownloadUsersCsv = async () => {
 // Plan Management Functions
 export const getCurrentPlanPrices = async () => {
   try {
-    const response = await axios.get(`${API_URL}/api/subscription/plans`);
+    const response = await axios.get(`${API_URL}/api/subscription/plans`, {
+      headers: {
+        "Cache-Control": "no-cache",
+        Pragma: "no-cache",
+      },
+      params: {
+        t: Date.now(), // Cache busting
+      },
+    });
     return { success: true, data: response.data };
   } catch (error) {
     console.error("Error fetching plan prices:", error);
@@ -1330,6 +1338,121 @@ export const validatePromotionCode = async (code) => {
       success: false,
       message:
         error.response?.data?.error || "Failed to validate promotion code",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+// Deactivate and Reactivate Promotion Code Functions
+export const deactivatePromotionCode = async (promotionCodeId) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    if (!promotionCodeId) {
+      throw new Error("Promotion code ID is required");
+    }
+
+    const response = await axios.delete(
+      `${API_URL}/api/subscription/promotion-codes/${promotionCodeId}`,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error deactivating promotion code:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to deactivate promotion code",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+export const reactivatePromotionCode = async (promotionCodeId) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    if (!promotionCodeId) {
+      throw new Error("Promotion code ID is required");
+    }
+
+    const response = await axios.patch(
+      `${API_URL}/api/subscription/promotion-codes/${promotionCodeId}/reactivate`,
+      {},
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error reactivating promotion code:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to reactivate promotion code",
+      error: error.response?.data || error.message,
+      status: error.response?.status,
+    };
+  }
+};
+
+export const bulkDeactivatePromotionCodesByName = async (codeName) => {
+  try {
+    const token = getAuthToken();
+    if (!token || isTokenExpired(token)) {
+      throw new Error("Authentication required");
+    }
+
+    if (!codeName) {
+      throw new Error("Code name is required");
+    }
+
+    const response = await axios.delete(
+      `${API_URL}/api/subscription/promotion-codes/code/${encodeURIComponent(
+        codeName
+      )}`,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+        timeout: 10000,
+      }
+    );
+
+    return { success: true, data: response.data };
+  } catch (error) {
+    console.error("Error bulk deactivating promotion codes:", error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.error ||
+        error.message ||
+        "Failed to bulk deactivate promotion codes",
       error: error.response?.data || error.message,
       status: error.response?.status,
     };

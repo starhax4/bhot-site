@@ -86,36 +86,49 @@ const PricingTable = () => {
   const [validatingPromo, setValidatingPromo] = useState(false);
   const [showPromoInput, setShowPromoInput] = useState(false);
 
-  // Fetch current plan prices on component mount
-  useEffect(() => {
-    const fetchPlanPrices = async () => {
-      try {
-        const response = await getCurrentPlanPrices();
-        if (response.success && response.data?.plans) {
-          const prices = response.data.plans;
+  // Function to fetch plan prices
+  const fetchPlanPrices = async () => {
+    setLoadingPrices(true);
+    try {
+      const response = await getCurrentPlanPrices();
+      if (response.success && response.data?.plans) {
+        const prices = response.data.plans;
 
-          // Update pricing data with fetched prices
-          setPricingData((prevData) => ({
-            ...prevData,
-            plans: prevData.plans.map((plan) => {
-              if (plan.id === "basic") {
-                return { ...plan, name: `£${prices.basic.toFixed(2)}` };
-              } else if (plan.id === "pro") {
-                return { ...plan, name: `£${prices.pro.toFixed(2)}` };
-              }
-              return plan;
-            }),
-          }));
-        }
-      } catch (error) {
-        console.error("Failed to fetch plan prices:", error);
-        // Use default prices if API fails
-      } finally {
-        setLoadingPrices(false);
+        // Update pricing data with fetched prices
+        setPricingData((prevData) => ({
+          ...prevData,
+          plans: prevData.plans.map((plan) => {
+            if (plan.id === "basic") {
+              return { ...plan, name: `£${prices.basic.toFixed(2)}` };
+            } else if (plan.id === "pro") {
+              return { ...plan, name: `£${prices.pro.toFixed(2)}` };
+            }
+            return plan;
+          }),
+        }));
       }
+    } catch (error) {
+      console.error("Failed to fetch plan prices:", error);
+      // Use default prices if API fails
+    } finally {
+      setLoadingPrices(false);
+    }
+  };
+
+  // Fetch current plan prices on component mount and listen for updates
+  useEffect(() => {
+    fetchPlanPrices();
+
+    // Listen for price update events from admin dashboard
+    const handlePriceUpdate = () => {
+      fetchPlanPrices();
     };
 
-    fetchPlanPrices();
+    window.addEventListener("pricesUpdated", handlePriceUpdate);
+
+    return () => {
+      window.removeEventListener("pricesUpdated", handlePriceUpdate);
+    };
   }, []);
 
   // Promo code validation with debounce
@@ -264,7 +277,7 @@ const PricingTable = () => {
   return (
     <div className="space-y-6">
       {/* Promo Code Section */}
-      <div className="max-w-md mx-auto">
+      {/* <div className="max-w-md mx-auto">
         <div className="text-center">
           <button
             onClick={() => setShowPromoInput(!showPromoInput)}
@@ -341,7 +354,7 @@ const PricingTable = () => {
             )}
           </div>
         )}
-      </div>
+      </div> */}
 
       {/* Pricing Table */}
       <div className="w-[95vw] bg-white rounded-3xl outline  outline-offset-[-1px] outline-slate-200 max-w-7xl mx-auto my-8 overflow-hidden">
@@ -362,12 +375,14 @@ const PricingTable = () => {
 
             {/* Cell 1.1: "Compare Plans" section */}
             <div className="p-5 md:p-6 md:pt-10">
-              <h2 className="text-xl font-bold md:text-2xl text-primary mb-1">
-                Compare plans
-              </h2>
-              <p className="text-xs md:text-sm text-gray-400">
-                Choose your plan according to your needs
-              </p>
+              <div>
+                <h2 className="text-xl font-bold md:text-2xl text-primary mb-1">
+                  Compare plans
+                </h2>
+                <p className="text-xs md:text-sm text-gray-400">
+                  Choose your plan according to your needs
+                </p>
+              </div>
             </div>
 
             {/* Cells 1.2, 1.3, 1.4: Plan Headers (Free, £9.99, £59.99) */}

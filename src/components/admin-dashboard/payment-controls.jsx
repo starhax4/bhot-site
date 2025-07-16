@@ -7,6 +7,8 @@ import {
   createPromotionCode,
   getPromotionCodes,
   validatePromotionCode,
+  deactivatePromotionCode,
+  reactivatePromotionCode,
 } from "../../api/serices/api_utils";
 
 const PaymentControls = () => {
@@ -44,7 +46,7 @@ const PaymentControls = () => {
   // Promotion Codes List State
   const [promoCodes, setPromoCodes] = useState([]);
   const [promoFilters, setPromoFilters] = useState({
-    active: true,
+    active: undefined, // undefined = all, true = active only, false = inactive only
     limit: 20,
   });
 
@@ -56,6 +58,11 @@ const PaymentControls = () => {
     fetchPlanPrices();
     fetchPromotionCodes();
   }, []);
+
+  // Refresh promotion codes when filters change
+  useEffect(() => {
+    fetchPromotionCodes();
+  }, [promoFilters]);
 
   const fetchPlanPrices = async () => {
     try {
@@ -95,12 +102,45 @@ const PaymentControls = () => {
       if (response.success) {
         setSuccess("Plan prices updated successfully!");
         setOriginalPrices(planPrices);
+
+        // Notify other components that prices have been updated
+        window.dispatchEvent(new CustomEvent("pricesUpdated"));
+
         setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(response.message);
+        // Show detailed error message if available
+        let errorMessage = response.message || "Failed to update plan prices";
+
+        // Check for detailed error information in different possible locations
+        if (response.error?.details) {
+          errorMessage = `${errorMessage}: ${response.error.details}`;
+        } else if (response.error && typeof response.error === "string") {
+          errorMessage = response.error;
+        } else if (response.error && response.error.error) {
+          errorMessage = response.error.error;
+          if (response.error.details) {
+            errorMessage = `${errorMessage}: ${response.error.details}`;
+          }
+        }
+
+        setError(errorMessage);
       }
     } catch (error) {
-      setError("Failed to update plan prices");
+      // Handle cases where error object has detailed information
+      let errorMessage = "Failed to update plan prices";
+
+      if (error.response?.data?.details) {
+        errorMessage = `${errorMessage}: ${error.response.data.details}`;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage = `${errorMessage}: ${error.response.data.details}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -143,10 +183,39 @@ const PaymentControls = () => {
         });
         setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(response.message);
+        // Show detailed error message if available
+        let errorMessage = response.message || "Failed to create coupon";
+
+        // Check for detailed error information in different possible locations
+        if (response.error?.details) {
+          errorMessage = `${errorMessage}: ${response.error.details}`;
+        } else if (response.error && typeof response.error === "string") {
+          errorMessage = response.error;
+        } else if (response.error && response.error.error) {
+          errorMessage = response.error.error;
+          if (response.error.details) {
+            errorMessage = `${errorMessage}: ${response.error.details}`;
+          }
+        }
+
+        setError(errorMessage);
       }
     } catch (error) {
-      setError("Failed to create coupon");
+      // Handle cases where error object has detailed information
+      let errorMessage = "Failed to create coupon";
+
+      if (error.response?.data?.details) {
+        errorMessage = `${errorMessage}: ${error.response.data.details}`;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage = `${errorMessage}: ${error.response.data.details}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -189,10 +258,40 @@ const PaymentControls = () => {
         fetchPromotionCodes(); // Refresh the list
         setTimeout(() => setSuccess(""), 3000);
       } else {
-        setError(response.message);
+        // Show detailed error message if available
+        let errorMessage =
+          response.message || "Failed to create promotion code";
+
+        // Check for detailed error information in different possible locations
+        if (response.error?.details) {
+          errorMessage = `${errorMessage}: ${response.error.details}`;
+        } else if (response.error && typeof response.error === "string") {
+          errorMessage = response.error;
+        } else if (response.error && response.error.error) {
+          errorMessage = response.error.error;
+          if (response.error.details) {
+            errorMessage = `${errorMessage}: ${response.error.details}`;
+          }
+        }
+
+        setError(errorMessage);
       }
     } catch (error) {
-      setError("Failed to create promotion code");
+      // Handle cases where error object has detailed information
+      let errorMessage = "Failed to create promotion code";
+
+      if (error.response?.data?.details) {
+        errorMessage = `${errorMessage}: ${error.response.data.details}`;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage = `${errorMessage}: ${error.response.data.details}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -213,6 +312,108 @@ const PaymentControls = () => {
       }
     } catch (error) {
       setValidationResult({ valid: false, error: "Validation failed" });
+    }
+  };
+
+  const handleDeactivatePromoCode = async (promotionCodeId) => {
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
+
+      const response = await deactivatePromotionCode(promotionCodeId);
+      if (response.success) {
+        setSuccess("Promotion code deactivated successfully!");
+        fetchPromotionCodes(); // Refresh the list
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        // Show detailed error message if available
+        let errorMessage =
+          response.message || "Failed to deactivate promotion code";
+
+        // Check for detailed error information in different possible locations
+        if (response.error?.details) {
+          errorMessage = `${errorMessage}: ${response.error.details}`;
+        } else if (response.error && typeof response.error === "string") {
+          errorMessage = response.error;
+        } else if (response.error && response.error.error) {
+          errorMessage = response.error.error;
+          if (response.error.details) {
+            errorMessage = `${errorMessage}: ${response.error.details}`;
+          }
+        }
+
+        setError(errorMessage);
+      }
+    } catch (error) {
+      // Handle cases where error object has detailed information
+      let errorMessage = "Failed to deactivate promotion code";
+
+      if (error.response?.data?.details) {
+        errorMessage = `${errorMessage}: ${error.response.data.details}`;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage = `${errorMessage}: ${error.response.data.details}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleReactivatePromoCode = async (promotionCodeId) => {
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
+
+      const response = await reactivatePromotionCode(promotionCodeId);
+      if (response.success) {
+        setSuccess("Promotion code reactivated successfully!");
+        fetchPromotionCodes(); // Refresh the list
+        setTimeout(() => setSuccess(""), 3000);
+      } else {
+        // Show detailed error message if available
+        let errorMessage =
+          response.message || "Failed to reactivate promotion code";
+
+        // Check for detailed error information in different possible locations
+        if (response.error?.details) {
+          errorMessage = `${errorMessage}: ${response.error.details}`;
+        } else if (response.error && typeof response.error === "string") {
+          errorMessage = response.error;
+        } else if (response.error && response.error.error) {
+          errorMessage = response.error.error;
+          if (response.error.details) {
+            errorMessage = `${errorMessage}: ${response.error.details}`;
+          }
+        }
+
+        setError(errorMessage);
+      }
+    } catch (error) {
+      // Handle cases where error object has detailed information
+      let errorMessage = "Failed to reactivate promotion code";
+
+      if (error.response?.data?.details) {
+        errorMessage = `${errorMessage}: ${error.response.data.details}`;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+        if (error.response.data.details) {
+          errorMessage = `${errorMessage}: ${error.response.data.details}`;
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -697,9 +898,40 @@ const PaymentControls = () => {
 
             {/* Existing Promotion Codes List */}
             <div>
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                Existing Promotion Codes
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Existing Promotion Codes
+                </h3>
+                <div className="flex items-center gap-3">
+                  <select
+                    value={promoFilters.active}
+                    onChange={(e) => {
+                      const newFilters = {
+                        ...promoFilters,
+                        active:
+                          e.target.value === "true"
+                            ? true
+                            : e.target.value === "false"
+                            ? false
+                            : undefined,
+                      };
+                      setPromoFilters(newFilters);
+                    }}
+                    className="px-3 py-1.5 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                  >
+                    <option value="">All Codes</option>
+                    <option value="true">Active Only</option>
+                    <option value="false">Inactive Only</option>
+                  </select>
+                  <button
+                    onClick={fetchPromotionCodes}
+                    disabled={loading}
+                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Refresh
+                  </button>
+                </div>
+              </div>
               {promoCodes.length > 0 ? (
                 <div className="bg-gray-50 rounded-lg p-4">
                   <div className="grid gap-4">
@@ -709,40 +941,67 @@ const PaymentControls = () => {
                         className="bg-white p-4 rounded-md border border-gray-200"
                       >
                         <div className="flex items-center justify-between">
-                          <div>
-                            <h4 className="text-lg font-medium text-gray-900">
-                              {promo.code}
-                            </h4>
-                            <p className="text-sm text-gray-600">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-3 mb-2">
+                              <h4 className="text-lg font-medium text-gray-900">
+                                {promo.code}
+                              </h4>
+                              <span
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                  promo.active
+                                    ? "bg-green-100 text-green-800"
+                                    : "bg-red-100 text-red-800"
+                                }`}
+                              >
+                                {promo.active ? "Active" : "Inactive"}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">
                               Coupon: {promo.coupon.id} •{" "}
                               {promo.coupon.percent_off
                                 ? `${promo.coupon.percent_off}% off`
                                 : `£${promo.coupon.amount_off / 100} off`}
                             </p>
+                            <div className="flex items-center gap-4 text-sm text-gray-600">
+                              <span>
+                                Used: {promo.times_redeemed || 0}
+                                {promo.max_redemptions
+                                  ? ` / ${promo.max_redemptions}`
+                                  : ""}
+                              </span>
+                              {promo.expires_at && (
+                                <span>
+                                  Expires: {formatDate(promo.expires_at)}
+                                </span>
+                              )}
+                            </div>
                           </div>
-                          <div className="text-right">
-                            <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                promo.active
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-red-100 text-red-800"
-                              }`}
-                            >
-                              {promo.active ? "Active" : "Inactive"}
-                            </span>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Used: {promo.times_redeemed || 0}
-                              {promo.max_redemptions
-                                ? ` / ${promo.max_redemptions}`
-                                : ""}
-                            </p>
+                          <div className="flex items-center gap-2 ml-4">
+                            {promo.active ? (
+                              <button
+                                onClick={() =>
+                                  handleDeactivatePromoCode(promo.id)
+                                }
+                                disabled={loading}
+                                className="px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Deactivate this promotion code"
+                              >
+                                Deactivate
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() =>
+                                  handleReactivatePromoCode(promo.id)
+                                }
+                                disabled={loading}
+                                className="px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Reactivate this promotion code"
+                              >
+                                Reactivate
+                              </button>
+                            )}
                           </div>
                         </div>
-                        {promo.expires_at && (
-                          <p className="text-sm text-gray-600 mt-2">
-                            Expires: {formatDate(promo.expires_at)}
-                          </p>
-                        )}
                       </div>
                     ))}
                   </div>

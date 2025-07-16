@@ -36,16 +36,16 @@ function getSizeCategoriesFromRange(min, max) {
 const DashboardCard = ({ propertyData, energyData }) => {
   const [filter, setFilter] = useState({
     distance: "2",
-    size: [], // Now an array of selected size codes
+    size: ["s", "m", "l", "xl", "xxl"], // Include all size codes by default
     type: {
-      detachedHouse: false,
-      terracedHouse: false,
-      parkHouse: false,
-      flat: false,
-      SemiDetachedHouse: false,
-      bungalow: false,
-      maisonette: false,
-      studioApartment: false,
+      detachedHouse: true,
+      terracedHouse: true,
+      parkHouse: true,
+      flat: true,
+      SemiDetachedHouse: true,
+      bungalow: true,
+      maisonette: true,
+      studioApartment: true,
     },
   });
 
@@ -63,8 +63,8 @@ const DashboardCard = ({ propertyData, energyData }) => {
 
   const [openDropdown, setOpenDropdown] = useState(null); // 'distance', 'size', 'type'
   const [distanceButtonLabel, setDistanceButtonLabel] = useState("Distance");
-  const [sizeButtonLabel, setSizeButtonLabel] = useState("Size");
-  const [typeButtonLabel, setTypeButtonLabel] = useState("Type");
+  const [sizeButtonLabel, setSizeButtonLabel] = useState("0-200 sqm");
+  const [typeButtonLabel, setTypeButtonLabel] = useState("All Types");
 
   const sampleData = [
     { id: "proj1", frequency: 3, projectSuccess: 50 },
@@ -773,67 +773,37 @@ const DashboardCard = ({ propertyData, energyData }) => {
   // Add state for add address error
   const [addAddressError, setAddAddressError] = useState("");
 
-  // Add state to track the slider's min/max
+  // Add state to track the slider's min/max - default to full range
   const [sizeRange, setSizeRange] = useState({ min: 0, max: 200 });
 
-  // Set initial filter size and slider range to property size category on propertyData load
+  // Set initial filter to show all property types and all sizes on propertyData load
   useEffect(() => {
     if (propertyData && propertyData.area_sqm) {
-      const sizeCode = mapAreaToCategory(Number(propertyData.area_sqm));
-      const normalizedType = normalizePropertyType(propertyData.type);
+      // Set all size categories by default (show all sizes from 0 to 200 sqm)
+      const allSizeCodes = SIZE_CATEGORIES.map((cat) => cat.code);
 
-      if (sizeCode && sizeCode !== "unknown") {
-        setFilter((prev) => ({
-          ...prev,
-          size: [sizeCode],
-          // Set the type filter to match the user's property type
-          type: {
-            detachedHouse:
-              normalizedType === "house" &&
-              propertyData.type.toLowerCase().includes("detached"),
-            terracedHouse:
-              normalizedType === "house" &&
-              propertyData.type.toLowerCase().includes("terrace"),
-            parkHouse: normalizedType === "park home",
-            flat: normalizedType === "flat",
-            SemiDetachedHouse:
-              normalizedType === "house" &&
-              propertyData.type.toLowerCase().includes("semi"),
-            bungalow: normalizedType === "bungalow",
-            maisonette: normalizedType === "maisonette",
-            studioApartment: false, // Default to false unless it's an "other" type
-          },
-        }));
-        // Set slider to the min/max for this category
-        const cat = SIZE_CATEGORIES.find((c) => c.code === sizeCode);
-        if (cat) {
-          setSizeRange({ min: cat.min, max: cat.max });
-          setSizeButtonLabel(cat.label);
-        }
+      setFilter((prev) => ({
+        ...prev,
+        size: allSizeCodes,
+        // Set all property types to true by default
+        type: {
+          detachedHouse: true,
+          terracedHouse: true,
+          parkHouse: true,
+          flat: true,
+          SemiDetachedHouse: true,
+          bungalow: true,
+          maisonette: true,
+          studioApartment: true,
+        },
+      }));
 
-        // Set type button label based on the property type
-        if (normalizedType === "house") {
-          if (propertyData.type.toLowerCase().includes("detached")) {
-            setTypeButtonLabel("House");
-          } else if (propertyData.type.toLowerCase().includes("terrace")) {
-            setTypeButtonLabel("House");
-          } else if (propertyData.type.toLowerCase().includes("semi")) {
-            setTypeButtonLabel("House");
-          } else {
-            setTypeButtonLabel("House");
-          }
-        } else if (normalizedType === "flat") {
-          setTypeButtonLabel("Flat");
-        } else if (normalizedType === "bungalow") {
-          setTypeButtonLabel("Bungalow");
-        } else if (normalizedType === "maisonette") {
-          setTypeButtonLabel("Maisonette");
-        } else if (normalizedType === "park home") {
-          setTypeButtonLabel("Park Home");
-        } else {
-          setTypeButtonLabel("Type");
-        }
-      }
+      // Set slider to show the full range (0-200 sqm)
+      setSizeRange({ min: 0, max: 200 });
+      setSizeButtonLabel("0-200 sqm");
+
+      // Set type button label to show all types are selected
+      setTypeButtonLabel("All Types");
     }
   }, [propertyData]);
 
