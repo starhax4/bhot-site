@@ -6,7 +6,6 @@ import {
   createCoupon,
   createPromotionCode,
   getPromotionCodes,
-  validatePromotionCode,
   deactivatePromotionCode,
   reactivatePromotionCode,
 } from "../../api/serices/api_utils";
@@ -49,10 +48,6 @@ const PaymentControls = () => {
     active: undefined, // undefined = all, true = active only, false = inactive only
     limit: 20,
   });
-
-  // Validation State
-  const [validationCode, setValidationCode] = useState("");
-  const [validationResult, setValidationResult] = useState(null);
 
   useEffect(() => {
     fetchPlanPrices();
@@ -297,24 +292,6 @@ const PaymentControls = () => {
     }
   };
 
-  const handleValidateCode = async () => {
-    if (!validationCode.trim()) {
-      setValidationResult(null);
-      return;
-    }
-
-    try {
-      const response = await validatePromotionCode(validationCode);
-      if (response.success) {
-        setValidationResult(response.data);
-      } else {
-        setValidationResult({ valid: false, error: response.message });
-      }
-    } catch (error) {
-      setValidationResult({ valid: false, error: "Validation failed" });
-    }
-  };
-
   const handleDeactivatePromoCode = async (promotionCodeId) => {
     try {
       setLoading(true);
@@ -436,29 +413,28 @@ const PaymentControls = () => {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] p-6  md:w-[93vw] md:mx-auto">
-      <div className="p-6 border-b border-gray-200">
-        <h2 className="text-xl font-semibold text-gray-900">
+    <div className="bg-white rounded-3xl shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] p-4 md:p-6 w-full md:w-[93vw] mx-auto max-w-full overflow-hidden">
+      <div className="p-4 md:p-6 border-b border-gray-200">
+        <h2 className="text-lg md:text-xl font-semibold text-gray-900">
           Payment Controls
         </h2>
-        <p className="text-gray-600 mt-1">
+        <p className="text-gray-600 mt-1 text-sm md:text-base">
           Manage subscription plans, coupons, and promotion codes
         </p>
       </div>
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex space-x-8 px-6">
+      <div className="border-b border-gray-200 overflow-x-auto">
+        <nav className="flex space-x-4 md:space-x-8 px-4 md:px-6 min-w-max">
           {[
             { id: "plans", label: "Plan Pricing" },
             { id: "coupons", label: "Create Coupon" },
             { id: "promos", label: "Promotion Codes" },
-            { id: "validate", label: "Validate Code" },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
                 activeTab === tab.id
                   ? "border-primary text-primary"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
@@ -470,7 +446,7 @@ const PaymentControls = () => {
         </nav>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 md:p-6">
         {/* Error/Success Messages */}
         {error && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
@@ -525,7 +501,7 @@ const PaymentControls = () => {
               <h3 className="text-lg font-medium text-gray-900 mb-4">
                 Update Plan Pricing
               </h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Basic Plan Price (£)
@@ -563,15 +539,15 @@ const PaymentControls = () => {
                   />
                 </div>
               </div>
-              <div className="mt-6 flex items-center justify-between">
-                <div className="text-sm text-gray-600">
+              <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="text-sm text-gray-600 order-2 sm:order-1">
                   Current prices: Basic {formatCurrency(originalPrices.basic)},
                   Pro {formatCurrency(originalPrices.pro)}
                 </div>
                 <button
                   onClick={handleUpdatePrices}
                   disabled={loading || !hasUnsavedChanges()}
-                  className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  className={`order-1 sm:order-2 w-full sm:w-auto px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
                     loading || !hasUnsavedChanges()
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-primary hover:bg-green-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -594,7 +570,7 @@ const PaymentControls = () => {
               onSubmit={handleCreateCoupon}
               className="space-y-4"
             >
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Coupon ID *
@@ -630,7 +606,7 @@ const PaymentControls = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {couponForm.discountType === "percent" ? (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -690,7 +666,7 @@ const PaymentControls = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {couponForm.duration === "repeating" && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -746,7 +722,7 @@ const PaymentControls = () => {
                 <button
                   type="submit"
                   disabled={loading}
-                  className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                  className={`w-full sm:w-auto px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
                     loading
                       ? "bg-gray-400 cursor-not-allowed"
                       : "bg-primary hover:bg-green-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -771,7 +747,7 @@ const PaymentControls = () => {
                 onSubmit={handleCreatePromoCode}
                 className="space-y-4"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Coupon ID *
@@ -807,7 +783,7 @@ const PaymentControls = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Max Redemptions
@@ -884,7 +860,7 @@ const PaymentControls = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className={`px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
+                    className={`w-full sm:w-auto px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
                       loading
                         ? "bg-gray-400 cursor-not-allowed"
                         : "bg-primary hover:bg-green-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -898,11 +874,11 @@ const PaymentControls = () => {
 
             {/* Existing Promotion Codes List */}
             <div>
-              <div className="flex items-center justify-between mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-3">
                 <h3 className="text-lg font-medium text-gray-900">
                   Existing Promotion Codes
                 </h3>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                   <select
                     value={promoFilters.active}
                     onChange={(e) => {
@@ -926,7 +902,7 @@ const PaymentControls = () => {
                   <button
                     onClick={fetchPromotionCodes}
                     disabled={loading}
-                    className="px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Refresh
                   </button>
@@ -940,14 +916,14 @@ const PaymentControls = () => {
                         key={promo.id}
                         className="bg-white p-4 rounded-md border border-gray-200"
                       >
-                        <div className="flex items-center justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-3 mb-2">
-                              <h4 className="text-lg font-medium text-gray-900">
+                        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
+                              <h4 className="text-lg font-medium text-gray-900 break-all">
                                 {promo.code}
                               </h4>
                               <span
-                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium w-fit ${
                                   promo.active
                                     ? "bg-green-100 text-green-800"
                                     : "bg-red-100 text-red-800"
@@ -962,28 +938,28 @@ const PaymentControls = () => {
                                 ? `${promo.coupon.percent_off}% off`
                                 : `£${promo.coupon.amount_off / 100} off`}
                             </p>
-                            <div className="flex items-center gap-4 text-sm text-gray-600">
-                              <span>
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm text-gray-600">
+                              <span className="whitespace-nowrap">
                                 Used: {promo.times_redeemed || 0}
                                 {promo.max_redemptions
                                   ? ` / ${promo.max_redemptions}`
                                   : ""}
                               </span>
                               {promo.expires_at && (
-                                <span>
+                                <span className="whitespace-nowrap">
                                   Expires: {formatDate(promo.expires_at)}
                                 </span>
                               )}
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 ml-4">
+                          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:ml-4">
                             {promo.active ? (
                               <button
                                 onClick={() =>
                                   handleDeactivatePromoCode(promo.id)
                                 }
                                 disabled={loading}
-                                className="px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-red-700 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Deactivate this promotion code"
                               >
                                 Deactivate
@@ -994,7 +970,7 @@ const PaymentControls = () => {
                                   handleReactivatePromoCode(promo.id)
                                 }
                                 disabled={loading}
-                                className="px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="w-full sm:w-auto px-3 py-1.5 text-sm font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
                                 title="Reactivate this promotion code"
                               >
                                 Reactivate
@@ -1009,131 +985,6 @@ const PaymentControls = () => {
               ) : (
                 <div className="text-center py-8 bg-gray-50 rounded-lg">
                   <p className="text-gray-600">No promotion codes found</p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Validate Code Tab */}
-        {activeTab === "validate" && (
-          <div>
-            <h3 className="text-lg font-medium text-gray-900 mb-4">
-              Validate Promotion Code
-            </h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Promotion Code
-                </label>
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={validationCode}
-                    onChange={(e) =>
-                      setValidationCode(e.target.value.toUpperCase())
-                    }
-                    onKeyPress={(e) =>
-                      e.key === "Enter" && handleValidateCode()
-                    }
-                    placeholder="Enter promotion code"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
-                  />
-                  <button
-                    onClick={handleValidateCode}
-                    disabled={!validationCode.trim()}
-                    className={`px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                      !validationCode.trim()
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-primary hover:bg-green-950 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
-                    }`}
-                  >
-                    Validate
-                  </button>
-                </div>
-              </div>
-
-              {validationResult && (
-                <div
-                  className={`p-4 rounded-md border ${
-                    validationResult.valid
-                      ? "bg-green-50 border-green-200"
-                      : "bg-red-50 border-red-200"
-                  }`}
-                >
-                  {validationResult.valid ? (
-                    <div>
-                      <div className="flex items-center">
-                        <svg
-                          className="h-5 w-5 text-green-400 mr-2"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <h4 className="text-lg font-medium text-green-900">
-                          Valid Promotion Code
-                        </h4>
-                      </div>
-                      <div className="mt-2 text-sm text-green-700">
-                        <p>
-                          <strong>Code:</strong>{" "}
-                          {validationResult.promotionCode.code}
-                        </p>
-                        <p>
-                          <strong>Discount:</strong>{" "}
-                          {validationResult.promotionCode.coupon.percent_off
-                            ? `${validationResult.promotionCode.coupon.percent_off}% off`
-                            : `£${
-                                validationResult.promotionCode.coupon
-                                  .amount_off / 100
-                              } off`}
-                        </p>
-                        <p>
-                          <strong>Used:</strong>{" "}
-                          {validationResult.promotionCode.times_redeemed || 0}
-                          {validationResult.promotionCode.max_redemptions
-                            ? ` / ${validationResult.promotionCode.max_redemptions}`
-                            : ""}
-                        </p>
-                        {validationResult.promotionCode.expires_at && (
-                          <p>
-                            <strong>Expires:</strong>{" "}
-                            {formatDate(
-                              validationResult.promotionCode.expires_at
-                            )}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="flex items-center">
-                        <svg
-                          className="h-5 w-5 text-red-400 mr-2"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
-                        >
-                          <path
-                            fillRule="evenodd"
-                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-                            clipRule="evenodd"
-                          />
-                        </svg>
-                        <h4 className="text-lg font-medium text-red-900">
-                          Invalid Promotion Code
-                        </h4>
-                      </div>
-                      <p className="mt-2 text-sm text-red-700">
-                        {validationResult.error ||
-                          "Code is not valid or has expired"}
-                      </p>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
