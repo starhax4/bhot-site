@@ -538,10 +538,17 @@ export const fetchNeighbourhoodBenchmarking = async (filters) => {
     userFloorArea,
     userPropertyType,
   } = filters || {};
-  if (!postcode || !floorArea || !propertyType) {
+  if (
+    !postcode ||
+    !floorArea ||
+    !propertyType ||
+    (Array.isArray(floorArea) && floorArea.length === 0) ||
+    (Array.isArray(propertyType) && propertyType.length === 0)
+  ) {
     return {
       success: false,
-      message: "All of postcode, floor-area , property-type are required",
+      message:
+        "All of postcode, floor-area , property-type are required and must not be empty",
       error: null,
       status: 400,
     };

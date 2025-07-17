@@ -39,13 +39,10 @@ const DashboardCard = ({ propertyData, energyData }) => {
     size: ["s", "m", "l", "xl", "xxl"], // Include all size codes by default
     type: {
       detachedHouse: true,
-      terracedHouse: true,
       parkHouse: true,
       flat: true,
-      SemiDetachedHouse: true,
       bungalow: true,
       maisonette: true,
-      studioApartment: true,
     },
   });
 
@@ -229,6 +226,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
       const selectedTypes = Object.entries(filterToUse.type)
         .filter(([_, v]) => v)
         .map(([k]) => k);
+
       let typeCategories =
         selectedTypes.length > 0
           ? selectedTypes.map((key) => mapTypeToCategory({ [key]: true }))
@@ -249,9 +247,16 @@ const DashboardCard = ({ propertyData, energyData }) => {
         setBenchmarkingData([]);
         return;
       }
-      // Remove the check for typeCategories.length === 0
+      // Check if no filters are selected
       if (sizeCategories.length === 0) {
         setBenchmarkingError("Please select at least one size category.");
+        setBenchmarkingLoading(false);
+        setBenchmarkingData([]);
+        return;
+      }
+
+      if (typeCategories.length === 0) {
+        setBenchmarkingError("No data found, please review filters.");
         setBenchmarkingLoading(false);
         setBenchmarkingData([]);
         return;
@@ -307,16 +312,35 @@ const DashboardCard = ({ propertyData, energyData }) => {
   );
 
   useEffect(() => {
-    fetchDashboardData();
+    // Only fetch data if filters are valid
+    if (
+      currentAddress &&
+      propertyData &&
+      filter.size.length > 0 &&
+      Object.values(filter.type).some(Boolean)
+    ) {
+      fetchDashboardData();
+    } else if (currentAddress && propertyData) {
+      // Clear data if no valid filters
+      setBenchmarkingData([]);
+      setBenchmarkingLoading(false);
+      setBenchmarkingError("No data found, please review filters.");
+    }
   }, [currentAddress]);
 
   // Call fetchDashboardData when filters change
   useEffect(() => {
     if (
       propertyData &&
-      (filter.size.length > 0 || Object.values(filter.type).some(Boolean))
+      filter.size.length > 0 &&
+      Object.values(filter.type).some(Boolean)
     ) {
       fetchDashboardData();
+    } else if (propertyData) {
+      // If no filters are selected, clear data and show message
+      setBenchmarkingData([]);
+      setBenchmarkingLoading(false);
+      setBenchmarkingError("No data found, please review filters.");
     }
   }, [filter, propertyData]);
 
@@ -480,7 +504,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
     // On apply, ensure filter.size matches the current slider range
     const covered = getSizeCategoriesFromRange(sizeRange.min, sizeRange.max);
     setFilter((prev) => ({ ...prev, size: covered }));
-    fetchDashboardData();
+    // Don't call fetchDashboardData directly - let the useEffect handle it
   };
 
   // --- TYPE FILTER LOGIC ---
@@ -505,8 +529,6 @@ const DashboardCard = ({ propertyData, energyData }) => {
             Object.keys(prevFilter.type).map((k) => [k, false])
           ), // Reset all to false first
           detachedHouse: true,
-          terracedHouse: true,
-          SemiDetachedHouse: true,
         },
       }));
     } else if (option.value === "parkHome") {
@@ -546,8 +568,6 @@ const DashboardCard = ({ propertyData, energyData }) => {
       case "parkHouse":
         return "park home";
       case "detachedHouse":
-      case "terracedHouse":
-      case "SemiDetachedHouse":
       case "house":
         return "house";
       default:
@@ -556,7 +576,8 @@ const DashboardCard = ({ propertyData, energyData }) => {
   }
 
   const handleTypeApply = () => {
-    fetchDashboardData();
+    // Don't call fetchDashboardData directly - let the useEffect handle it
+    // fetchDashboardData();
   };
 
   const handleDropdownToggle = (dropdownId) => {
@@ -588,17 +609,13 @@ const DashboardCard = ({ propertyData, energyData }) => {
         .map(([key]) => key);
 
       // Define house-related types
-      const houseTypes = [
-        "detachedHouse",
-        "terracedHouse",
-        "SemiDetachedHouse",
-      ];
+      const houseTypes = ["detachedHouse"];
       const selectedHouseTypes = trueTypes.filter((type) =>
         houseTypes.includes(type)
       );
 
       if (trueTypes.length === 0) {
-        setTypeButtonLabel("Any Type");
+        setTypeButtonLabel("No Type Selected");
       } else if (trueTypes.length === 1) {
         // Special handling for parkHouse -> Park Home mapping
         if (trueTypes[0] === "parkHouse") {
@@ -777,8 +794,12 @@ const DashboardCard = ({ propertyData, energyData }) => {
   const [sizeRange, setSizeRange] = useState({ min: 0, max: 200 });
 
   // Set initial filter to show all property types and all sizes on propertyData load
+  // Use a ref to track if we've already initialized to prevent resetting user selections
+  const [hasInitializedFilters, setHasInitializedFilters] = useState(false);
+
   useEffect(() => {
-    if (propertyData && propertyData.area_sqm) {
+    // Only initialize once when propertyData first loads, and never reset after that
+    if (propertyData && propertyData.area_sqm && !hasInitializedFilters) {
       // Set all size categories by default (show all sizes from 0 to 200 sqm)
       const allSizeCodes = SIZE_CATEGORIES.map((cat) => cat.code);
 
@@ -788,13 +809,10 @@ const DashboardCard = ({ propertyData, energyData }) => {
         // Set all property types to true by default
         type: {
           detachedHouse: true,
-          terracedHouse: true,
           parkHouse: true,
           flat: true,
-          SemiDetachedHouse: true,
           bungalow: true,
           maisonette: true,
-          studioApartment: true,
         },
       }));
 
@@ -804,8 +822,11 @@ const DashboardCard = ({ propertyData, energyData }) => {
 
       // Set type button label to show all types are selected
       setTypeButtonLabel("All Types");
+
+      // Mark as initialized to prevent future resets - this should NEVER change back to false
+      setHasInitializedFilters(true);
     }
-  }, [propertyData]);
+  }, [propertyData]); // Remove hasInitializedFilters from dependencies to prevent re-running
 
   return (
     <div className="flex flex-col  md:w-[45vw] px-4 pt-8 pb-5 bg-white  shadow-[0px_10px_20px_0px_rgba(0,0,0,0.20)] rounded-3xl ">
