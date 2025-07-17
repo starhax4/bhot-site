@@ -905,73 +905,98 @@ const DashboardCard = ({ propertyData, energyData }) => {
             )}
 
           {/* Inline add address form with search functionality */}
-          {showAddForm && (
-            <div className="mb-3 p-2 bg-gray-50 rounded-md border border-gray-200">
-              <div className="flex flex-col gap-2 mb-2">
-                <Input
-                  label="Postcode"
-                  name="postcode"
-                  value={newAddress.postcode || ""}
-                  onChange={handlePostcodeChange}
-                  placeholder="Enter your UK postcode (e.g., SW1A 0AA)"
-                  pattern="^[A-Z]{1,2}[0-9R][0-9A-Z]?\s[0-9][A-Z]{2}$"
-                  title="Please enter a valid UK postcode (e.g., SW1A 0AA, M1 9AB)"
-                  maxLength="8"
-                  type="text"
-                  required
-                  helperText="Enter your postcode to find your address automatically."
-                  size="small"
-                  className="text-sm"
-                />
+          {showAddForm &&
+            user &&
+            user.plan &&
+            user.plan.toLowerCase() === "pro" && (
+              <div className="mb-3 p-2 bg-gray-50 rounded-md border border-gray-200">
+                <div className="flex flex-col gap-2 mb-2">
+                  <Input
+                    label="Postcode"
+                    name="postcode"
+                    value={newAddress.postcode || ""}
+                    onChange={handlePostcodeChange}
+                    placeholder="Enter your UK postcode (e.g., SW1A 0AA)"
+                    pattern="^[A-Z]{1,2}[0-9R][0-9A-Z]?\s[0-9][A-Z]{2}$"
+                    title="Please enter a valid UK postcode (e.g., SW1A 0AA, M1 9AB)"
+                    maxLength="8"
+                    type="text"
+                    required
+                    helperText="Enter your postcode to find your address automatically."
+                    size="small"
+                    className="text-sm"
+                  />
 
-                {/* Address Selection */}
-                {newAddress.postcode && (
-                  <div className="relative">
-                    {isLoadingAddresses ? (
-                      <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
-                        <span className="text-xs text-blue-700">
-                          Finding addresses for {newAddress.postcode}...
-                        </span>
-                      </div>
-                    ) : addressSuggestions.length > 0 ? (
-                      <SelectInput
-                        name="selectedAddress"
-                        label="Select Your Address"
-                        options={addressSuggestions}
-                        value={selectedAddress}
-                        onChange={handleAddressSelection}
-                        placeholder="Choose your address from the list"
-                        searchEnabled={true}
-                        required
-                        fullWidth
-                        helperText={`${addressSuggestions.length} address${
-                          addressSuggestions.length === 1 ? "" : "es"
-                        } found. Start typing to search.`}
-                        size="small"
-                        className="text-sm"
-                      />
-                    ) : addressError ? (
-                      <div className="space-y-3">
-                        <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-                          <div className="flex items-center justify-between">
-                            <p className="text-xs text-yellow-800">
-                              {addressError}
-                            </p>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handlePostcodeChange({
-                                  target: { value: newAddress.postcode },
-                                })
-                              }
-                              className="text-xs text-yellow-700 hover:text-yellow-900 underline"
-                              disabled={isLoadingAddresses}
-                            >
-                              Retry
-                            </button>
-                          </div>
+                  {/* Address Selection */}
+                  {newAddress.postcode && (
+                    <div className="relative">
+                      {isLoadingAddresses ? (
+                        <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary"></div>
+                          <span className="text-xs text-blue-700">
+                            Finding addresses for {newAddress.postcode}...
+                          </span>
                         </div>
+                      ) : addressSuggestions.length > 0 ? (
+                        <SelectInput
+                          name="selectedAddress"
+                          label="Select Your Address"
+                          options={addressSuggestions}
+                          value={selectedAddress}
+                          onChange={handleAddressSelection}
+                          placeholder="Choose your address from the list"
+                          searchEnabled={true}
+                          required
+                          fullWidth
+                          helperText={`${addressSuggestions.length} address${
+                            addressSuggestions.length === 1 ? "" : "es"
+                          } found. Start typing to search.`}
+                          size="small"
+                          className="text-sm"
+                        />
+                      ) : addressError ? (
+                        <div className="space-y-3">
+                          <div className="p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs text-yellow-800">
+                                {addressError}
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handlePostcodeChange({
+                                    target: { value: newAddress.postcode },
+                                  })
+                                }
+                                className="text-xs text-yellow-700 hover:text-yellow-900 underline"
+                                disabled={isLoadingAddresses}
+                              >
+                                Retry
+                              </button>
+                            </div>
+                          </div>
+                          <Input
+                            label="Street Address"
+                            name="address"
+                            value={newAddress.address || ""}
+                            onChange={(e) => {
+                              setNewAddress((prev) => ({
+                                ...prev,
+                                address: e.target.value,
+                              }));
+                              setAddAddressError("");
+                            }}
+                            placeholder="Enter your full street address manually"
+                            minLength="10"
+                            title="Please enter your complete street address"
+                            required
+                            helperText="Please enter your full address including house number and street name."
+                            size="small"
+                            className="text-sm"
+                          />
+                        </div>
+                      ) : newAddress.postcode.includes(" ") &&
+                        newAddress.postcode.length >= 6 ? (
                         <Input
                           label="Street Address"
                           name="address"
@@ -983,7 +1008,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                             }));
                             setAddAddressError("");
                           }}
-                          placeholder="Enter your full street address manually"
+                          placeholder="Enter your full street address"
                           minLength="10"
                           title="Please enter your complete street address"
                           required
@@ -991,74 +1016,52 @@ const DashboardCard = ({ propertyData, energyData }) => {
                           size="small"
                           className="text-sm"
                         />
-                      </div>
-                    ) : newAddress.postcode.includes(" ") &&
-                      newAddress.postcode.length >= 6 ? (
-                      <Input
-                        label="Street Address"
-                        name="address"
-                        value={newAddress.address || ""}
-                        onChange={(e) => {
-                          setNewAddress((prev) => ({
-                            ...prev,
-                            address: e.target.value,
-                          }));
-                          setAddAddressError("");
-                        }}
-                        placeholder="Enter your full street address"
-                        minLength="10"
-                        title="Please enter your complete street address"
-                        required
-                        helperText="Please enter your full address including house number and street name."
-                        size="small"
-                        className="text-sm"
-                      />
-                    ) : (
-                      <div className="p-2 bg-gray-50 border border-gray-200 rounded-lg">
-                        <p className="text-xs text-gray-600">
-                          Complete your postcode above to automatically find
-                          your address.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                )}
+                      ) : (
+                        <div className="p-2 bg-gray-50 border border-gray-200 rounded-lg">
+                          <p className="text-xs text-gray-600">
+                            Complete your postcode above to automatically find
+                            your address.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
-                {addAddressError && (
-                  <div className="text-xs text-red-600 mt-1">
-                    {addAddressError}
-                  </div>
-                )}
+                  {addAddressError && (
+                    <div className="text-xs text-red-600 mt-1">
+                      {addAddressError}
+                    </div>
+                  )}
+                </div>
+                <div className="flex justify-end gap-2">
+                  <button
+                    onClick={() => {
+                      setShowAddForm(false);
+                      setNewAddress({});
+                      setSelectedAddress(null);
+                      setAddressSuggestions([]);
+                      setAddAddressError("");
+                      setAddressError("");
+                    }}
+                    className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAddAddress}
+                    className="px-2 py-1 text-xs bg-primary text-white rounded cursor-pointer"
+                    disabled={
+                      isSubmitting ||
+                      (!selectedAddress && !newAddress.address) ||
+                      !newAddress.postcode
+                    }
+                  >
+                    {isSubmitting ? "Adding..." : "Add"}
+                  </button>
+                </div>
               </div>
-              <div className="flex justify-end gap-2">
-                <button
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setNewAddress({});
-                    setSelectedAddress(null);
-                    setAddressSuggestions([]);
-                    setAddAddressError("");
-                    setAddressError("");
-                  }}
-                  className="px-2 py-1 text-xs text-gray-600 hover:text-gray-800"
-                  disabled={isSubmitting}
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleAddAddress}
-                  className="px-2 py-1 text-xs bg-primary text-white rounded cursor-pointer"
-                  disabled={
-                    isSubmitting ||
-                    (!selectedAddress && !newAddress.address) ||
-                    !newAddress.postcode
-                  }
-                >
-                  {isSubmitting ? "Adding..." : "Add"}
-                </button>
-              </div>
-            </div>
-          )}
+            )}
 
           {/* Show error if propertyData is not found or has a 404 error, OR if addressNotFound is set */}
           {propertyData &&
@@ -1068,7 +1071,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
           !addressNotFound ? (
             <div className="flex gap-2">
               <div className="flex flex-col gap-10">
-                {user && user.plan === "Pro" ? (
+                {user && user.plan && user.plan.toLowerCase() === "pro" ? (
                   ""
                 ) : (
                   <p className="text-neutral-400 text-sm font-semibold">
@@ -1080,7 +1083,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
               </div>
 
               <div className="flex flex-col gap-5 w-48">
-                {user && user.plan === "Pro" ? (
+                {user && user.plan && user.plan.toLowerCase() === "pro" ? (
                   ""
                 ) : (
                   <p className="text-neutral-400 text-sm font-semibold h-10">
@@ -1113,7 +1116,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
               {/* Placeholder property info */}
               <div className="flex gap-2 mt-2">
                 <div className="flex flex-col gap-10">
-                  {user && user.plan === "Pro" ? (
+                  {user && user.plan && user.plan.toLowerCase() === "pro" ? (
                     ""
                   ) : (
                     <p className="text-neutral-400 text-sm font-semibold">
@@ -1128,7 +1131,7 @@ const DashboardCard = ({ propertyData, energyData }) => {
                   </p>
                 </div>
                 <div className="flex flex-col gap-5 w-48">
-                  {user && user.plan === "Pro" ? (
+                  {user && user.plan && user.plan.toLowerCase() === "pro" ? (
                     ""
                   ) : (
                     <p className="text-neutral-400 text-sm font-semibold h-10">
