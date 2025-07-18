@@ -395,19 +395,17 @@ export const AuthProvider = ({ children }) => {
     async (newPlan) => {
       if (!user) {
         setError("User not authenticated");
-        return;
+        return { success: false, message: "User not authenticated" };
       }
 
       if (!Object.values(PLANS).includes(newPlan)) {
         setError("Invalid plan type");
-        return;
+        return { success: false, message: "Invalid plan type" };
       }
 
       setLoading(true);
-      try {
-        // Replace with actual API call
-        // await userApi.updatePlan(newPlan);
 
+      try {
         const updatedUser = {
           ...user,
           plan: newPlan,
@@ -422,8 +420,11 @@ export const AuthProvider = ({ children }) => {
         }
 
         persistUserData(updatedUser);
+        return { success: true, data: updatedUser };
       } catch (error) {
+        console.error("Error updating plan:", error);
         handleApiError(error);
+        return { success: false, message: error.message };
       } finally {
         setLoading(false);
       }
@@ -448,48 +449,20 @@ export const AuthProvider = ({ children }) => {
         persistUserData(result.data);
         return { success: true, data: result.data };
       } else {
-        // If API call fails, we'll use fallback approach since payment was successful
-        console.log(
-          "API refresh failed, using fallback approach:",
-          result.message
-        );
-
-        // Update user plan to PRO since they just successfully paid
-        const updatedUser = {
-          ...user,
-          plan: PLANS.PRO,
-        };
-
-        persistUserData(updatedUser);
+        // If API call fails, don't modify the user data - let backend handle plan updates
         return {
-          success: true,
-          data: updatedUser,
+          success: false,
+          message: result.message,
           fallback: true,
-          message: "Account updated locally (API endpoint not available)",
         };
       }
     } catch (error) {
       console.error("Error refreshing user data:", error);
 
-      // As a last resort, update plan locally since payment was successful
-      try {
-        const updatedUser = {
-          ...user,
-          plan: PLANS.PRO,
-        };
-
-        persistUserData(updatedUser);
-        return {
-          success: true,
-          data: updatedUser,
-          fallback: true,
-          message: "Account updated locally (network error)",
-        };
-      } catch (fallbackError) {
-        const errorMessage = error.message || "Failed to refresh user data";
-        setError(errorMessage);
-        return { success: false, message: errorMessage };
-      }
+      // Don't try to update plan locally - this was causing the bug
+      const errorMessage = error.message || "Failed to refresh user data";
+      setError(errorMessage);
+      return { success: false, message: errorMessage };
     } finally {
       setLoading(false);
     }
